@@ -13,7 +13,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts"
   },
   "dependencies": {
-    "next": "15.1.4",
+    "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -21,11 +21,11 @@
     "@cloudflare/next-on-pages": "^1.13.7",
     "@cloudflare/workers-types": "^4.20250109.0",
     "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.1.4",
+    "eslint-config-next": "15.1.5",
     "typescript": "^5",
     "vercel": "^39.3.0",
     "wrangler": "^3.103.2"
