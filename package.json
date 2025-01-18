@@ -14,13 +14,19 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.4.2",
+    "hono": "^4.6.17",
     "next": "15.1.5",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.7",
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "@eslint/eslintrc": "^3",
     "@pandacss/dev": "^0.51.1",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
@@ -29,9 +35,6 @@
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.5",
     "typescript": "^5",
-    "@cloudflare/next-on-pages": "^1.13.7",
-    "@cloudflare/workers-types": "^4.20250109.0",
-    "@eslint/eslintrc": "^3",
     "vercel": "^32.3.0",
     "wrangler": "^3.103.2"
   }
