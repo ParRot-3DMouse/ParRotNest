@@ -1,0 +1,37 @@
+# For more details on how to configure Wrangler, refer to:
+# https://developers.cloudflare.com/workers/wrangler/configuration/
+name = "parrotnest"
+compatibility_date = "2025-01-09"
+
+# Compatibility flags
+compatibility_flags = ["nodejs_compat"]
+
+# Pages build output directory
+pages_build_output_dir = ".vercel/output/static"
+
+# Observability settings
+[observability]
+enabled = true
+
+# Smart Placement (commented out as in the original)
+# placement = { mode = "smart" }
+
+# Bindings section for interacting with resources (currently empty, add as needed)
+# https://developers.cloudflare.com/workers/runtime-apis/bindings/
+
+# Environment Variables (currently empty, add as needed)
+# https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+# [vars]
+# MY_VARIABLE = "production_value"
+
+# Static Assets (currently commented out)
+# https://developers.cloudflare.com/workers/static-assets/binding/
+# [assets]
+# directory = "./public/"
+# binding = "ASSETS"
+
+# Service Bindings for communication between Workers (currently commented out)
+# https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
+# [[services]]
+# binding = "MY_SERVICE"
+# service = "my-service"
