@@ -5,7 +5,7 @@ import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 // https://github.com/cloudflare/next-on-pages/blob/main/internal-packages/next-dev/README.md
 
 if (process.env.NODE_ENV === "development") {
-  await setupDevPlatform();
+  setupDevPlatform();
 }
 
 import type { NextConfig } from "next";
