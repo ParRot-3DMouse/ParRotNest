@@ -26,14 +26,11 @@ const app = new Hono<{
   // .use("*", jwtMiddleware)
   .route("/users", users)
   .get("/", async (c) => {
-    console.log("c", c);
-    console.log("c.env", c.env);
-    console.log("DB!!!!!!!!!!", c.env.DB);
-    if (!c.env.DB) {
+    if (!process.env.DB) {
       return c.json({ error: "DB is not bound" }, 500);
     }
     try {
-      const result = await c.env.DB.prepare(`SELECT * FROM users`).all();
+      const result = await process.env.DB.prepare(`SELECT * FROM users`).all();
       return c.json(result);
     } catch (error) {
       return c.json({ error: error }, 500);

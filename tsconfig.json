@@ -22,6 +22,7 @@
     "types": ["@cloudflare/workers-types/2023-07-01", "w3c-web-hid"]
   },
   "include": [
+    "env.d.ts",
     "next-env.d.ts",
     "next-auth.d.ts",
     "**/*.ts",
