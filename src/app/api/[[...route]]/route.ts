@@ -14,6 +14,8 @@ export interface Bindings {
 export type Variables = JwtVariables;
 
 const jwtSecret = process.env.NEXTAUTH_SECRET;
+console.log("jwtSecret", jwtSecret);
+console.log("nextauth_url", process.env.NEXTAUTH_URL);
 if (!jwtSecret) {
   throw new Error("NEXTAUTH_SECRET is not defined");
 }
