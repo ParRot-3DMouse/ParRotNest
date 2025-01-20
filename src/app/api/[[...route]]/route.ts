@@ -3,27 +3,30 @@ import { Hono } from "hono";
 import users from "./users";
 import { D1Database } from "@cloudflare/workers-types";
 import { handle } from "hono/vercel";
+import { jwt, JwtVariables } from "hono/jwt";
+import { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export interface Bindings {
   DB: D1Database;
 }
 
-// export type Variables = JwtVariables;
+export type Variables = JwtVariables;
 
-// const jwtSecret = process.env.NEXTAUTH_SECRET;
-// if (!jwtSecret) {
-//   throw new Error("NEXTAUTH_SECRET is not defined");
-// }
-// const jwtMiddleware = jwt({
-//   secret: jwtSecret,
-// });
+const jwtSecret = process.env.NEXTAUTH_SECRET;
+if (!jwtSecret) {
+  throw new Error("NEXTAUTH_SECRET is not defined");
+}
+const jwtMiddleware = jwt({
+  secret: jwtSecret,
+});
 
 const app = new Hono<{
   Bindings: Bindings;
-  // Variables: Variables;
+  Variables: Variables;
 }>()
   .basePath("/api")
-  // .use("*", jwtMiddleware)
+  .use("*", jwtMiddleware)
   .route("/users", users)
   .get("/", async (c) => {
     if (!process.env.DB) {
@@ -40,5 +43,32 @@ const app = new Hono<{
 export type AppType = typeof app;
 
 export const runtime = "edge";
-export const GET = handle(app);
-export const POST = handle(app);
+
+export async function GET(nextReq: NextRequest) {
+  const token = await getToken({ req: nextReq, raw: true });
+  const clonedHeaders = new Headers(nextReq.headers);
+  if (token) {
+    clonedHeaders.set("Authorization", `Bearer ${token}`);
+  }
+  const honoRequest = new Request(nextReq.url, {
+    method: nextReq.method,
+    headers: clonedHeaders,
+    body: nextReq.body,
+  });
+  return handle(app)(honoRequest);
+}
+
+export async function POST(nextReq: NextRequest) {
+  const token = await getToken({ req: nextReq, raw: true });
+  const clonedHeaders = new Headers(nextReq.headers);
+  if (token) {
+    clonedHeaders.set("Authorization", `Bearer ${token}`);
+  }
+  const honoRequest = new Request(nextReq.url, {
+    method: nextReq.method,
+    headers: clonedHeaders,
+    body: nextReq.body,
+  });
+
+  return handle(app)(honoRequest);
+}
