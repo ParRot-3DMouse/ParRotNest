@@ -3,6 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
+import { getUserId } from "../../../lib/api/getUserId";
 
 const postKeymapSchema = z.object({
   keymap_name: z.string(),
@@ -32,14 +33,12 @@ const keymaps = new Hono<{
       const { keymap_name, keymap_json } = postKeymapSchema.parse(
         await c.req.json()
       );
-      const user_id = c.get("jwtPayload").user.id;
-      if (!user_id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+      const authUserId = getUserId(c);
 
       console.log("POST /keymaps: Received data", {
         keymap_name,
         keymap_json,
+        authUserId,
       });
 
       const keymap_id = v4();
@@ -47,12 +46,12 @@ const keymaps = new Hono<{
       await process.env.DB.prepare(
         `INSERT INTO keymaps (keymap_id, keymap_name, keymap_json, user_id) VALUES (?1, ?2, ?3, ?4)`
       )
-        .bind(keymap_id, keymap_name, keymap_json, user_id)
+        .bind(keymap_id, keymap_name, keymap_json, authUserId)
         .run();
 
       return c.json({ status: "created", keymap_id });
     } catch (err) {
-      console.error("POST /users: Error", err);
+      console.error("POST /keymaps: Error", err);
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
@@ -66,19 +65,17 @@ const keymaps = new Hono<{
         user_id: c.req.param("user_id"),
       });
 
-      // user_id が一致するすべてのキーマップを取得
+      const authUserId = getUserId(c);
+
+      if (user_id !== authUserId) {
+        return c.json({ error: "Forbidden" }, 403);
+      }
+
       const { results } = await process.env.DB.prepare(
-        `
-      SELECT * FROM keymaps
-      WHERE user_id = ?1
-    `
+        `SELECT * FROM keymaps WHERE user_id = ?1`
       )
         .bind(user_id)
         .all();
-
-      if (!results || results.length === 0) {
-        return c.json({ error: "No keymaps found for that user" }, 404);
-      }
 
       return c.json(results);
     } catch (err) {
@@ -98,21 +95,15 @@ const keymaps = new Hono<{
         keymap_id: c.req.param("keymap_id"),
       });
 
-      // keymap_id が一致する1件のみ取得
+      const authUserId = getUserId(c);
+
       const { results } = await process.env.DB.prepare(
-        `
-        SELECT * FROM keymaps
-        WHERE keymap_id = ?1
-      `
+        `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
-        .bind(keymap_id)
+        .bind(keymap_id, authUserId)
         .all();
 
-      if (!results || results.length === 0) {
-        return c.json({ error: "Keymap not found" }, 404);
-      }
-
-      return c.json(results[0]);
+      return c.json(results);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid keymap_id", details: err.errors }, 400);
@@ -120,7 +111,6 @@ const keymaps = new Hono<{
       return c.json({ error: err }, 500);
     }
   })
-
   // PUT /keymaps/:keymap_id
   .put("/:keymap_id", zValidator("json", updateKeymapSchema), async (c) => {
     try {
@@ -128,17 +118,17 @@ const keymaps = new Hono<{
         keymap_id: c.req.param("keymap_id"),
       });
 
+      const authUserId = getUserId(c);
+
       const partialData = updateKeymapSchema.parse(await c.req.json());
       if (!partialData.keymap_name && !partialData.keymap_json) {
         return c.json({ error: "No fields to update" }, 400);
       }
 
       const { results: existing } = await process.env.DB.prepare(
-        `
-      SELECT * FROM keymaps WHERE keymap_id = ?1
-    `
+        `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
-        .bind(keymap_id)
+        .bind(keymap_id, authUserId)
         .all();
 
       if (!existing || existing.length === 0) {
@@ -157,10 +147,8 @@ const keymaps = new Hono<{
         params.push(partialData.keymap_json);
       }
 
-      const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")} WHERE keymap_id = ?${
-        setClauses.length + 1
-      }`;
-      params.push(keymap_id);
+      const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")} WHERE keymap_id = ?${setClauses.length + 1} AND user_id = ?${setClauses.length + 2}`;
+      params.push(keymap_id, authUserId);
 
       await process.env.DB.prepare(updateSql)
         .bind(...params)
@@ -181,10 +169,12 @@ const keymaps = new Hono<{
         keymap_id: c.req.param("keymap_id"),
       });
 
+      const authUserId = getUserId(c);
+
       const { results } = await process.env.DB.prepare(
-        `SELECT * FROM keymaps WHERE keymap_id = ?1`
+        `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
-        .bind(keymap_id)
+        .bind(keymap_id, authUserId)
         .all();
 
       if (!results || results.length === 0) {
@@ -192,12 +182,9 @@ const keymaps = new Hono<{
       }
 
       await process.env.DB.prepare(
-        `
-      DELETE FROM keymaps
-      WHERE keymap_id = ?1
-    `
+        `DELETE FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
-        .bind(keymap_id)
+        .bind(keymap_id, authUserId)
         .run();
 
       return c.json({ status: "deleted" });
