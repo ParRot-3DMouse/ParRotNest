@@ -49,3 +49,5 @@ styled-system
 styled-system-studio
 
 .dev.vars
+
+wrangler.toml
