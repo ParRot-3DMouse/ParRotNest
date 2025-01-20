@@ -34,6 +34,9 @@ const keymaps = new Hono<{
         await c.req.json()
       );
       const authUserId = getUserId(c);
+      if (!authUserId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       console.log("POST /keymaps: Received data", {
         keymap_name,
@@ -66,6 +69,9 @@ const keymaps = new Hono<{
       });
 
       const authUserId = getUserId(c);
+      if (!authUserId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       if (user_id !== authUserId) {
         return c.json({ error: "Forbidden" }, 403);
@@ -96,6 +102,9 @@ const keymaps = new Hono<{
       });
 
       const authUserId = getUserId(c);
+      if (!authUserId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
@@ -119,6 +128,9 @@ const keymaps = new Hono<{
       });
 
       const authUserId = getUserId(c);
+      if (!authUserId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       const partialData = updateKeymapSchema.parse(await c.req.json());
       if (!partialData.keymap_name && !partialData.keymap_json) {
@@ -170,6 +182,9 @@ const keymaps = new Hono<{
       });
 
       const authUserId = getUserId(c);
+      if (!authUserId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
