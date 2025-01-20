@@ -25,7 +25,7 @@ const users = new Hono<{
         user_name,
       });
 
-      const { results } = await c.env.DB.prepare(
+      const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
       )
         .bind(user_id)
@@ -36,7 +36,7 @@ const users = new Hono<{
         return c.json({ status: "existing_user" });
       } else {
         console.log("POST /users: Inserting new user");
-        await c.env.DB.prepare(
+        await process.env.DB.prepare(
           `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
         )
           .bind(user_id, user_email, user_name)
@@ -56,7 +56,7 @@ const users = new Hono<{
   .get("/:user_id", async (c) => {
     const user_id = c.req.param("user_id");
 
-    const { results } = await c.env.DB.prepare(
+    const { results } = await process.env.DB.prepare(
       `SELECT * FROM users WHERE user_id = ?1`
     )
       .bind(user_id)
@@ -70,7 +70,8 @@ const users = new Hono<{
   })
   // GET /users: ユーザー一覧取得
   .get("/", async (c) => {
-    const { results } = await c.env.DB.prepare(`SELECT * FROM users`).all();
+    const { results } =
+      await process.env.DB.prepare(`SELECT * FROM users`).all();
 
     return c.json(results);
   });
