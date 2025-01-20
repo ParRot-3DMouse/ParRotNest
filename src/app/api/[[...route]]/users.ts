@@ -13,6 +13,10 @@ const getUserSchema = z.object({
   user_id: z.string().uuid(),
 });
 
+const updateUserSchema = z.object({
+  user_name: z.string().optional(),
+});
+
 const users = new Hono<{
   Bindings: Bindings;
   Variables: Variables;
@@ -61,26 +65,84 @@ const users = new Hono<{
   })
   // GET /users/:user_id
   .get("/:user_id", async (c) => {
-    const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+    try {
+      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
 
-    const { results } = await process.env.DB.prepare(
-      `SELECT * FROM users WHERE user_id = ?1`
-    )
-      .bind(user_id)
-      .all();
+      const { results } = await process.env.DB.prepare(
+        `SELECT * FROM users WHERE user_id = ?1`
+      )
+        .bind(user_id)
+        .all();
 
-    if (!results || results.length === 0) {
-      return c.json({ error: "Not found" }, 404);
+      if (!results || results.length === 0) {
+        return c.json({ error: "Not found" }, 404);
+      }
+
+      return c.json(results[0]);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return c.json({ error: "Invalid user_id format" }, 400);
+      }
+      return c.json({ error: err }, 500);
     }
-
-    return c.json(results[0]);
   })
-  // GET /users
-  .get("/", async (c) => {
-    const { results } =
-      await process.env.DB.prepare(`SELECT * FROM users`).all();
+  // PUT /users/:user_id
+  .put("/:user_id", zValidator("json", updateUserSchema), async (c) => {
+    try {
+      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+      const { user_name } = updateUserSchema.parse(await c.req.json());
+      if (!user_name) {
+        return c.json({ error: "No fields to update" }, 400);
+      }
+      const { results: existing } = await process.env.DB.prepare(
+        `SELECT * FROM users WHERE user_id = ?1`
+      )
+        .bind(user_id)
+        .all();
 
-    return c.json(results);
+      if (!existing || existing.length === 0) {
+        return c.json({ error: "User not found" }, 404);
+      }
+
+      await process.env.DB.prepare(
+        `UPDATE users SET user_name = ?1 WHERE user_id = ?2`
+      )
+        .bind(user_name, user_id)
+        .run();
+
+      return c.json({ status: "updated" });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return c.json({ error: "Invalid input", details: err.errors }, 400);
+      }
+      return c.json({ error: err }, 500);
+    }
+  })
+  // DELETE /users/:user_id
+  .delete("/:user_id", async (c) => {
+    try {
+      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+
+      const { results } = await process.env.DB.prepare(
+        `SELECT * FROM users WHERE user_id = ?1`
+      )
+        .bind(user_id)
+        .all();
+      if (!results || results.length === 0) {
+        return c.json({ error: "User not found" }, 404);
+      }
+
+      await process.env.DB.prepare(`DELETE FROM users WHERE user_id = ?1`)
+        .bind(user_id)
+        .run();
+
+      return c.json({ status: "deleted" });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return c.json({ error: "Invalid user_id format" }, 400);
+      }
+      return c.json({ error: err }, 500);
+    }
   });
 
 export const runtime = "edge";
