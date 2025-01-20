@@ -12,11 +12,8 @@ export default function SyncUser() {
       signIn();
     } else {
       if (status === "authenticated" && session?.user) {
-        console.log("user", session.user);
-        console.log("access_token", session.id_token);
-        const api = clientApi(session.id_token);
+        const api = clientApi();
         api.users.postUser({
-          user_id: session.user.id ?? session.user.email!,
           user_email: session.user.email!,
           user_name: session.user.name ?? "",
         });
