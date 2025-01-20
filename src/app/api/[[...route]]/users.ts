@@ -41,8 +41,6 @@ const users = new Hono<{
       } else {
         console.log("POST /users: Inserting new user");
 
-        // ユーザーIDはランダムなUUIDを生成
-        // A require() style import is forbidden. Use dynamic imports instead.
         const user_id = v4();
 
         await process.env.DB.prepare(
