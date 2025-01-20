@@ -60,6 +60,7 @@ export async function GET(nextReq: NextRequest) {
 
 export async function POST(nextReq: NextRequest) {
   const token = await getToken({ req: nextReq, raw: true });
+  console.log("token", token);
   const clonedHeaders = new Headers(nextReq.headers);
   if (token) {
     clonedHeaders.set("Authorization", `Bearer ${token}`);
