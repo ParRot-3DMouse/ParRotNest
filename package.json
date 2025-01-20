@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prepare": "panda codegen",
+    "prepare": "panda codegen && wrangler d1 migrations apply parrotnest-db --remote",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
