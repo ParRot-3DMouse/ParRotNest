@@ -34,5 +34,47 @@ export const KeymapsAPI = () => {
         throw new Error(await res.text());
       }
     },
+    getKeymapById: async ({ keymap_id }: { keymap_id: string }) => {
+      const res = await appClient.api.keymaps[":keymap_id"].$get({
+        param: { keymap_id: keymap_id },
+      });
+      if (res.ok) {
+        return await res.json();
+      } else {
+        throw new Error(await res.text());
+      }
+    },
+    putKeymap: async ({
+      keymap_id,
+      keymap_name,
+      keymap_json,
+    }: {
+      keymap_id: string;
+      keymap_name: string;
+      keymap_json: KeyMapCollection;
+    }) => {
+      const res = await appClient.api.keymaps[":keymap_id"].$put({
+        param: { keymap_id: keymap_id },
+        json: {
+          keymap_name: keymap_name,
+          keymap_json: keymap_json as unknown as string,
+        },
+      });
+      if (res.ok) {
+        return await res.json();
+      } else {
+        throw new Error(await res.text());
+      }
+    },
+    deleteKeymap: async ({ keymap_id }: { keymap_id: string }) => {
+      const res = await appClient.api.keymaps[":keymap_id"].$delete({
+        param: { keymap_id: keymap_id },
+      });
+      if (res.ok) {
+        return await res.json();
+      } else {
+        throw new Error(await res.text());
+      }
+    },
   };
 };
