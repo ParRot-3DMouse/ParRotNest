@@ -3,6 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
+import { getUserID } from "../../../lib/api/getUserId";
 
 const postUserSchema = z.object({
   user_email: z.string().email(),
@@ -28,11 +29,6 @@ const users = new Hono<{
         await c.req.json()
       );
 
-      console.log("POST /users: Received data", {
-        user_email,
-        user_name,
-      });
-
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_email = ?1`
       )
@@ -40,23 +36,18 @@ const users = new Hono<{
         .all();
 
       if (results && results.length > 0) {
-        console.log("POST /users: Existing user found");
         return c.json({ status: "existing_user" });
-      } else {
-        console.log("POST /users: Inserting new user");
-
-        const user_id = v4();
-
-        await process.env.DB.prepare(
-          `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
-        )
-          .bind(user_id, user_email, user_name)
-          .run();
-
-        return c.json({ status: "new_user" });
       }
+      const user_id = v4();
+
+      await process.env.DB.prepare(
+        `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
+      )
+        .bind(user_id, user_email, user_name)
+        .run();
+
+      return c.json({ status: "new_user" });
     } catch (err) {
-      console.error("POST /users: Error", err);
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
@@ -66,7 +57,17 @@ const users = new Hono<{
   // GET /users/:user_id
   .get("/:user_id", async (c) => {
     try {
-      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+      const { user_id } = getUserSchema.parse({
+        user_id: c.req.param("user_id"),
+      });
+
+      const authedUserId = await getUserID(c);
+      if (!authedUserId) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      if (authedUserId !== user_id) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
@@ -89,8 +90,17 @@ const users = new Hono<{
   // PUT /users/:user_id
   .put("/:user_id", zValidator("json", updateUserSchema), async (c) => {
     try {
-      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
-      const { user_name } = updateUserSchema.parse(await c.req.json());
+      const { user_id } = getUserSchema.parse({
+        user_id: c.req.param("user_id"),
+      });
+      const authedUserId = await getUserID(c);
+      if (!authedUserId) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      if (authedUserId !== user_id) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      const { user_name } = updateUserSchema.parse(c.req.json());
       if (!user_name) {
         return c.json({ error: "No fields to update" }, 400);
       }
@@ -121,7 +131,16 @@ const users = new Hono<{
   // DELETE /users/:user_id
   .delete("/:user_id", async (c) => {
     try {
-      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+      const { user_id } = getUserSchema.parse({
+        user_id: c.req.param("user_id"),
+      });
+      const authedUserId = await getUserID(c);
+      if (!authedUserId) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      if (authedUserId !== user_id) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
