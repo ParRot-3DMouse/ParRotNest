@@ -29,11 +29,6 @@ const users = new Hono<{
         await c.req.json()
       );
 
-      console.log("POST /users: Received data", {
-        user_email,
-        user_name,
-      });
-
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_email = ?1`
       )
@@ -41,23 +36,18 @@ const users = new Hono<{
         .all();
 
       if (results && results.length > 0) {
-        console.log("POST /users: Existing user found");
         return c.json({ status: "existing_user" });
-      } else {
-        console.log("POST /users: Inserting new user");
-
-        const user_id = v4();
-
-        await process.env.DB.prepare(
-          `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
-        )
-          .bind(user_id, user_email, user_name)
-          .run();
-
-        return c.json({ status: "new_user" });
       }
+      const user_id = v4();
+
+      await process.env.DB.prepare(
+        `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
+      )
+        .bind(user_id, user_email, user_name)
+        .run();
+
+      return c.json({ status: "new_user" });
     } catch (err) {
-      console.error("POST /users: Error", err);
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
@@ -75,7 +65,6 @@ const users = new Hono<{
       if (!authedUserId) {
         return c.json({ error: "Unauthorized" }, 403);
       }
-      console.log("isSame?", authedUserId, user_id);
       if (authedUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 403);
       }
