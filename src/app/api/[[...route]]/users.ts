@@ -66,7 +66,9 @@ const users = new Hono<{
   // GET /users/:user_id
   .get("/:user_id", async (c) => {
     try {
-      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+      const { user_id } = getUserSchema.parse({
+        user_id: c.req.param("user_id"),
+      });
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
@@ -89,8 +91,10 @@ const users = new Hono<{
   // PUT /users/:user_id
   .put("/:user_id", zValidator("json", updateUserSchema), async (c) => {
     try {
-      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
-      const { user_name } = updateUserSchema.parse(await c.req.json());
+      const { user_id } = getUserSchema.parse({
+        user_id: c.req.param("user_id"),
+      });
+      const { user_name } = updateUserSchema.parse(c.req.json());
       if (!user_name) {
         return c.json({ error: "No fields to update" }, 400);
       }
@@ -121,7 +125,9 @@ const users = new Hono<{
   // DELETE /users/:user_id
   .delete("/:user_id", async (c) => {
     try {
-      const { user_id } = getUserSchema.parse(c.req.param("user_id"));
+      const { user_id } = getUserSchema.parse({
+        user_id: c.req.param("user_id"),
+      });
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
