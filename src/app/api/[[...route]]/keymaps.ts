@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
-import { getUserId } from "../../../lib/api/getUserId";
+import { getUserID } from "../../../lib/api/getUserId";
 
 const postKeymapSchema = z.object({
   keymap_name: z.string(),
@@ -33,7 +33,7 @@ const keymaps = new Hono<{
       const { keymap_name, keymap_json } = postKeymapSchema.parse(
         await c.req.json()
       );
-      const authUserId = getUserId(c);
+      const authUserId = await getUserID(c);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -68,7 +68,7 @@ const keymaps = new Hono<{
         user_id: c.req.param("user_id"),
       });
 
-      const authUserId = getUserId(c);
+      const authUserId = await getUserID(c);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -101,7 +101,7 @@ const keymaps = new Hono<{
         keymap_id: c.req.param("keymap_id"),
       });
 
-      const authUserId = getUserId(c);
+      const authUserId = await getUserID(c);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -127,7 +127,7 @@ const keymaps = new Hono<{
         keymap_id: c.req.param("keymap_id"),
       });
 
-      const authUserId = getUserId(c);
+      const authUserId = await getUserID(c);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -181,7 +181,7 @@ const keymaps = new Hono<{
         keymap_id: c.req.param("keymap_id"),
       });
 
-      const authUserId = getUserId(c);
+      const authUserId = await getUserID(c);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
