@@ -47,7 +47,11 @@ export type AppType = typeof app;
 export const runtime = "edge";
 
 export async function GET(nextReq: NextRequest) {
-  const token = await getToken({ req: nextReq, raw: true, secureCookie: true });
+  const token = await getToken({
+    req: nextReq,
+    raw: true,
+    secureCookie: process.env.APP_ENV === "production",
+  });
   const clonedHeaders = new Headers(nextReq.headers);
   if (token) {
     clonedHeaders.set("Authorization", `Bearer ${token}`);
@@ -61,7 +65,11 @@ export async function GET(nextReq: NextRequest) {
 }
 
 export async function POST(nextReq: NextRequest) {
-  const token = await getToken({ req: nextReq, raw: true, secureCookie: true });
+  const token = await getToken({
+    req: nextReq,
+    raw: true,
+    secureCookie: process.env.APP_ENV === "production",
+  });
   console.log("token", token);
   console.log("jwtSecret", jwtSecret);
   console.log("nextauth_url", process.env.NEXTAUTH_URL);

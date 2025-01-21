@@ -72,7 +72,7 @@ export const config: NextAuthConfig = {
       }
     },
   },
-  debug: process.env.NODE_ENV !== "production",
+  debug: process.env.APP_ENV !== "production",
   trustHost: true,
   callbacks: {
     async redirect({ url }) {

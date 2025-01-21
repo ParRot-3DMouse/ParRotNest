@@ -8,7 +8,7 @@ interface CloudflareEnv {
   GOOGLE_CLIENT_SECRET: string;
   D1_DB_NAME: string;
   D1_DB_ID: string;
-  NODE_ENV: string;
+  APP_ENV: string;
   DB: D1Database;
 }
 
