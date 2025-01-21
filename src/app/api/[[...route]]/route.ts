@@ -70,9 +70,6 @@ export async function POST(nextReq: NextRequest) {
     raw: true,
     secureCookie: process.env.APP_ENV === "production",
   });
-  console.log("token", token);
-  console.log("jwtSecret", jwtSecret);
-  console.log("nextauth_url", process.env.NEXTAUTH_URL);
   const clonedHeaders = new Headers(nextReq.headers);
   if (token) {
     clonedHeaders.set("Authorization", `Bearer ${token}`);
