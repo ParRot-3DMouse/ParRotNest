@@ -198,4 +198,9 @@ export type KeyMapType = {
   monitorKey: Key;
 };
 
-export type ValueOf<T> = T[keyof T];
+export type KeyMapCollection = {
+  appName: string;
+  rayer1: KeyMapType;
+  rayer2?: KeyMapType;
+  rayer3?: KeyMapType;
+};
