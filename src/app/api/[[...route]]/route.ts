@@ -6,6 +6,7 @@ import { handle } from "hono/vercel";
 import { jwt, JwtVariables } from "hono/jwt";
 import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import keymaps from "./keymaps";
 
 export interface Bindings {
   DB: D1Database;
@@ -14,8 +15,6 @@ export interface Bindings {
 export type Variables = JwtVariables;
 
 const jwtSecret = process.env.NEXTAUTH_SECRET;
-console.log("jwtSecret", jwtSecret);
-console.log("nextauth_url", process.env.NEXTAUTH_URL);
 if (!jwtSecret) {
   throw new Error("NEXTAUTH_SECRET is not defined");
 }
@@ -30,13 +29,14 @@ const app = new Hono<{
   .basePath("/api")
   .use("*", jwtMiddleware)
   .route("/users", users)
+  .route("/keymaps", keymaps)
   .get("/", async (c) => {
     if (!process.env.DB) {
       return c.json({ error: "DB is not bound" }, 500);
     }
     try {
-      const result = await process.env.DB.prepare(`SELECT * FROM users`).all();
-      return c.json(result);
+      await process.env.DB.prepare(`SELECT * FROM users`).all();
+      return c.json({ status: "db connected" });
     } catch (error) {
       return c.json({ error: error }, 500);
     }
