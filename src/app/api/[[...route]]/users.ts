@@ -3,6 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
+import { getUserID } from "../../../lib/api/getUserId";
 
 const postUserSchema = z.object({
   user_email: z.string().email(),
@@ -70,6 +71,15 @@ const users = new Hono<{
         user_id: c.req.param("user_id"),
       });
 
+      const authedUserId = await getUserID(c);
+      if (!authedUserId) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      console.log("isSame?", authedUserId, user_id);
+      if (authedUserId !== user_id) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
       )
@@ -94,6 +104,13 @@ const users = new Hono<{
       const { user_id } = getUserSchema.parse({
         user_id: c.req.param("user_id"),
       });
+      const authedUserId = await getUserID(c);
+      if (!authedUserId) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      if (authedUserId !== user_id) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
       const { user_name } = updateUserSchema.parse(c.req.json());
       if (!user_name) {
         return c.json({ error: "No fields to update" }, 400);
@@ -128,6 +145,13 @@ const users = new Hono<{
       const { user_id } = getUserSchema.parse({
         user_id: c.req.param("user_id"),
       });
+      const authedUserId = await getUserID(c);
+      if (!authedUserId) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
+      if (authedUserId !== user_id) {
+        return c.json({ error: "Unauthorized" }, 403);
+      }
 
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
