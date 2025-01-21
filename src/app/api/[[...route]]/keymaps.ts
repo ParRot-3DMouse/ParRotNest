@@ -37,13 +37,6 @@ const keymaps = new Hono<{
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-
-      console.log("POST /keymaps: Received data", {
-        keymap_name,
-        keymap_json,
-        authUserId,
-      });
-
       const keymap_id = v4();
 
       await process.env.DB.prepare(
@@ -72,11 +65,9 @@ const keymaps = new Hono<{
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-
       if (user_id !== authUserId) {
         return c.json({ error: "Forbidden" }, 403);
       }
-
       const { results } = await process.env.DB.prepare(
         `SELECT * FROM keymaps WHERE user_id = ?1`
       )
