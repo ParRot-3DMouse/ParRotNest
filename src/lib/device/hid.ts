@@ -1,13 +1,12 @@
 "use client";
 
-import { Key, KeyColumn, KeyMapType } from "./types";
+import { useState } from "react";
+import { Key, KeyColumn, KeyMapCollection, KeyMapType } from "./types";
 import { getKeyUsageID, Uint8 } from "./usageId";
 
 let connectedDevice: HIDDevice | null = null;
-/**
- * HIDデバイスに接続する
- */
-export async function connectHIDDevice(): Promise<void> {
+
+async function connectHIDDevice(): Promise<void> {
   try {
     const devices = await navigator.hid.requestDevice({
       filters: [
@@ -62,23 +61,75 @@ export async function sendKeyMap(keyMap: KeyMapType): Promise<void> {
   }
 }
 
-/**
- * HIDデバイスとの接続を切断する
- */
-export async function disconnectHIDDevice(): Promise<void> {
+export async function sendKeyMapCollection(
+  keyMapCollection: KeyMapCollection
+): Promise<void> {
+  if (!connectedDevice) {
+    throw new Error("Device not connected");
+  }
+
+  try {
+    const data = convertKeyMapCollectionToBytes(keyMapCollection);
+
+    if (!connectedDevice.opened) {
+      await connectedDevice.open();
+    }
+
+    await connectedDevice.sendReport(0x1f, data);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "NotAllowedError") {
+      throw new Error(
+        "デバイスへの書き込み権限がありません。デバイスを再接続してください。"
+      );
+    }
+    console.error("Failed to send key map", error);
+    throw error;
+  }
+}
+
+async function disconnectHIDDevice(): Promise<void> {
   if (connectedDevice) {
     await connectedDevice.close();
     connectedDevice = null;
   }
 }
 
-/**
- * 現在接続されているデバイスを取得する
- * @returns 接続されているHIDデバイス、または未接続の場合はnull
- */
 export function getConnectedDevice(): HIDDevice | null {
   return connectedDevice;
 }
+
+export function useHIDConnection() {
+  const [connectedDevice, setConnectedDevice] = useState<HIDDevice | null>(
+    null
+  );
+  const [error, setError] = useState<string>("");
+
+  const connect = async () => {
+    try {
+      await connectHIDDevice();
+      const device = getConnectedDevice();
+      if (device) {
+        setConnectedDevice(device);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to connect device");
+    }
+  };
+
+  const disconnect = async () => {
+    try {
+      await disconnectHIDDevice();
+      setConnectedDevice(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to disconnect device"
+      );
+    }
+  };
+
+  return { connectedDevice, connect, disconnect, error, setError };
+}
+
 export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);
@@ -113,11 +164,16 @@ export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
       ...monitorKeyByte,
     ];
 
-    const allBytesWithPrefix = [0x05, ...allBytes];
+    const allBytesWithPrefix = [
+      // 0x05,
+      ...allBytes,
+    ];
 
-    // 32バイトに満たない場合、ゼロでパディング
     const paddedBytes = new Uint8Array(32);
-    paddedBytes.set(allBytesWithPrefix.slice(0, 32));
+    paddedBytes.set(
+      allBytesWithPrefix
+      // .slice(0, 32)
+    );
 
     return paddedBytes;
   } catch (error) {
@@ -125,3 +181,35 @@ export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
     throw new Error("Failed to convert key map to bytes");
   }
 };
+
+export function convertKeyMapCollectionToBytes(
+  keyMapCollection: KeyMapCollection
+): Uint8Array {
+  const appNameBytes = stringToByteArray(keyMapCollection.appName);
+  // rayer1 は必須
+  const layer1Bytes = convertKeyMapToBytes(keyMapCollection.rayer1);
+
+  // rayer2, rayer3 は存在する場合のみ変換
+  const layer2Bytes = keyMapCollection.rayer2
+    ? convertKeyMapToBytes(keyMapCollection.rayer2)
+    : new Uint8Array(32);
+
+  const layer3Bytes = keyMapCollection.rayer3
+    ? convertKeyMapToBytes(keyMapCollection.rayer3)
+    : new Uint8Array(32);
+
+  const totalSize = 96 + appNameBytes.length;
+
+  const allBytes = new Uint8Array(totalSize);
+  allBytes.set(layer1Bytes, 0); // 先頭0～31
+  allBytes.set(layer2Bytes, 32); // 32～63
+  allBytes.set(layer3Bytes, 64); // 64～95
+  allBytes.set(appNameBytes, 96);
+
+  return allBytes;
+}
+
+function stringToByteArray(str: string): Uint8Array {
+  const encoder = new TextEncoder();
+  return encoder.encode(str);
+}

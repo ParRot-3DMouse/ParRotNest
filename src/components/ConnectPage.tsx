@@ -1,27 +1,20 @@
 "use client";
 
-import { css } from "../../styled-system/css";
-import { useState, useEffect, useReducer } from "react";
-import {
-  connectHIDDevice,
-  convertKeyMapToBytes,
-  disconnectHIDDevice,
-  getConnectedDevice,
-  sendKeyMap,
-} from "../lib/device/hid";
-import Device from "../app/remap/device";
-import { Key, KeyColumn, KeyMapType } from "../lib/device/types";
-import { reducer, initialState, update } from "../lib/device/reducer";
-import UniqueKeyMenu from "../components/UniqueKeyMenu";
+import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-interface ConnectedDevice {
-  productName: string;
-  vendorId: number;
-  productId: number;
-  device: HIDDevice;
-}
+import { css } from "../../styled-system/css";
+import Device from "../app/remap/device";
+import { clientApi } from "../lib/api/clientApi";
+import {
+  useHIDConnection,
+  getConnectedDevice,
+  sendKeyMapCollection,
+  convertKeyMapCollectionToBytes,
+} from "../lib/device/hid";
+import { initialState } from "../lib/device/reducer";
+import { KeyMapCollection, KeyMapType } from "../lib/device/types";
+import UniqueKeyMenu from "./UniqueKeyMenu";
 
 const style = {
   container: css({
@@ -207,13 +200,17 @@ const style = {
 };
 
 export default function ConnectPage() {
-  const [connectedDevice, setConnectedDevice] =
-    useState<ConnectedDevice | null>(null);
-  const [error, setError] = useState<string>("");
   const [isSupported, setIsSupported] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
-  const [keyState, dispatch] = useReducer(reducer, initialState);
-  const [tempState, setTempState] = useState<KeyMapType>(initialState);
+  const { connectedDevice, connect, disconnect, error, setError } =
+    useHIDConnection();
+  const [keyMapCollection, setKeyMapCollection] = useState<KeyMapCollection>({
+    appName: "",
+    rayer1: initialState,
+    rayer2: initialState,
+    rayer3: initialState,
+  });
+  const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     setMounted(true);
@@ -221,93 +218,58 @@ export default function ConnectPage() {
   }, []);
 
   useEffect(() => {
-    const checkConnectedDevice = () => {
-      const device = getConnectedDevice();
-      if (device) {
-        setConnectedDevice({
-          productName: device.productName,
-          vendorId: device.vendorId,
-          productId: device.productId,
-          device: device,
-        });
-      }
-    };
-
     if (mounted) {
-      checkConnectedDevice();
+      getConnectedDevice();
     }
   }, [mounted]);
 
-  const handleConnect = async () => {
-    try {
-      await connectHIDDevice();
-      const device = getConnectedDevice();
-      if (device) {
-        setConnectedDevice({
-          productName: device.productName,
-          vendorId: device.vendorId,
-          productId: device.productId,
-          device: device,
-        });
+  const currentLayerKeyMap: KeyMapType = (() => {
+    if (activeLayer === 1) return keyMapCollection.rayer1;
+    if (activeLayer === 2) return keyMapCollection.rayer2!;
+    return keyMapCollection.rayer3!;
+  })();
+
+  const updateCurrentLayerKeyMap = (newLayerState: KeyMapType) => {
+    setKeyMapCollection((prev) => {
+      if (activeLayer === 1) {
+        return { ...prev, rayer1: newLayerState };
+      } else if (activeLayer === 2) {
+        return { ...prev, rayer2: newLayerState };
+      } else {
+        return { ...prev, rayer3: newLayerState };
       }
+    });
+  };
+
+  const handleWrite = () => {
+    sendKeyMapCollection(keyMapCollection).catch((err) => {
+      setError(err instanceof Error ? err.message : "Failed to send keymap");
+    });
+  };
+
+  const handleSave = () => {
+    try {
+      clientApi().keymaps.postKeymap({
+        keymap_name: keyMapCollection.appName,
+        keymap_json: keyMapCollection,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect device");
+      setError(err instanceof Error ? err.message : "Failed to save keymap");
     }
   };
 
-  const handleDisconnect = async () => {
-    try {
-      await disconnectHIDDevice();
-      setConnectedDevice(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to disconnect device"
-      );
-    }
+  const handleReset = () => {
+    setKeyMapCollection({
+      appName: "",
+      rayer1: initialState,
+      rayer2: initialState,
+      rayer3: initialState,
+    });
   };
 
   if (!mounted) {
     return null;
   }
-
-  const handleInputChange = (
-    col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
-    key: keyof KeyColumn,
-    value: Key
-  ) => {
-    setTempState((prev) => ({
-      ...prev,
-      [col]: { ...prev[col], [key]: value },
-    }));
-  };
-
-  const handleThumbKey1Change = (value: Key) => {
-    setTempState((prev) => ({
-      ...prev,
-      thumbKey1: value,
-    }));
-  };
-
-  const handleThumbKey2Change = (value: Key) => {
-    setTempState((prev) => ({
-      ...prev,
-      thumbKey2: value,
-    }));
-  };
-
-  const handleMonitorKeyChange = (value: Key) => {
-    setTempState((prev) => ({
-      ...prev,
-      monitorKey: value,
-    }));
-  };
-
-  const handleUpdate = () => {
-    dispatch(update(tempState));
-    sendKeyMap(tempState);
-  };
-
-  const keyArray = convertKeyMapToBytes(keyState);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -336,7 +298,7 @@ export default function ConnectPage() {
             })}
           >
             {!connectedDevice ? (
-              <button onClick={handleConnect} className={style.primaryButton}>
+              <button onClick={connect} className={style.primaryButton}>
                 デバイスを接続
               </button>
             ) : (
@@ -363,7 +325,7 @@ export default function ConnectPage() {
                     <div className={style.buttonGroup}>
                       <div>
                         <button
-                          onClick={handleDisconnect}
+                          onClick={disconnect}
                           className={style.dangerButton}
                         >
                           切断
@@ -372,39 +334,51 @@ export default function ConnectPage() {
                     </div>
                   </div>
                   <div>
+                    <input
+                      type="text"
+                      placeholder="Keymap Name"
+                      value={keyMapCollection.appName}
+                      onChange={(e) =>
+                        setKeyMapCollection((prev) => {
+                          return { ...prev, appName: e.target.value };
+                        })
+                      }
+                      className={css({
+                        width: "100%",
+                        padding: "8px",
+                        marginBottom: "1rem",
+                        borderRadius: "0.375rem",
+                        border: "1px solid gray",
+                        backgroundColor: "gray.800",
+                        color: "white",
+                      })}
+                    />
                     <div className={style.container}>
-                      <div className={css({ pointerEvents: "none" })}>
-                        <Device
-                          tempState={keyState}
-                          handleInputChange={handleInputChange}
-                          handleThumbKey1Change={handleThumbKey1Change}
-                          handleThumbKey2Change={handleThumbKey2Change}
-                          handleMonitorKeyChange={handleMonitorKeyChange}
-                        />
-                      </div>
-
-                      <div className={style.arrow}></div>
-
                       <Device
-                        tempState={tempState}
-                        handleInputChange={handleInputChange}
-                        handleThumbKey1Change={handleThumbKey1Change}
-                        handleThumbKey2Change={handleThumbKey2Change}
-                        handleMonitorKeyChange={handleMonitorKeyChange}
+                        tempState={currentLayerKeyMap}
+                        setLayerState={updateCurrentLayerKeyMap}
+                        activeLayer={activeLayer}
+                        setActiveLayer={setActiveLayer}
                       />
 
                       <div className={style.buttonContainer}>
                         <button
-                          onClick={() => setTempState(initialState)}
+                          onClick={handleReset}
                           className={style.dangerButton}
                         >
                           Reset
                         </button>
                         <button
-                          onClick={handleUpdate}
+                          onClick={handleWrite}
                           className={style.successButton}
                         >
-                          Update
+                          Write
+                        </button>
+                        <button
+                          onClick={handleSave}
+                          className={style.primaryButton}
+                        >
+                          Save
                         </button>
                       </div>
                     </div>
@@ -414,9 +388,11 @@ export default function ConnectPage() {
                   <UniqueKeyMenu />
                 </div>
 
-                <pre className={style.codeBlock}>{keyArray}</pre>
                 <pre className={style.codeBlock}>
-                  {JSON.stringify(keyState, null, 2)}
+                  {convertKeyMapCollectionToBytes(keyMapCollection)}
+                </pre>
+                <pre className={style.codeBlock}>
+                  {JSON.stringify(keyMapCollection, null, 2)}
                 </pre>
               </div>
             )}

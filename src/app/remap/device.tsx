@@ -46,17 +46,13 @@ const trackBallStyle = css({
 });
 interface DeviceProps {
   tempState: KeyMapType;
-  handleInputChange: (
-    col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
-    row: keyof KeyColumn,
-    value: Key
-  ) => void;
-  handleThumbKey1Change: (value: Key) => void;
-  handleThumbKey2Change: (value: Key) => void;
-  handleMonitorKeyChange: (value: Key) => void;
+  setLayerState: (updated: KeyMapType) => void;
+  activeLayer: 1 | 2 | 3;
+  setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
 }
 
-const Device = (params: DeviceProps) => {
+const Device = (props: DeviceProps) => {
+  const { tempState, setLayerState, activeLayer, setActiveLayer } = props;
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>): StandardKey => {
       e.preventDefault();
@@ -128,32 +124,22 @@ const Device = (params: DeviceProps) => {
   const renderKeyInputs = (
     column: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">
   ) => {
-    return (
-      Object.keys(params.tempState[column]) as Array<keyof KeyColumn>
-    ).map((key) => {
-      const keyValue = params.tempState[column][key];
-      return (
-        // <input
-        //   key={`${row}-${key}`}
-        //   type="text"
-        //   value={getDisplayValue(keyValue)}
-        //   onKeyDown={(e) =>
-        //     params.handleInputChange(row, key, handleKeyDown(e))
-        //   }
-        //   readOnly
-        //   className={inputKeyStyle}
-        // />
-        <DraggableKey
-          key={`${column}-${key}`}
-          keyValue={keyValue}
-          row={key}
-          col={column}
-          handleInputChange={params.handleInputChange}
-          handleKeyDown={handleKeyDown}
-          getDisplayValue={getDisplayValue}
-        />
-      );
-    });
+    return (Object.keys(tempState[column]) as Array<keyof KeyColumn>).map(
+      (key) => {
+        const keyValue = tempState[column][key];
+        return (
+          <DraggableKey
+            key={`${column}-${key}`}
+            keyValue={keyValue}
+            row={key}
+            col={column}
+            handleInputChange={handleInputChange}
+            handleKeyDown={handleKeyDown}
+            getDisplayValue={getDisplayValue}
+          />
+        );
+      }
+    );
   };
 
   // Key型の値を表示用の文字列に変換する関数
@@ -175,12 +161,46 @@ const Device = (params: DeviceProps) => {
     }
   };
 
+  const handleInputChange = (
+    col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
+    row: keyof KeyColumn,
+    value: Key
+  ) => {
+    setLayerState({
+      ...tempState,
+      [col]: {
+        ...tempState[col],
+        [row]: value,
+      },
+    });
+  };
+
+  const handleThumbKey1Change = (value: Key) => {
+    setLayerState({
+      ...tempState,
+      thumbKey1: value,
+    });
+  };
+
+  const handleThumbKey2Change = (value: Key) => {
+    setLayerState({
+      ...tempState,
+      thumbKey2: value,
+    });
+  };
+
+  const handleMonitorKeyChange = (value: Key) => {
+    setLayerState({
+      ...tempState,
+      monitorKey: value,
+    });
+  };
+
   return (
     <div
       className={css({
         display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
         gap: "20px",
       })}
@@ -188,68 +208,126 @@ const Device = (params: DeviceProps) => {
       <div
         className={css({
           display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
+          gap: "1rem",
+          marginBottom: "1rem",
+          justifyContent: "center",
         })}
       >
-        {(["column4", "column3", "column2", "column1"] as const).map(
-          (column) => (
-            <div
-              key={column}
-              className={css({
-                display: "flex",
-                alignItems: "center",
-              })}
-            >
-              <div
-                className={css({
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                })}
-              >
-                {renderKeyInputs(column)}
-              </div>
-            </div>
-          )
-        )}
+        <button
+          onClick={() => setActiveLayer(1)}
+          disabled={activeLayer === 1}
+          className={css({
+            padding: "0.5rem 1rem",
+            backgroundColor: activeLayer === 1 ? "teal.500" : "gray.600",
+            borderRadius: "0.25rem",
+            color: "white",
+            cursor: "pointer",
+          })}
+        >
+          Layer 1
+        </button>
+        <button
+          onClick={() => setActiveLayer(2)}
+          disabled={activeLayer === 2}
+          className={css({
+            padding: "0.5rem 1rem",
+            backgroundColor: activeLayer === 2 ? "teal.500" : "gray.600",
+            borderRadius: "0.25rem",
+            color: "white",
+            cursor: "pointer",
+          })}
+        >
+          Layer 2
+        </button>
+        <button
+          onClick={() => setActiveLayer(3)}
+          disabled={activeLayer === 3}
+          className={css({
+            padding: "0.5rem 1rem",
+            backgroundColor: activeLayer === 3 ? "teal.500" : "gray.600",
+            borderRadius: "0.25rem",
+            color: "white",
+            cursor: "pointer",
+          })}
+        >
+          Layer 3
+        </button>
       </div>
       <div
         className={css({
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          flexDirection: "row",
           justifyContent: "center",
+          alignItems: "center",
           gap: "20px",
         })}
       >
-        <div className={trackBallStyle}></div>
-        <div>
-          <input
-            type="text"
-            value={getDisplayValue(params.tempState.thumbKey1)}
-            onKeyDown={(e) => params.handleThumbKey1Change(handleKeyDown(e))}
-            className={inputKeyThumbStyle}
-            readOnly
-          />
+        <div
+          className={css({
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          })}
+        >
+          {(["column4", "column3", "column2", "column1"] as const).map(
+            (column) => (
+              <div
+                key={column}
+                className={css({
+                  display: "flex",
+                  alignItems: "center",
+                })}
+              >
+                <div
+                  className={css({
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  })}
+                >
+                  {renderKeyInputs(column)}
+                </div>
+              </div>
+            )
+          )}
         </div>
-        <div>
-          <input
-            type="text"
-            value={getDisplayValue(params.tempState.thumbKey2)}
-            onKeyDown={(e) => params.handleThumbKey2Change(handleKeyDown(e))}
-            className={inputKeyThumbStyle}
-            readOnly
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            value={getDisplayValue(params.tempState.monitorKey)}
-            onKeyDown={(e) => params.handleMonitorKeyChange(handleKeyDown(e))}
-            className={inputKeyThumbStyle}
-            readOnly
-          />
+        <div
+          className={css({
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "20px",
+          })}
+        >
+          <div className={trackBallStyle}></div>
+          <div>
+            <input
+              type="text"
+              value={getDisplayValue(tempState.thumbKey1)}
+              onKeyDown={(e) => handleThumbKey1Change(handleKeyDown(e))}
+              className={inputKeyThumbStyle}
+              readOnly
+            />
+          </div>
+          <div>
+            <input
+              type="text"
+              value={getDisplayValue(tempState.thumbKey2)}
+              onKeyDown={(e) => handleThumbKey2Change(handleKeyDown(e))}
+              className={inputKeyThumbStyle}
+              readOnly
+            />
+          </div>
+          <div>
+            <input
+              type="text"
+              value={getDisplayValue(tempState.monitorKey)}
+              onKeyDown={(e) => handleMonitorKeyChange(handleKeyDown(e))}
+              className={inputKeyThumbStyle}
+              readOnly
+            />
+          </div>
         </div>
       </div>
     </div>
