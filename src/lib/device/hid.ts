@@ -1,13 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Key, KeyColumn, KeyMapCollection, KeyMapType } from "./types";
 import { getKeyUsageID, Uint8 } from "./usageId";
 
 let connectedDevice: HIDDevice | null = null;
-/**
- * HIDデバイスに接続する
- */
-export async function connectHIDDevice(): Promise<void> {
+
+async function connectHIDDevice(): Promise<void> {
   try {
     const devices = await navigator.hid.requestDevice({
       filters: [
@@ -88,23 +87,49 @@ export async function sendKeyMapCollection(
   }
 }
 
-/**
- * HIDデバイスとの接続を切断する
- */
-export async function disconnectHIDDevice(): Promise<void> {
+async function disconnectHIDDevice(): Promise<void> {
   if (connectedDevice) {
     await connectedDevice.close();
     connectedDevice = null;
   }
 }
 
-/**
- * 現在接続されているデバイスを取得する
- * @returns 接続されているHIDデバイス、または未接続の場合はnull
- */
 export function getConnectedDevice(): HIDDevice | null {
   return connectedDevice;
 }
+
+export function useHIDConnection() {
+  const [connectedDevice, setConnectedDevice] = useState<HIDDevice | null>(
+    null
+  );
+  const [error, setError] = useState<string>("");
+
+  const connect = async () => {
+    try {
+      await connectHIDDevice();
+      const device = getConnectedDevice();
+      if (device) {
+        setConnectedDevice(device);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to connect device");
+    }
+  };
+
+  const disconnect = async () => {
+    try {
+      await disconnectHIDDevice();
+      setConnectedDevice(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to disconnect device"
+      );
+    }
+  };
+
+  return { connectedDevice, connect, disconnect, error, setError };
+}
+
 export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);

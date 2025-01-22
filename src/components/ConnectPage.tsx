@@ -1,28 +1,20 @@
 "use client";
 
-import { css } from "../../styled-system/css";
 import { useState, useEffect } from "react";
-import {
-  connectHIDDevice,
-  convertKeyMapCollectionToBytes,
-  disconnectHIDDevice,
-  getConnectedDevice,
-  sendKeyMapCollection,
-} from "../lib/device/hid";
-import Device from "../app/remap/device";
-import { KeyMapCollection, KeyMapType } from "../lib/device/types";
-import { initialState } from "../lib/device/reducer";
-import UniqueKeyMenu from "../components/UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { css } from "../../styled-system/css";
+import Device from "../app/remap/device";
 import { clientApi } from "../lib/api/clientApi";
-
-interface ConnectedDevice {
-  productName: string;
-  vendorId: number;
-  productId: number;
-  device: HIDDevice;
-}
+import {
+  useHIDConnection,
+  getConnectedDevice,
+  sendKeyMapCollection,
+  convertKeyMapCollectionToBytes,
+} from "../lib/device/hid";
+import { initialState } from "../lib/device/reducer";
+import { KeyMapCollection, KeyMapType } from "../lib/device/types";
+import UniqueKeyMenu from "./UniqueKeyMenu";
 
 const style = {
   container: css({
@@ -208,11 +200,10 @@ const style = {
 };
 
 export default function ConnectPage() {
-  const [connectedDevice, setConnectedDevice] =
-    useState<ConnectedDevice | null>(null);
-  const [error, setError] = useState<string>("");
   const [isSupported, setIsSupported] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
+  const { connectedDevice, connect, disconnect, error, setError } =
+    useHIDConnection();
   const [keyMapCollection, setKeyMapCollection] = useState<KeyMapCollection>({
     appName: "",
     rayer1: initialState,
@@ -227,54 +218,10 @@ export default function ConnectPage() {
   }, []);
 
   useEffect(() => {
-    const checkConnectedDevice = () => {
-      const device = getConnectedDevice();
-      if (device) {
-        setConnectedDevice({
-          productName: device.productName,
-          vendorId: device.vendorId,
-          productId: device.productId,
-          device: device,
-        });
-      }
-    };
-
     if (mounted) {
-      checkConnectedDevice();
+      getConnectedDevice();
     }
   }, [mounted]);
-
-  const handleConnect = async () => {
-    try {
-      await connectHIDDevice();
-      const device = getConnectedDevice();
-      if (device) {
-        setConnectedDevice({
-          productName: device.productName,
-          vendorId: device.vendorId,
-          productId: device.productId,
-          device: device,
-        });
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect device");
-    }
-  };
-
-  const handleDisconnect = async () => {
-    try {
-      await disconnectHIDDevice();
-      setConnectedDevice(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to disconnect device"
-      );
-    }
-  };
-
-  if (!mounted) {
-    return null;
-  }
 
   const currentLayerKeyMap: KeyMapType = (() => {
     if (activeLayer === 1) return keyMapCollection.rayer1;
@@ -294,25 +241,35 @@ export default function ConnectPage() {
     });
   };
 
-  const handleUpdate = () => {
-    sendKeyMapCollection(keyMapCollection);
+  const handleWrite = () => {
+    sendKeyMapCollection(keyMapCollection).catch((err) => {
+      setError(err instanceof Error ? err.message : "Failed to send keymap");
+    });
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     try {
-      // API クライアント経由で keymap を保存（必要に応じてパラメータを変更）
-      clientApi()
-        .keymaps.postKeymap({
-          keymap_name: keyMapCollection.appName,
-          keymap_json: keyMapCollection,
-        })
-        .catch(() => {
-          setError("Failed to save keymap");
-        });
+      clientApi().keymaps.postKeymap({
+        keymap_name: keyMapCollection.appName,
+        keymap_json: keyMapCollection,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save keymap");
     }
   };
+
+  const handleReset = () => {
+    setKeyMapCollection({
+      appName: "",
+      rayer1: initialState,
+      rayer2: initialState,
+      rayer3: initialState,
+    });
+  };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -341,7 +298,7 @@ export default function ConnectPage() {
             })}
           >
             {!connectedDevice ? (
-              <button onClick={handleConnect} className={style.primaryButton}>
+              <button onClick={connect} className={style.primaryButton}>
                 デバイスを接続
               </button>
             ) : (
@@ -368,7 +325,7 @@ export default function ConnectPage() {
                     <div className={style.buttonGroup}>
                       <div>
                         <button
-                          onClick={handleDisconnect}
+                          onClick={disconnect}
                           className={style.dangerButton}
                         >
                           切断
@@ -406,20 +363,13 @@ export default function ConnectPage() {
 
                       <div className={style.buttonContainer}>
                         <button
-                          onClick={() => {
-                            setKeyMapCollection({
-                              appName: "",
-                              rayer1: initialState,
-                              rayer2: initialState,
-                              rayer3: initialState,
-                            });
-                          }}
+                          onClick={handleReset}
                           className={style.dangerButton}
                         >
                           Reset
                         </button>
                         <button
-                          onClick={handleUpdate}
+                          onClick={handleWrite}
                           className={style.successButton}
                         >
                           Write
