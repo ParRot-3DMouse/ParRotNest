@@ -204,7 +204,7 @@ export default function ConnectPage() {
   const [mounted, setMounted] = useState(false);
   const { connectedDevice, connect, disconnect, error, setError } =
     useHIDConnection();
-  const [keyMapCollection, setKeyMapCollection] = useState<KeyMapCollection>({
+  const [keymapCollection, setKeyMapCollection] = useState<KeyMapCollection>({
     appName: "",
     rayer1: initialState,
     rayer2: initialState,
@@ -224,9 +224,9 @@ export default function ConnectPage() {
   }, [mounted]);
 
   const currentLayerKeyMap: KeyMapType = (() => {
-    if (activeLayer === 1) return keyMapCollection.rayer1;
-    if (activeLayer === 2) return keyMapCollection.rayer2!;
-    return keyMapCollection.rayer3!;
+    if (activeLayer === 1) return keymapCollection.rayer1;
+    if (activeLayer === 2) return keymapCollection.rayer2!;
+    return keymapCollection.rayer3!;
   })();
 
   const updateCurrentLayerKeyMap = (newLayerState: KeyMapType) => {
@@ -242,7 +242,7 @@ export default function ConnectPage() {
   };
 
   const handleWrite = () => {
-    sendKeyMapCollection(keyMapCollection).catch((err) => {
+    sendKeyMapCollection(keymapCollection).catch((err) => {
       setError(err instanceof Error ? err.message : "Failed to send keymap");
     });
   };
@@ -250,8 +250,8 @@ export default function ConnectPage() {
   const handleSave = () => {
     try {
       clientApi().keymaps.postKeymap({
-        keymap_name: keyMapCollection.appName,
-        keymap_json: keyMapCollection,
+        keymap_name: keymapCollection.appName,
+        keymap_json: keymapCollection,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save keymap");
@@ -337,7 +337,7 @@ export default function ConnectPage() {
                     <input
                       type="text"
                       placeholder="Keymap Name"
-                      value={keyMapCollection.appName}
+                      value={keymapCollection.appName}
                       onChange={(e) =>
                         setKeyMapCollection((prev) => {
                           return { ...prev, appName: e.target.value };
@@ -389,10 +389,10 @@ export default function ConnectPage() {
                 </div>
 
                 <pre className={style.codeBlock}>
-                  {convertKeyMapCollectionToBytes(keyMapCollection)}
+                  {convertKeyMapCollectionToBytes(keymapCollection)}
                 </pre>
                 <pre className={style.codeBlock}>
-                  {JSON.stringify(keyMapCollection, null, 2)}
+                  {JSON.stringify(keymapCollection, null, 2)}
                 </pre>
               </div>
             )}
