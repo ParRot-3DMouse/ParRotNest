@@ -35,21 +35,4 @@ export type Action =
   | { type: typeof ActionType.reset }
   | { type: typeof ActionType.update; payload: Partial<KeyMapType> };
 
-export const reducer = (state: KeyMapType, action: Action): KeyMapType => {
-  switch (action.type) {
-    case ActionType.reset:
-      return initialState;
-    case ActionType.update:
-      return { ...state, ...action.payload };
-    default: {
-      return state;
-    }
-  }
-};
-
 export const reset = (): Action => ({ type: ActionType.reset });
-
-export const update = (payload: Partial<KeyMapType>): Action => ({
-  type: ActionType.update,
-  payload,
-});

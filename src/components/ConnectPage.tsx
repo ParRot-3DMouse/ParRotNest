@@ -1,17 +1,17 @@
 "use client";
 
 import { css } from "../../styled-system/css";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect } from "react";
 import {
   connectHIDDevice,
-  convertKeyMapToBytes,
+  convertKeyMapCollectionToBytes,
   disconnectHIDDevice,
   getConnectedDevice,
-  sendKeyMap,
+  sendKeyMapCollection,
 } from "../lib/device/hid";
 import Device from "../app/remap/device";
-import { Key, KeyColumn, KeyMapType } from "../lib/device/types";
-import { reducer, initialState, update } from "../lib/device/reducer";
+import { KeyMapCollection, KeyMapType } from "../lib/device/types";
+import { initialState } from "../lib/device/reducer";
 import UniqueKeyMenu from "../components/UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -213,10 +213,13 @@ export default function ConnectPage() {
   const [error, setError] = useState<string>("");
   const [isSupported, setIsSupported] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
-  const [keyState, dispatch] = useReducer(reducer, initialState);
-  const [tempState, setTempState] = useState<KeyMapType>(initialState);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [keymapName, setKeymapName] = useState<string>("");
+  const [keyMapCollection, setKeyMapCollection] = useState<KeyMapCollection>({
+    appName: "",
+    rayer1: initialState,
+    rayer2: initialState,
+    rayer3: initialState,
+  });
+  const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     setMounted(true);
@@ -273,58 +276,35 @@ export default function ConnectPage() {
     return null;
   }
 
-  const handleInputChange = (
-    col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
-    key: keyof KeyColumn,
-    value: Key
-  ) => {
-    setTempState((prev) => ({
-      ...prev,
-      [col]: { ...prev[col], [key]: value },
-    }));
-  };
+  const currentLayerKeyMap: KeyMapType = (() => {
+    if (activeLayer === 1) return keyMapCollection.rayer1;
+    if (activeLayer === 2) return keyMapCollection.rayer2!;
+    return keyMapCollection.rayer3!;
+  })();
 
-  const handleThumbKey1Change = (value: Key) => {
-    setTempState((prev) => ({
-      ...prev,
-      thumbKey1: value,
-    }));
-  };
-
-  const handleThumbKey2Change = (value: Key) => {
-    setTempState((prev) => ({
-      ...prev,
-      thumbKey2: value,
-    }));
-  };
-
-  const handleMonitorKeyChange = (value: Key) => {
-    setTempState((prev) => ({
-      ...prev,
-      monitorKey: value,
-    }));
+  const updateCurrentLayerKeyMap = (newLayerState: KeyMapType) => {
+    setKeyMapCollection((prev) => {
+      if (activeLayer === 1) {
+        return { ...prev, rayer1: newLayerState };
+      } else if (activeLayer === 2) {
+        return { ...prev, rayer2: newLayerState };
+      } else {
+        return { ...prev, rayer3: newLayerState };
+      }
+    });
   };
 
   const handleUpdate = () => {
-    dispatch(update(tempState));
-    sendKeyMap(tempState);
+    sendKeyMapCollection(keyMapCollection);
   };
 
-  const handleSave = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleModalSave = async () => {
+  const handleSave = async () => {
     try {
       // API クライアント経由で keymap を保存（必要に応じてパラメータを変更）
       clientApi()
         .keymaps.postKeymap({
-          keymap_name: keymapName,
-          keymap_json: { appName: "appName", rayer1: tempState },
-        })
-        .then(() => {
-          setIsModalOpen(false);
-          setKeymapName("");
+          keymap_name: keyMapCollection.appName,
+          keymap_json: keyMapCollection,
         })
         .catch(() => {
           setError("Failed to save keymap");
@@ -333,13 +313,6 @@ export default function ConnectPage() {
       setError(err instanceof Error ? err.message : "Failed to save keymap");
     }
   };
-
-  const handleModalCancel = () => {
-    setIsModalOpen(false);
-    setKeymapName("");
-  };
-
-  const keyArray = convertKeyMapToBytes(keyState);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -404,30 +377,43 @@ export default function ConnectPage() {
                     </div>
                   </div>
                   <div>
+                    <input
+                      type="text"
+                      placeholder="Keymap Name"
+                      value={keyMapCollection.appName}
+                      onChange={(e) =>
+                        setKeyMapCollection((prev) => {
+                          return { ...prev, appName: e.target.value };
+                        })
+                      }
+                      className={css({
+                        width: "100%",
+                        padding: "8px",
+                        marginBottom: "1rem",
+                        borderRadius: "0.375rem",
+                        border: "1px solid gray",
+                        backgroundColor: "gray.800",
+                        color: "white",
+                      })}
+                    />
                     <div className={style.container}>
-                      <div className={css({ pointerEvents: "none" })}>
-                        <Device
-                          tempState={keyState}
-                          handleInputChange={handleInputChange}
-                          handleThumbKey1Change={handleThumbKey1Change}
-                          handleThumbKey2Change={handleThumbKey2Change}
-                          handleMonitorKeyChange={handleMonitorKeyChange}
-                        />
-                      </div>
-
-                      <div className={style.arrow}></div>
-
                       <Device
-                        tempState={tempState}
-                        handleInputChange={handleInputChange}
-                        handleThumbKey1Change={handleThumbKey1Change}
-                        handleThumbKey2Change={handleThumbKey2Change}
-                        handleMonitorKeyChange={handleMonitorKeyChange}
+                        tempState={currentLayerKeyMap}
+                        setLayerState={updateCurrentLayerKeyMap}
+                        activeLayer={activeLayer}
+                        setActiveLayer={setActiveLayer}
                       />
 
                       <div className={style.buttonContainer}>
                         <button
-                          onClick={() => setTempState(initialState)}
+                          onClick={() => {
+                            setKeyMapCollection({
+                              appName: "",
+                              rayer1: initialState,
+                              rayer2: initialState,
+                              rayer3: initialState,
+                            });
+                          }}
                           className={style.dangerButton}
                         >
                           Reset
@@ -452,9 +438,11 @@ export default function ConnectPage() {
                   <UniqueKeyMenu />
                 </div>
 
-                <pre className={style.codeBlock}>{keyArray}</pre>
                 <pre className={style.codeBlock}>
-                  {JSON.stringify(keyState, null, 2)}
+                  {convertKeyMapCollectionToBytes(keyMapCollection)}
+                </pre>
+                <pre className={style.codeBlock}>
+                  {JSON.stringify(keyMapCollection, null, 2)}
                 </pre>
               </div>
             )}
@@ -465,67 +453,6 @@ export default function ConnectPage() {
           </div>
         )}
       </div>
-      {isModalOpen && (
-        <div
-          className={css({
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          })}
-        >
-          <div
-            className={css({
-              backgroundColor: "gray.900",
-              padding: "20px",
-              borderRadius: "0.5rem",
-              width: "90%",
-              maxWidth: "400px",
-            })}
-          >
-            <h2 className={css({ color: "white", marginBottom: "1rem" })}>
-              キーマップ名を入力
-            </h2>
-            <input
-              type="text"
-              placeholder="Keymap Name"
-              value={keymapName}
-              onChange={(e) => setKeymapName(e.target.value)}
-              className={css({
-                width: "100%",
-                padding: "8px",
-                marginBottom: "1rem",
-                borderRadius: "0.375rem",
-                border: "1px solid gray",
-                backgroundColor: "gray.800",
-                color: "white",
-              })}
-            />
-            <div
-              className={css({
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "1rem",
-              })}
-            >
-              <button
-                onClick={handleModalCancel}
-                className={style.dangerButton}
-              >
-                Cancel
-              </button>
-              <button onClick={handleModalSave} className={style.successButton}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </DndProvider>
   );
 }
