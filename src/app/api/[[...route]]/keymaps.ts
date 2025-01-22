@@ -47,7 +47,6 @@ const keymaps = new Hono<{
 
       return c.json({ status: "created", keymap_id });
     } catch (err) {
-      console.error("POST /keymaps: Error", err);
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
