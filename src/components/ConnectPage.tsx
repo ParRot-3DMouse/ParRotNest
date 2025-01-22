@@ -15,6 +15,7 @@ import { reducer, initialState, update } from "../lib/device/reducer";
 import UniqueKeyMenu from "../components/UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { clientApi } from "../lib/api/clientApi";
 
 interface ConnectedDevice {
   productName: string;
@@ -214,6 +215,8 @@ export default function ConnectPage() {
   const [mounted, setMounted] = useState(false);
   const [keyState, dispatch] = useReducer(reducer, initialState);
   const [tempState, setTempState] = useState<KeyMapType>(initialState);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [keymapName, setKeymapName] = useState<string>("");
 
   useEffect(() => {
     setMounted(true);
@@ -305,6 +308,35 @@ export default function ConnectPage() {
   const handleUpdate = () => {
     dispatch(update(tempState));
     sendKeyMap(tempState);
+  };
+
+  const handleSave = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalSave = async () => {
+    try {
+      // API クライアント経由で keymap を保存（必要に応じてパラメータを変更）
+      clientApi()
+        .keymaps.postKeymap({
+          keymap_name: keymapName,
+          keymap_json: { appName: "appName", rayer1: tempState },
+        })
+        .then(() => {
+          setIsModalOpen(false);
+          setKeymapName("");
+        })
+        .catch(() => {
+          setError("Failed to save keymap");
+        });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save keymap");
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setKeymapName("");
   };
 
   const keyArray = convertKeyMapToBytes(keyState);
@@ -404,7 +436,13 @@ export default function ConnectPage() {
                           onClick={handleUpdate}
                           className={style.successButton}
                         >
-                          Update
+                          Write
+                        </button>
+                        <button
+                          onClick={handleSave}
+                          className={style.primaryButton}
+                        >
+                          Save
                         </button>
                       </div>
                     </div>
@@ -427,6 +465,67 @@ export default function ConnectPage() {
           </div>
         )}
       </div>
+      {isModalOpen && (
+        <div
+          className={css({
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          })}
+        >
+          <div
+            className={css({
+              backgroundColor: "gray.900",
+              padding: "20px",
+              borderRadius: "0.5rem",
+              width: "90%",
+              maxWidth: "400px",
+            })}
+          >
+            <h2 className={css({ color: "white", marginBottom: "1rem" })}>
+              キーマップ名を入力
+            </h2>
+            <input
+              type="text"
+              placeholder="Keymap Name"
+              value={keymapName}
+              onChange={(e) => setKeymapName(e.target.value)}
+              className={css({
+                width: "100%",
+                padding: "8px",
+                marginBottom: "1rem",
+                borderRadius: "0.375rem",
+                border: "1px solid gray",
+                backgroundColor: "gray.800",
+                color: "white",
+              })}
+            />
+            <div
+              className={css({
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "1rem",
+              })}
+            >
+              <button
+                onClick={handleModalCancel}
+                className={style.dangerButton}
+              >
+                Cancel
+              </button>
+              <button onClick={handleModalSave} className={style.successButton}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DndProvider>
   );
 }
