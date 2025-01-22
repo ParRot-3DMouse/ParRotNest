@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { css } from "../../../styled-system/css";
+import { css } from "../../styled-system/css";
 import {
   Key,
   KeyColumn,
@@ -8,8 +8,8 @@ import {
   ModifierKey,
   StandardKey,
   isValidKey,
-} from "../../lib/device/types";
-import { DraggableKey } from "../../components/DraggableKeyInput";
+} from "../lib/device/types";
+import { DraggableKey } from "./DraggableKeyInput";
 
 const inputKeyThumbStyle = css({
   width: "100px",

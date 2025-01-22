@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { css } from "../../styled-system/css";
-import Device from "../app/remap/device";
+import Device from "./device";
 import { clientApi } from "../lib/api/clientApi";
 import {
   useHIDConnection,
