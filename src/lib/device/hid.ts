@@ -185,6 +185,7 @@ export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
 export function convertKeyMapCollectionToBytes(
   keyMapCollection: KeyMapCollection
 ): Uint8Array {
+  const appNameBytes = stringToByteArray(keyMapCollection.appName);
   // rayer1 は必須
   const layer1Bytes = convertKeyMapToBytes(keyMapCollection.rayer1);
 
@@ -197,11 +198,18 @@ export function convertKeyMapCollectionToBytes(
     ? convertKeyMapToBytes(keyMapCollection.rayer3)
     : new Uint8Array(32);
 
-  // 結合 (1レイヤー=32バイト x 3レイヤー = 96バイト)
-  const allBytes = new Uint8Array(96);
+  const totalSize = 96 + appNameBytes.length;
+
+  const allBytes = new Uint8Array(totalSize);
   allBytes.set(layer1Bytes, 0); // 先頭0～31
   allBytes.set(layer2Bytes, 32); // 32～63
   allBytes.set(layer3Bytes, 64); // 64～95
+  allBytes.set(appNameBytes, 96);
 
   return allBytes;
+}
+
+function stringToByteArray(str: string): Uint8Array {
+  const encoder = new TextEncoder();
+  return encoder.encode(str);
 }
