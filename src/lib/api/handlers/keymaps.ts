@@ -15,7 +15,7 @@ export const KeymapsAPI = () => {
       const res = await appClient.api.keymaps.$post({
         json: {
           keymap_name: keymap_name,
-          keymap_json: keymap_json as unknown as string,
+          keymap_json: JSON.stringify(keymap_json),
         },
       });
       if (res.ok) {
