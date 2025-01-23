@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
-import { KeyMapCollection } from "../../device/types";
+import { KeymapCollection } from "../../device/types";
 
 export const KeymapsAPI = () => {
   const appClient = hc<AppType>("/");
@@ -10,7 +10,7 @@ export const KeymapsAPI = () => {
       keymap_json,
     }: {
       keymap_name: string;
-      keymap_json: KeyMapCollection;
+      keymap_json: KeymapCollection;
     }) => {
       const res = await appClient.api.keymaps.$post({
         json: {
@@ -51,7 +51,7 @@ export const KeymapsAPI = () => {
     }: {
       keymap_id: string;
       keymap_name: string;
-      keymap_json: KeyMapCollection;
+      keymap_json: KeymapCollection;
     }) => {
       const res = await appClient.api.keymaps[":keymap_id"].$put({
         param: { keymap_id: keymap_id },
