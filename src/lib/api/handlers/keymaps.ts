@@ -1,6 +1,7 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
 import { KeymapCollection } from "../../device/types";
+import { redirectTo404 } from "../../redirectTo404";
 
 export const KeymapsAPI = () => {
   const appClient = hc<AppType>("/");
@@ -46,6 +47,7 @@ export const KeymapsAPI = () => {
           ),
         };
       } else {
+        redirectTo404();
         throw new Error(await res.text());
       }
     },
