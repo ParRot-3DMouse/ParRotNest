@@ -20,7 +20,6 @@ const getKeymapToShareByAuthorSchema = z.object({
 });
 
 const deleteKeymapToShareSchema = z.object({
-  share_id: z.string().uuid(),
   author_id: z.string().uuid(),
 });
 
@@ -94,9 +93,12 @@ const keymaps_to_share = new Hono<{
     zValidator("json", deleteKeymapToShareSchema),
     async (c) => {
       try {
-        const { share_id, author_id } = deleteKeymapToShareSchema.parse({
+        const { share_id } = getKeymapToShareIdSchema.parse({
           share_id: c.req.param("share_id"),
         });
+        const { author_id } = deleteKeymapToShareSchema.parse(
+          await c.req.json()
+        );
 
         const authUserId = await getUserID(c);
         if (!authUserId) {
