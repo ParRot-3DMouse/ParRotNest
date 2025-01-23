@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Key, KeyColumn, KeyMapCollection, KeyMapType } from "./types";
+import { Key, KeyColumn, KeymapCollection, KeymapType } from "./types";
 import { getKeyUsageID, Uint8 } from "./usageId";
 
 let connectedDevice: HIDDevice | null = null;
@@ -35,14 +35,14 @@ async function connectHIDDevice(): Promise<void> {
  * キーマップをデバイスに送信する
  * @param keymap 送信するキーマップ
  */
-export async function sendKeyMap(keymap: KeyMapType): Promise<void> {
+export async function sendKeymap(keymap: KeymapType): Promise<void> {
   if (!connectedDevice) {
     throw new Error("Device not connected");
   }
 
   try {
-    // KeyMapTypeをバイト配列に変換
-    const data = convertKeyMapToBytes(keymap);
+    // KeymapTypeをバイト配列に変換
+    const data = convertKeymapToBytes(keymap);
 
     if (!connectedDevice.opened) {
       await connectedDevice.open();
@@ -61,15 +61,15 @@ export async function sendKeyMap(keymap: KeyMapType): Promise<void> {
   }
 }
 
-export async function sendKeyMapCollection(
-  keymapCollection: KeyMapCollection
+export async function sendKeymapCollection(
+  keymapCollection: KeymapCollection
 ): Promise<void> {
   if (!connectedDevice) {
     throw new Error("Device not connected");
   }
 
   try {
-    const data = convertKeyMapCollectionToBytes(keymapCollection);
+    const data = convertKeymapCollectionToBytes(keymapCollection);
 
     if (!connectedDevice.opened) {
       await connectedDevice.open();
@@ -130,7 +130,7 @@ export function useHIDConnection() {
   return { connectedDevice, connect, disconnect, error, setError };
 }
 
-export const convertKeyMapToBytes = (keymap: KeyMapType): Uint8Array => {
+export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);
     return [modifier, character];
@@ -182,20 +182,20 @@ export const convertKeyMapToBytes = (keymap: KeyMapType): Uint8Array => {
   }
 };
 
-export function convertKeyMapCollectionToBytes(
-  keymapCollection: KeyMapCollection
+export function convertKeymapCollectionToBytes(
+  keymapCollection: KeymapCollection
 ): Uint8Array {
   const appNameBytes = stringToByteArray(keymapCollection.appName);
   // rayer1 は必須
-  const layer1Bytes = convertKeyMapToBytes(keymapCollection.rayer1);
+  const layer1Bytes = convertKeymapToBytes(keymapCollection.rayer1);
 
   // rayer2, rayer3 は存在する場合のみ変換
   const layer2Bytes = keymapCollection.rayer2
-    ? convertKeyMapToBytes(keymapCollection.rayer2)
+    ? convertKeymapToBytes(keymapCollection.rayer2)
     : new Uint8Array(32);
 
   const layer3Bytes = keymapCollection.rayer3
-    ? convertKeyMapToBytes(keymapCollection.rayer3)
+    ? convertKeymapToBytes(keymapCollection.rayer3)
     : new Uint8Array(32);
 
   const totalSize = 96 + appNameBytes.length;

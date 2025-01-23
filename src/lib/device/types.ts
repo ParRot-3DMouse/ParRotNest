@@ -188,7 +188,7 @@ export type KeyColumn = {
   key3: Key;
 };
 
-export type KeyMapType = {
+export type KeymapType = {
   column1: KeyColumn;
   column2: KeyColumn;
   column3: KeyColumn;
@@ -198,9 +198,9 @@ export type KeyMapType = {
   monitorKey: Key;
 };
 
-export type KeyMapCollection = {
+export type KeymapCollection = {
   appName: string;
-  rayer1: KeyMapType;
-  rayer2?: KeyMapType;
-  rayer3?: KeyMapType;
+  rayer1: KeymapType;
+  rayer2: KeymapType;
+  rayer3: KeymapType;
 };
