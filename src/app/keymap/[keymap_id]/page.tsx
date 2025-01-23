@@ -6,6 +6,7 @@ import { initialState } from "../../../lib/device/reducer";
 // import { css } from "../../../../styled-system/css";
 import { KeymapComponent } from "../../../components/KeymapComponent";
 import { clientApi } from "../../../lib/api/clientApi";
+import { useRouter } from "next/navigation";
 
 export default function KeymapPage({
   params,
@@ -20,6 +21,7 @@ export default function KeymapPage({
   });
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
   const [keymap_id, setKeymap_id] = useState<string>("");
+  const router = useRouter();
   const api = clientApi();
 
   const fetchKeymap = async () => {
@@ -35,6 +37,7 @@ export default function KeymapPage({
         setKeymapCollection(receivedKeymap);
       }
     } catch (error) {
+      router.push("/");
       console.error("Failed to fetch keymap:", error);
     }
   };
