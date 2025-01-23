@@ -38,6 +38,7 @@ interface DraggableKeyProps {
   ) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => Key;
   getDisplayValue: (key: Key) => string;
+  pageKinds: "new" | "edit" | "share";
 }
 
 export const DraggableKey: React.FC<DraggableKeyProps> = ({
@@ -47,19 +48,25 @@ export const DraggableKey: React.FC<DraggableKeyProps> = ({
   handleInputChange,
   handleKeyDown,
   getDisplayValue,
+  pageKinds,
 }) => {
   const [, drop] = useDrop({
     accept: "uniqueKey",
     drop: (item: { uniqueKey: UniqueKey }) => {
-      handleInputChange(col, row, {
-        type: "custom",
-        uniqueKey: item.uniqueKey,
-      });
+      if (!(pageKinds === "share")) {
+        handleInputChange(col, row, {
+          type: "custom",
+          uniqueKey: item.uniqueKey,
+        });
+      }
     },
+    canDrop: () => pageKinds !== "share",
   });
 
   const dropRef = (node: HTMLInputElement | null) => {
-    drop(node);
+    if (!(pageKinds === "share")) {
+      drop(node);
+    }
   };
 
   return (
@@ -67,7 +74,11 @@ export const DraggableKey: React.FC<DraggableKeyProps> = ({
       ref={dropRef}
       type="text"
       value={getDisplayValue(keyValue)}
-      onKeyDown={(e) => handleInputChange(col, row, handleKeyDown(e))}
+      onKeyDown={(e) => {
+        if (!(pageKinds === "share")) {
+          handleInputChange(col, row, handleKeyDown(e));
+        }
+      }}
       readOnly
       className={inputKeyStyle}
     />

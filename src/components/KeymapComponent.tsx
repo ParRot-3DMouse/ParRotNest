@@ -14,15 +14,16 @@ interface KeymapComponentBaseProps {
   setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
   setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
+  pageKinds: "new" | "edit" | "share";
 }
 
 interface NewKeymapProps extends KeymapComponentBaseProps {
-  isNew: true;
+  pageKinds: "new";
   keymap_id?: never; // `isNew`がtrueの場合は`keymap_id`を渡さない
 }
 
 interface ExistingKeymapProps extends KeymapComponentBaseProps {
-  isNew: false;
+  pageKinds: "edit" | "share";
   keymap_id: string; // `isNew`がfalseの場合は`keymap_id`を必須にする
 }
 
@@ -90,12 +91,12 @@ const primaryButton = css({
 });
 
 export const KeymapComponent: React.FC<KeymapComponentProps> = ({
-  isNew,
   keymap_id,
   keymapCollection,
   setKeymapCollection,
   activeLayer,
   setActiveLayer,
+  pageKinds,
 }) => {
   const router = useRouter();
   const handleWrite = () => {
@@ -106,13 +107,13 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
 
   const handleSave = async () => {
     try {
-      if (isNew) {
+      if (pageKinds === "new") {
         const res = await clientApi().keymaps.postKeymap({
           keymap_name: keymapCollection.appName,
           keymap_json: keymapCollection,
         });
         router.push(`/keymap/${res.keymap_id}`);
-      } else {
+      } else if (pageKinds === "edit") {
         await clientApi().keymaps.putKeymap({
           keymap_id: keymap_id,
           keymap_name: keymapCollection.appName,
@@ -122,6 +123,20 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
       }
     } catch (err) {
       throw Error(err instanceof Error ? err.message : "Failed to save keymap");
+    }
+  };
+
+  const handlePost = async () => {
+    try {
+      if (pageKinds === "edit") {
+        await clientApi().keymaps_to_share.postKeymapToShare({
+          keymap_name: keymapCollection.appName,
+          keymap_json: keymapCollection,
+        });
+        router.push(`/keymap/share/${keymap_id}`);
+      }
+    } catch (err) {
+      throw Error(err instanceof Error ? err.message : "Failed to post keymap");
     }
   };
 
@@ -151,6 +166,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
               return { ...prev, appName: e.target.value };
             })
           }
+          disabled={pageKinds === "share"}
           className={css({
             width: "100%",
             padding: "8px",
@@ -162,23 +178,33 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
           })}
         />
         <Device
+          pageKinds={pageKinds}
           keymapCollection={keymapCollection}
           setKeymapCollection={setKeymapCollection}
           activeLayer={activeLayer}
           setActiveLayer={setActiveLayer}
         />
         <div className={buttonContainer}>
-          <button onClick={handleReset} className={dangerButton}>
-            Reset
-          </button>
+          {pageKinds === "edit" && (
+            <button onClick={handleReset} className={dangerButton}>
+              Reset
+            </button>
+          )}
           <button onClick={handleWrite} className={successButton}>
             Write
           </button>
-          <button onClick={handleSave} className={primaryButton}>
-            Save
-          </button>
+          {pageKinds === "edit" && (
+            <button onClick={handleSave} className={primaryButton}>
+              Save
+            </button>
+          )}
+          {pageKinds === "edit" && (
+            <button onClick={handlePost} className={primaryButton}>
+              Post
+            </button>
+          )}
         </div>
-        <UniqueKeyMenu />
+        {!(pageKinds === "share") && <UniqueKeyMenu />}
       </DndProvider>
     </div>
   );

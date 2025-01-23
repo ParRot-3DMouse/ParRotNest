@@ -1,5 +1,6 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
+import { KeymapCollection } from "../../device/types";
 
 export const KeymapsToShareAPI = () => {
   const appClient = hc<AppType>("/");
@@ -7,17 +8,14 @@ export const KeymapsToShareAPI = () => {
     postKeymapToShare: async ({
       keymap_name,
       keymap_json,
-      author_id,
     }: {
       keymap_name: string;
-      keymap_json: string;
-      author_id: string;
+      keymap_json: KeymapCollection;
     }) => {
       const res = await appClient.api.keymaps_to_share.$post({
         json: {
           keymap_name: keymap_name,
-          keymap_json: keymap_json,
-          author_id: author_id,
+          keymap_json: JSON.stringify(keymap_json),
         },
       });
       if (res.ok) {

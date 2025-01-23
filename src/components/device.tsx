@@ -46,6 +46,7 @@ const trackBallStyle = css({
   boxShadow: "0 0 20px rgba(0,0,0,0.3)",
 });
 interface DeviceProps {
+  pageKinds: "new" | "edit" | "share";
   keymapCollection: KeymapCollection;
   setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
@@ -77,6 +78,7 @@ function updateActiveLayerKeymap(
 }
 
 const Device: React.FC<DeviceProps> = ({
+  pageKinds,
   keymapCollection,
   setKeymapCollection,
   activeLayer,
@@ -234,6 +236,7 @@ const Device: React.FC<DeviceProps> = ({
             handleInputChange={handleInputChange}
             handleKeyDown={handleKeyDown}
             getDisplayValue={getDisplayValue}
+            pageKinds={pageKinds}
           />
         );
       }

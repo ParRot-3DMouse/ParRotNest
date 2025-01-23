@@ -8,7 +8,6 @@ import { v4 } from "uuid";
 const postKeymapToShareSchema = z.object({
   keymap_name: z.string(),
   keymap_json: z.string(),
-  author_id: z.string().uuid(),
 });
 
 const getKeymapToShareIdSchema = z.object({
@@ -30,8 +29,10 @@ const keymaps_to_share = new Hono<{
   // POST /keymaps_to_share
   .post("/", zValidator("json", postKeymapToShareSchema), async (c) => {
     try {
-      const { keymap_name, keymap_json, author_id } =
-        postKeymapToShareSchema.parse(await c.req.json());
+      const { keymap_name, keymap_json } = postKeymapToShareSchema.parse(
+        await c.req.json()
+      );
+      const author_id = await getUserID(c);
       const share_id = v4();
 
       await process.env.DB.prepare(
