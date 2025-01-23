@@ -19,11 +19,13 @@ export default function KeymapPage({
     rayer3: initialState,
   });
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
+  const [keymap_id, setKeymap_id] = useState<string>("");
   const api = clientApi();
 
   const fetchKeymap = async () => {
     try {
       const { keymap_id } = await params;
+      setKeymap_id(keymap_id);
       const res = await api.keymaps.getKeymapById({
         keymap_id: keymap_id,
       });
@@ -45,6 +47,8 @@ export default function KeymapPage({
   return (
     <div>
       <KeymapComponent
+        isNew={false}
+        keymap_id={keymap_id}
         keymapCollection={keymapCollection}
         setKeymapCollection={setKeymapCollection}
         activeLayer={activeLayer}

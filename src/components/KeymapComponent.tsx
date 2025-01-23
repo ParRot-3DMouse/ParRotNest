@@ -7,13 +7,26 @@ import { initialState } from "../lib/device/reducer";
 import UniqueKeyMenu from "./UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { useRouter } from "next/navigation";
 
-interface KeymapComponentProps {
+interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
   setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
   setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
 }
+
+interface NewKeymapProps extends KeymapComponentBaseProps {
+  isNew: true;
+  keymap_id?: never; // `isNew`がtrueの場合は`keymap_id`を渡さない
+}
+
+interface ExistingKeymapProps extends KeymapComponentBaseProps {
+  isNew: false;
+  keymap_id: string; // `isNew`がfalseの場合は`keymap_id`を必須にする
+}
+
+type KeymapComponentProps = NewKeymapProps | ExistingKeymapProps;
 
 const buttonContainer = css({
   margin: "30px",
@@ -77,23 +90,36 @@ const primaryButton = css({
 });
 
 export const KeymapComponent: React.FC<KeymapComponentProps> = ({
+  isNew,
+  keymap_id,
   keymapCollection,
   setKeymapCollection,
   activeLayer,
   setActiveLayer,
 }) => {
+  const router = useRouter();
   const handleWrite = () => {
     sendKeymapCollection(keymapCollection).catch((err) => {
       throw Error(err instanceof Error ? err.message : "Failed to send keymap");
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      clientApi().keymaps.postKeymap({
-        keymap_name: keymapCollection.appName,
-        keymap_json: keymapCollection,
-      });
+      if (isNew) {
+        const res = await clientApi().keymaps.postKeymap({
+          keymap_name: keymapCollection.appName,
+          keymap_json: keymapCollection,
+        });
+        router.push(`/keymap/${res.keymap_id}`);
+      } else {
+        await clientApi().keymaps.putKeymap({
+          keymap_id: keymap_id,
+          keymap_name: keymapCollection.appName,
+          keymap_json: keymapCollection,
+        });
+        router.push(`/keymap/${keymap_id}`);
+      }
     } catch (err) {
       throw Error(err instanceof Error ? err.message : "Failed to save keymap");
     }
