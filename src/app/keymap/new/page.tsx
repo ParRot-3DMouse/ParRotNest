@@ -85,7 +85,7 @@ export default function KeymapPage() {
     <div>
       <div>
         <KeymapComponent
-          isNew={true}
+          pageKinds="new"
           keymapCollection={keymapCollection}
           setKeymapCollection={setKeymapCollection}
           activeLayer={activeLayer}

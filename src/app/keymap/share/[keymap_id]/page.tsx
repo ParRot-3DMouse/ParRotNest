@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { KeymapCollection } from "../../../lib/device/types";
-import { initialState } from "../../../lib/device/reducer";
-// import { css } from "../../../../styled-system/css";
-import { KeymapComponent } from "../../../components/KeymapComponent";
-import { clientApi } from "../../../lib/api/clientApi";
 import { useRouter } from "next/navigation";
+import { KeymapComponent } from "../../../../components/KeymapComponent";
+import { clientApi } from "../../../../lib/api/clientApi";
+import { initialState } from "../../../../lib/device/reducer";
+import { KeymapCollection } from "../../../../lib/device/types";
 
 export default function KeymapPage({
   params,
@@ -50,7 +49,7 @@ export default function KeymapPage({
   return (
     <div>
       <KeymapComponent
-        pageKinds="edit"
+        pageKinds="share"
         keymap_id={keymap_id}
         keymapCollection={keymapCollection}
         setKeymapCollection={setKeymapCollection}
