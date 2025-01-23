@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Key, KeyColumn, KeyMapCollection, KeyMapType } from "./types";
+import { Key, KeyColumn, KeymapCollection, KeymapType } from "./types";
 import { getKeyUsageID, Uint8 } from "./usageId";
 
 let connectedDevice: HIDDevice | null = null;
@@ -33,16 +33,16 @@ async function connectHIDDevice(): Promise<void> {
 
 /**
  * キーマップをデバイスに送信する
- * @param keyMap 送信するキーマップ
+ * @param keymap 送信するキーマップ
  */
-export async function sendKeyMap(keyMap: KeyMapType): Promise<void> {
+export async function sendKeymap(keymap: KeymapType): Promise<void> {
   if (!connectedDevice) {
     throw new Error("Device not connected");
   }
 
   try {
-    // KeyMapTypeをバイト配列に変換
-    const data = convertKeyMapToBytes(keyMap);
+    // KeymapTypeをバイト配列に変換
+    const data = convertKeymapToBytes(keymap);
 
     if (!connectedDevice.opened) {
       await connectedDevice.open();
@@ -61,15 +61,15 @@ export async function sendKeyMap(keyMap: KeyMapType): Promise<void> {
   }
 }
 
-export async function sendKeyMapCollection(
-  keyMapCollection: KeyMapCollection
+export async function sendKeymapCollection(
+  keymapCollection: KeymapCollection
 ): Promise<void> {
   if (!connectedDevice) {
     throw new Error("Device not connected");
   }
 
   try {
-    const data = convertKeyMapCollectionToBytes(keyMapCollection);
+    const data = convertKeymapCollectionToBytes(keymapCollection);
 
     if (!connectedDevice.opened) {
       await connectedDevice.open();
@@ -130,7 +130,7 @@ export function useHIDConnection() {
   return { connectedDevice, connect, disconnect, error, setError };
 }
 
-export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
+export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);
     return [modifier, character];
@@ -145,13 +145,13 @@ export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
   };
 
   try {
-    const column1Bytes = processColumn(keyMap.column1);
-    const column2Bytes = processColumn(keyMap.column2);
-    const column3Bytes = processColumn(keyMap.column3);
-    const column4Bytes = processColumn(keyMap.column4);
-    const thumbKey1Byte = processKey(keyMap.thumbKey1);
-    const thumbKey2Byte = processKey(keyMap.thumbKey2);
-    const monitorKeyByte = processKey(keyMap.monitorKey);
+    const column1Bytes = processColumn(keymap.column1);
+    const column2Bytes = processColumn(keymap.column2);
+    const column3Bytes = processColumn(keymap.column3);
+    const column4Bytes = processColumn(keymap.column4);
+    const thumbKey1Byte = processKey(keymap.thumbKey1);
+    const thumbKey2Byte = processKey(keymap.thumbKey2);
+    const monitorKeyByte = processKey(keymap.monitorKey);
 
     // 全てのバイト配列を結合
     const allBytes = [
@@ -182,20 +182,20 @@ export const convertKeyMapToBytes = (keyMap: KeyMapType): Uint8Array => {
   }
 };
 
-export function convertKeyMapCollectionToBytes(
-  keyMapCollection: KeyMapCollection
+export function convertKeymapCollectionToBytes(
+  keymapCollection: KeymapCollection
 ): Uint8Array {
-  const appNameBytes = stringToByteArray(keyMapCollection.appName);
+  const appNameBytes = stringToByteArray(keymapCollection.appName);
   // rayer1 は必須
-  const layer1Bytes = convertKeyMapToBytes(keyMapCollection.rayer1);
+  const layer1Bytes = convertKeymapToBytes(keymapCollection.rayer1);
 
   // rayer2, rayer3 は存在する場合のみ変換
-  const layer2Bytes = keyMapCollection.rayer2
-    ? convertKeyMapToBytes(keyMapCollection.rayer2)
+  const layer2Bytes = keymapCollection.rayer2
+    ? convertKeymapToBytes(keymapCollection.rayer2)
     : new Uint8Array(32);
 
-  const layer3Bytes = keyMapCollection.rayer3
-    ? convertKeyMapToBytes(keyMapCollection.rayer3)
+  const layer3Bytes = keymapCollection.rayer3
+    ? convertKeymapToBytes(keymapCollection.rayer3)
     : new Uint8Array(32);
 
   const totalSize = 96 + appNameBytes.length;

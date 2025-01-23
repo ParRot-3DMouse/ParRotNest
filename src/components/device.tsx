@@ -1,15 +1,16 @@
 import React, { useCallback } from "react";
-import { css } from "../../../styled-system/css";
+import { css } from "../../styled-system/css";
 import {
   Key,
   KeyColumn,
-  KeyMapType,
+  KeymapCollection,
+  KeymapType,
   KeyboardInput,
   ModifierKey,
   StandardKey,
   isValidKey,
-} from "../../lib/device/types";
-import { DraggableKey } from "../../components/DraggableKeyInput";
+} from "../lib/device/types";
+import { DraggableKey } from "./DraggableKeyInput";
 
 const inputKeyThumbStyle = css({
   width: "100px",
@@ -45,14 +46,46 @@ const trackBallStyle = css({
   boxShadow: "0 0 20px rgba(0,0,0,0.3)",
 });
 interface DeviceProps {
-  tempState: KeyMapType;
-  setLayerState: (updated: KeyMapType) => void;
+  keymapCollection: KeymapCollection;
+  setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
   setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
 }
 
-const Device = (props: DeviceProps) => {
-  const { tempState, setLayerState, activeLayer, setActiveLayer } = props;
+function getActiveLayerKeymap(
+  collection: KeymapCollection,
+  layer: 1 | 2 | 3
+): KeymapType {
+  if (layer === 1) return collection.rayer1;
+  if (layer === 2) return collection.rayer2;
+  if (layer === 3) return collection.rayer3;
+  return collection.rayer1;
+}
+
+function updateActiveLayerKeymap(
+  collection: KeymapCollection,
+  layer: 1 | 2 | 3,
+  newLayerState: KeymapType
+): KeymapCollection {
+  if (layer === 1) {
+    return { ...collection, rayer1: newLayerState };
+  } else if (layer === 2) {
+    return { ...collection, rayer2: newLayerState };
+  } else {
+    return { ...collection, rayer3: newLayerState };
+  }
+}
+
+const Device: React.FC<DeviceProps> = ({
+  keymapCollection,
+  setKeymapCollection,
+  activeLayer,
+  setActiveLayer,
+}) => {
+  const tempState: KeymapType = getActiveLayerKeymap(
+    keymapCollection,
+    activeLayer
+  );
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>): StandardKey => {
       e.preventDefault();
@@ -120,28 +153,6 @@ const Device = (props: DeviceProps) => {
     []
   );
 
-  // キーコンポーネント
-  const renderKeyInputs = (
-    column: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">
-  ) => {
-    return (Object.keys(tempState[column]) as Array<keyof KeyColumn>).map(
-      (key) => {
-        const keyValue = tempState[column][key];
-        return (
-          <DraggableKey
-            key={`${column}-${key}`}
-            keyValue={keyValue}
-            row={key}
-            col={column}
-            handleInputChange={handleInputChange}
-            handleKeyDown={handleKeyDown}
-            getDisplayValue={getDisplayValue}
-          />
-        );
-      }
-    );
-  };
-
   // Key型の値を表示用の文字列に変換する関数
   const getDisplayValue = (key: Key): string => {
     if (!key) return "No Key";
@@ -161,18 +172,26 @@ const Device = (props: DeviceProps) => {
     }
   };
 
+  const setLayerState = (newLayerState: KeymapType) => {
+    setKeymapCollection((prev) =>
+      updateActiveLayerKeymap(prev, activeLayer, newLayerState)
+    );
+  };
+
   const handleInputChange = (
-    col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
+    col: keyof Omit<KeymapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
     row: keyof KeyColumn,
     value: Key
   ) => {
-    setLayerState({
+    const newLayerState: KeymapType = {
       ...tempState,
       [col]: {
         ...tempState[col],
         [row]: value,
       },
-    });
+    };
+
+    setLayerState(newLayerState);
   };
 
   const handleThumbKey1Change = (value: Key) => {
@@ -194,6 +213,31 @@ const Device = (props: DeviceProps) => {
       ...tempState,
       monitorKey: value,
     });
+  };
+  // キーコンポーネント
+  const renderKeyInputs = (
+    column: keyof Omit<KeymapType, "thumbKey1" | "thumbKey2" | "monitorKey">
+  ) => {
+    if (!tempState[column]) {
+      throw new Error(`tempState does not contain the expected key: ${column}`);
+    }
+
+    return (Object.keys(tempState[column]) as Array<keyof KeyColumn>).map(
+      (key) => {
+        const keyValue = tempState[column][key];
+        return (
+          <DraggableKey
+            key={`${column}-${key}`}
+            keyValue={keyValue}
+            row={key}
+            col={column}
+            handleInputChange={handleInputChange}
+            handleKeyDown={handleKeyDown}
+            getDisplayValue={getDisplayValue}
+          />
+        );
+      }
+    );
   };
 
   return (

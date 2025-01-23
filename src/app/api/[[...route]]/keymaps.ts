@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
 import { getUserID } from "../../../lib/api/getUserId";
+import { Keymap } from "../types";
 
 const postKeymapSchema = z.object({
   keymap_name: z.string(),
@@ -67,7 +68,7 @@ const keymaps = new Hono<{
       if (user_id !== authUserId) {
         return c.json({ error: "Forbidden" }, 403);
       }
-      const { results } = await process.env.DB.prepare(
+      const { results }: { results: Keymap[] } = await process.env.DB.prepare(
         `SELECT * FROM keymaps WHERE user_id = ?1`
       )
         .bind(user_id)
@@ -96,7 +97,7 @@ const keymaps = new Hono<{
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const { results } = await process.env.DB.prepare(
+      const { results }: { results: Keymap[] } = await process.env.DB.prepare(
         `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
         .bind(keymap_id, authUserId)

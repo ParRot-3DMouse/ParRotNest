@@ -3,6 +3,7 @@
 import SyncUser from "./SyncUser";
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
+import { HIDProvider } from "./HIDContext";
 
 type ProviderProps = {
   children: ReactNode;
@@ -11,8 +12,10 @@ type ProviderProps = {
 function Provider({ children }: ProviderProps) {
   return (
     <SessionProvider>
-      <SyncUser />
-      {children}
+      <HIDProvider>
+        <SyncUser />
+        {children}
+      </HIDProvider>
     </SessionProvider>
   );
 }

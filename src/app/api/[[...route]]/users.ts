@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
 import { getUserID } from "../../../lib/api/getUserId";
+import { User } from "../types";
 
 const postUserSchema = z.object({
   user_email: z.string().email(),
@@ -69,7 +70,7 @@ const users = new Hono<{
         return c.json({ error: "Unauthorized" }, 403);
       }
 
-      const { results } = await process.env.DB.prepare(
+      const { results }: { results: User[] } = await process.env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
       )
         .bind(user_id)

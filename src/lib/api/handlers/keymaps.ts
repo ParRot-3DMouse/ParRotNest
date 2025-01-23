@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
-import { KeyMapCollection } from "../../device/types";
+import { KeymapCollection } from "../../device/types";
 
 export const KeymapsAPI = () => {
   const appClient = hc<AppType>("/");
@@ -10,7 +10,7 @@ export const KeymapsAPI = () => {
       keymap_json,
     }: {
       keymap_name: string;
-      keymap_json: KeyMapCollection;
+      keymap_json: KeymapCollection;
     }) => {
       const res = await appClient.api.keymaps.$post({
         json: {
@@ -24,26 +24,58 @@ export const KeymapsAPI = () => {
         throw new Error(await res.text());
       }
     },
-    getKeymapsByUser: async ({ user_id }: { user_id: string }) => {
-      const res = await appClient.api.keymaps.user[":user_id"].$get({
-        param: { user_id: user_id },
-      });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
-    },
-    getKeymapById: async ({ keymap_id }: { keymap_id: string }) => {
+    getKeymapById: async ({
+      keymap_id,
+    }: {
+      keymap_id: string;
+    }): Promise<{
+      keymap_id: string;
+      keymap_name: string;
+      keymap_json: KeymapCollection;
+    }> => {
       const res = await appClient.api.keymaps[":keymap_id"].$get({
         param: { keymap_id: keymap_id },
       });
       if (res.ok) {
-        return await res.json();
+        const data = await res.json();
+        return {
+          keymap_id: data[0].keymap_id,
+          keymap_name: data[0].keymap_name,
+          keymap_json: JSON.parse(
+            JSON.parse(JSON.stringify(data[0].keymap_json))
+          ),
+        };
       } else {
         throw new Error(await res.text());
       }
     },
+    getKeymapsByUser: async ({
+      user_id,
+    }: {
+      user_id: string;
+    }): Promise<
+      {
+        keymap_id: string;
+        keymap_name: string;
+        keymap_json: KeymapCollection;
+      }[]
+    > => {
+      const res = await appClient.api.keymaps.user[":user_id"].$get({
+        param: { user_id: user_id },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const formattedData = data.map((item) => ({
+          keymap_id: item.keymap_id,
+          keymap_name: item.keymap_name,
+          keymap_json: JSON.parse(JSON.parse(JSON.stringify(item.keymap_json))),
+        }));
+        return formattedData;
+      } else {
+        throw new Error(await res.text());
+      }
+    },
+
     putKeymap: async ({
       keymap_id,
       keymap_name,
@@ -51,7 +83,7 @@ export const KeymapsAPI = () => {
     }: {
       keymap_id: string;
       keymap_name: string;
-      keymap_json: KeyMapCollection;
+      keymap_json: KeymapCollection;
     }) => {
       const res = await appClient.api.keymaps[":keymap_id"].$put({
         param: { keymap_id: keymap_id },

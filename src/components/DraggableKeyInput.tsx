@@ -1,4 +1,4 @@
-import { Key, KeyColumn, KeyMapType, UniqueKey } from "../lib/device/types";
+import { Key, KeyColumn, KeymapType, UniqueKey } from "../lib/device/types";
 import { useDrop } from "react-dnd";
 import { css } from "../../styled-system/css";
 
@@ -29,10 +29,10 @@ const inputKeyStyle = css({
 
 interface DraggableKeyProps {
   keyValue: Key;
-  col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">;
+  col: keyof Omit<KeymapType, "thumbKey1" | "thumbKey2" | "monitorKey">;
   row: keyof KeyColumn;
   handleInputChange: (
-    col: keyof Omit<KeyMapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
+    col: keyof Omit<KeymapType, "thumbKey1" | "thumbKey2" | "monitorKey">,
     key: keyof KeyColumn,
     value: Key
   ) => void;
