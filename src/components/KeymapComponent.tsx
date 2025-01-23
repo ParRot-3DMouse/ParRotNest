@@ -185,19 +185,21 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
           setActiveLayer={setActiveLayer}
         />
         <div className={buttonContainer}>
-          {pageKinds === "edit" && (
-            <button onClick={handleReset} className={dangerButton}>
-              Reset
-            </button>
-          )}
+          {pageKinds === "edit" ||
+            (pageKinds === "new" && (
+              <button onClick={handleReset} className={dangerButton}>
+                Reset
+              </button>
+            ))}
           <button onClick={handleWrite} className={successButton}>
             Write
           </button>
-          {pageKinds === "edit" && (
-            <button onClick={handleSave} className={primaryButton}>
-              Save
-            </button>
-          )}
+          {pageKinds === "edit" ||
+            (pageKinds === "new" && (
+              <button onClick={handleSave} className={primaryButton}>
+                Save
+              </button>
+            ))}
           {pageKinds === "edit" && (
             <button onClick={handlePost} className={primaryButton}>
               Post
