@@ -2,14 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { css } from "../../styled-system/css";
-import {
-  useHIDConnection,
-  getConnectedDevice,
-  convertKeymapCollectionToBytes,
-} from "../lib/device/hid";
-import { initialState } from "../lib/device/reducer";
-import { KeymapCollection } from "../lib/device/types";
-import { KeymapComponent } from "./KeymapComponent";
+import { useRouter } from "next/navigation";
+import { useHID } from "./HIDContext";
 
 const style = {
   container: css({
@@ -197,14 +191,8 @@ const style = {
 export default function ConnectPage() {
   const [isSupported, setIsSupported] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
-  const { connectedDevice, connect, disconnect, error } = useHIDConnection();
-  const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
-    appName: "",
-    rayer1: initialState,
-    rayer2: initialState,
-    rayer3: initialState,
-  });
-  const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
+  const { connectedDevice, connect, error } = useHID();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -212,15 +200,14 @@ export default function ConnectPage() {
   }, []);
 
   useEffect(() => {
-    if (mounted) {
-      getConnectedDevice();
+    if (connectedDevice) {
+      router.push("/keymap/new");
     }
-  }, [mounted]);
+  }, [connectedDevice, router]);
 
   if (!mounted) {
     return null;
   }
-
   return (
     <div className={style.container}>
       <h1 className={style.title}>HIDデバイス接続</h1>
@@ -261,43 +248,7 @@ export default function ConnectPage() {
                     flexDirection: "column",
                   },
                 })}
-              >
-                <div className={style.card}>
-                  <p className={style.text.normal}>
-                    接続中のデバイス: {connectedDevice.productName}
-                  </p>
-                  <p className={style.text.small}>
-                    VendorID: 0x{connectedDevice.vendorId.toString(16)},
-                    ProductID: 0x
-                    {connectedDevice.productId.toString(16)}
-                  </p>
-                  <div className={style.buttonGroup}>
-                    <div>
-                      <button
-                        onClick={disconnect}
-                        className={style.dangerButton}
-                      >
-                        切断
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <KeymapComponent
-                    keymapCollection={keymapCollection}
-                    setKeymapCollection={setKeymapCollection}
-                    activeLayer={activeLayer}
-                    setActiveLayer={setActiveLayer}
-                  />
-                </div>
-              </div>
-
-              <pre className={style.codeBlock}>
-                {convertKeymapCollectionToBytes(keymapCollection)}
-              </pre>
-              <pre className={style.codeBlock}>
-                {JSON.stringify(keymapCollection, null, 2)}
-              </pre>
+              ></div>
             </div>
           )}
 
