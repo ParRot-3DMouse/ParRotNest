@@ -5,7 +5,7 @@ import { UniqueKey } from "../lib/device/types";
 const uniqueKeys: UniqueKey[] = [
   "SWITCH_MOVEMENT",
   "DPI",
-  "RAYER",
+  "LAYER",
   "APP",
   "X_ONLY",
   "Y_ONLY",

@@ -57,10 +57,10 @@ function getActiveLayerKeymap(
   collection: KeymapCollection,
   layer: 1 | 2 | 3
 ): KeymapType {
-  if (layer === 1) return collection.rayer1;
-  if (layer === 2) return collection.rayer2;
-  if (layer === 3) return collection.rayer3;
-  return collection.rayer1;
+  if (layer === 1) return collection.layer1;
+  if (layer === 2) return collection.layer2;
+  if (layer === 3) return collection.layer3;
+  return collection.layer1;
 }
 
 function updateActiveLayerKeymap(
@@ -69,11 +69,11 @@ function updateActiveLayerKeymap(
   newLayerState: KeymapType
 ): KeymapCollection {
   if (layer === 1) {
-    return { ...collection, rayer1: newLayerState };
+    return { ...collection, layer1: newLayerState };
   } else if (layer === 2) {
-    return { ...collection, rayer2: newLayerState };
+    return { ...collection, layer2: newLayerState };
   } else {
-    return { ...collection, rayer3: newLayerState };
+    return { ...collection, layer3: newLayerState };
   }
 }
 

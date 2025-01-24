@@ -14,9 +14,9 @@ export default function KeymapPage({
 }) {
   const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
     appName: "",
-    rayer1: initialState,
-    rayer2: initialState,
-    rayer3: initialState,
+    layer1: initialState,
+    layer2: initialState,
+    layer3: initialState,
   });
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
   const [keymap_id, setKeymap_id] = useState<string>("");

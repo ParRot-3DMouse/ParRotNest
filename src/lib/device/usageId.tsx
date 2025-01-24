@@ -110,7 +110,7 @@ export function getUniqueKeyUsageID(uniqueKey: UniqueKey): Uint8 {
   const usageIDMap: { [K in UniqueKey]: number } = {
     SWITCH_MOVEMENT: 0x11,
     DPI: 0x22,
-    RAYER: 0x33,
+    LAYER: 0x33,
     APP: 0x44,
     X_ONLY: 0x51,
     Y_ONLY: 0x52,

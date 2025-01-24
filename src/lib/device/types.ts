@@ -169,7 +169,7 @@ export interface StandardKey {
 export type UniqueKey =
   | "SWITCH_MOVEMENT"
   | "DPI"
-  | "RAYER"
+  | "LAYER"
   | "APP"
   | "X_ONLY"
   | "Y_ONLY"
@@ -200,7 +200,7 @@ export type KeymapType = {
 
 export type KeymapCollection = {
   appName: string;
-  rayer1: KeymapType;
-  rayer2: KeymapType;
-  rayer3: KeymapType;
+  layer1: KeymapType;
+  layer2: KeymapType;
+  layer3: KeymapType;
 };
