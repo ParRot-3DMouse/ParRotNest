@@ -12,31 +12,6 @@ import {
 } from "../lib/device/types";
 import { DraggableKey } from "./DraggableKeyInput";
 
-const inputKeyThumbStyle = css({
-  width: "100px",
-  height: "40px",
-  margin: "5px",
-  padding: "5px",
-  textAlign: "center",
-  backgroundColor: "#f0f0f0",
-  color: "#333",
-  border: "none",
-  borderRadius: "20px",
-  boxShadow: "0 4px 0 #999, 0 5px 5px rgba(0,0,0,0.3)",
-  fontWeight: "bold",
-  fontSize: "16px",
-  transition: "all 0.1s",
-  cursor: "pointer",
-  "&:active": {
-    boxShadow: "0 1px 0 #999",
-    transform: "translateY(3px)",
-  },
-  "&:focus": {
-    outline: "none",
-    backgroundColor: "#e0e0e0",
-  },
-});
-
 const trackBallStyle = css({
   width: "200px",
   height: "200px",
@@ -57,10 +32,10 @@ function getActiveLayerKeymap(
   collection: KeymapCollection,
   layer: 1 | 2 | 3
 ): KeymapType {
-  if (layer === 1) return collection.rayer1;
-  if (layer === 2) return collection.rayer2;
-  if (layer === 3) return collection.rayer3;
-  return collection.rayer1;
+  if (layer === 1) return collection.layer1;
+  if (layer === 2) return collection.layer2;
+  if (layer === 3) return collection.layer3;
+  return collection.layer1;
 }
 
 function updateActiveLayerKeymap(
@@ -69,11 +44,11 @@ function updateActiveLayerKeymap(
   newLayerState: KeymapType
 ): KeymapCollection {
   if (layer === 1) {
-    return { ...collection, rayer1: newLayerState };
+    return { ...collection, layer1: newLayerState };
   } else if (layer === 2) {
-    return { ...collection, rayer2: newLayerState };
+    return { ...collection, layer2: newLayerState };
   } else {
-    return { ...collection, rayer3: newLayerState };
+    return { ...collection, layer3: newLayerState };
   }
 }
 
@@ -349,30 +324,30 @@ const Device: React.FC<DeviceProps> = ({
         >
           <div className={trackBallStyle}></div>
           <div>
-            <input
-              type="text"
-              value={getDisplayValue(tempState.thumbKey1)}
-              onKeyDown={(e) => handleThumbKey1Change(handleKeyDown(e))}
-              className={inputKeyThumbStyle}
-              readOnly
+            <DraggableKey
+              keyValue={tempState.thumbKey1}
+              handleKeyDown={handleKeyDown}
+              getDisplayValue={getDisplayValue}
+              pageKinds={pageKinds}
+              onKeyChange={handleThumbKey1Change}
             />
           </div>
           <div>
-            <input
-              type="text"
-              value={getDisplayValue(tempState.thumbKey2)}
-              onKeyDown={(e) => handleThumbKey2Change(handleKeyDown(e))}
-              className={inputKeyThumbStyle}
-              readOnly
+            <DraggableKey
+              keyValue={tempState.thumbKey2}
+              handleKeyDown={handleKeyDown}
+              getDisplayValue={getDisplayValue}
+              pageKinds={pageKinds}
+              onKeyChange={handleThumbKey2Change}
             />
           </div>
           <div>
-            <input
-              type="text"
-              value={getDisplayValue(tempState.monitorKey)}
-              onKeyDown={(e) => handleMonitorKeyChange(handleKeyDown(e))}
-              className={inputKeyThumbStyle}
-              readOnly
+            <DraggableKey
+              keyValue={tempState.monitorKey}
+              handleKeyDown={handleKeyDown}
+              getDisplayValue={getDisplayValue}
+              pageKinds={pageKinds}
+              onKeyChange={handleMonitorKeyChange}
             />
           </div>
         </div>

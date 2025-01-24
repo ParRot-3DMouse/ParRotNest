@@ -186,16 +186,16 @@ export function convertKeymapCollectionToBytes(
   keymapCollection: KeymapCollection
 ): Uint8Array {
   const appNameBytes = stringToByteArray(keymapCollection.appName);
-  // rayer1 は必須
-  const layer1Bytes = convertKeymapToBytes(keymapCollection.rayer1);
+  // layer1 は必須
+  const layer1Bytes = convertKeymapToBytes(keymapCollection.layer1);
 
-  // rayer2, rayer3 は存在する場合のみ変換
-  const layer2Bytes = keymapCollection.rayer2
-    ? convertKeymapToBytes(keymapCollection.rayer2)
+  // layer2, layer3 は存在する場合のみ変換
+  const layer2Bytes = keymapCollection.layer2
+    ? convertKeymapToBytes(keymapCollection.layer2)
     : new Uint8Array(32);
 
-  const layer3Bytes = keymapCollection.rayer3
-    ? convertKeymapToBytes(keymapCollection.rayer3)
+  const layer3Bytes = keymapCollection.layer3
+    ? convertKeymapToBytes(keymapCollection.layer3)
     : new Uint8Array(32);
 
   const totalSize = 96 + appNameBytes.length;

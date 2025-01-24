@@ -26,9 +26,14 @@ const inputKeyStyle = css({
     backgroundColor: "#e0e0e0",
   },
 });
-
-interface DraggableKeyProps {
+interface DraggableKeyPropsBase {
   keyValue: Key;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => Key;
+  getDisplayValue: (key: Key) => string;
+  pageKinds: "new" | "edit" | "share";
+}
+
+interface DraggableKeyPropsRegular extends DraggableKeyPropsBase {
   col: keyof Omit<KeymapType, "thumbKey1" | "thumbKey2" | "monitorKey">;
   row: keyof KeyColumn;
   handleInputChange: (
@@ -36,10 +41,16 @@ interface DraggableKeyProps {
     key: keyof KeyColumn,
     value: Key
   ) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => Key;
-  getDisplayValue: (key: Key) => string;
-  pageKinds: "new" | "edit" | "share";
+  onKeyChange?: never;
 }
+
+interface DraggableKeyPropsSubKey extends DraggableKeyPropsBase {
+  col?: never;
+  row?: never;
+  handleInputChange?: never;
+  onKeyChange: (newKey: Key) => void;
+}
+type DraggableKeyProps = DraggableKeyPropsRegular | DraggableKeyPropsSubKey;
 
 export const DraggableKey: React.FC<DraggableKeyProps> = ({
   keyValue,
@@ -49,15 +60,22 @@ export const DraggableKey: React.FC<DraggableKeyProps> = ({
   handleKeyDown,
   getDisplayValue,
   pageKinds,
+  onKeyChange,
 }) => {
   const [, drop] = useDrop({
     accept: "uniqueKey",
     drop: (item: { uniqueKey: UniqueKey }) => {
       if (!(pageKinds === "share")) {
-        handleInputChange(col, row, {
+        const newKey: Key = {
           type: "custom",
           uniqueKey: item.uniqueKey,
-        });
+        };
+
+        if (handleInputChange) {
+          handleInputChange(col, row, newKey);
+        } else if (onKeyChange) {
+          onKeyChange(newKey);
+        }
       }
     },
     canDrop: () => pageKinds !== "share",
@@ -76,7 +94,11 @@ export const DraggableKey: React.FC<DraggableKeyProps> = ({
       value={getDisplayValue(keyValue)}
       onKeyDown={(e) => {
         if (!(pageKinds === "share")) {
-          handleInputChange(col, row, handleKeyDown(e));
+          if (handleInputChange) {
+            handleInputChange(col, row, handleKeyDown(e));
+          } else if (onKeyChange) {
+            onKeyChange(handleKeyDown(e));
+          }
         }
       }}
       readOnly
