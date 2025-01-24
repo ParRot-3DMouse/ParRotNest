@@ -40,6 +40,6 @@
     "eslint-config-next": "^15.1.5",
     "typescript": "^5",
     "vercel": "^32.3.0",
-    "wrangler": "^3.103.2"
+    "wrangler": "^3.105.0"
   }
 }
