@@ -8,6 +8,7 @@ import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import keymaps from "./keymaps";
 import keymaps_to_share from "./keymaps_to_share";
+import likes from "./likes";
 
 export interface Bindings {
   DB: D1Database;
@@ -32,6 +33,7 @@ const app = new Hono<{
   .route("/users", users)
   .route("/keymaps", keymaps)
   .route("/keymaps_to_share", keymaps_to_share)
+  .route("/likes", likes)
   .get("/", async (c) => {
     if (!process.env.DB) {
       return c.json({ error: "DB is not bound" }, 500);
