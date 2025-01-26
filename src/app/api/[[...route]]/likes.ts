@@ -3,7 +3,7 @@ import { Bindings, Variables } from "./route";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { getUserID } from "../../../lib/api/getUserId";
-import { User } from "../types";
+import { KeymapToShare, User } from "../types";
 
 const postLikeSchema = z.object({
   share_id: z.string().uuid(),
@@ -110,11 +110,12 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const { results }: { results: User[] } = await process.env.DB.prepare(
-        `SELECT shares.share_id, shares.share_name, shares.share_json FROM likes JOIN shares ON likes.share_id = shares.share_id WHERE likes.user_id = ?1`
-      )
-        .bind(user_id)
-        .all();
+      const { results }: { results: KeymapToShare[] } =
+        await process.env.DB.prepare(
+          `SELECT shares.share_id, shares.share_name, shares.share_json, shares.author_id, shares.created_at, shares.update_at FROM likes JOIN shares ON likes.share_id = shares.share_id WHERE likes.user_id = ?1`
+        )
+          .bind(user_id)
+          .all();
 
       return c.json({ results });
     } catch (err) {
@@ -126,7 +127,6 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   // DELETE /likes/
   .delete("/", zValidator("json", deleteLikeSchema), async (c) => {
-    console.log("delete");
     try {
       const user_id = await getUserID(c);
       if (!user_id) {

@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
-import { User } from "../../../app/api/types";
+import { KeymapToShare, User } from "../../../app/api/types";
 
 export const LikesAPI = () => {
   const appClient = hc<AppType>("/");
@@ -54,12 +54,12 @@ export const LikesAPI = () => {
       user_id,
     }: {
       user_id: string;
-    }): Promise<User[]> => {
+    }): Promise<KeymapToShare[]> => {
       const res = await appClient.api.likes.user[":user_id"].$get({
         param: { user_id: user_id },
       });
       if (res.ok) {
-        const { results }: { results: User[] } = await res.json();
+        const { results }: { results: KeymapToShare[] } = await res.json();
 
         return results;
       } else {

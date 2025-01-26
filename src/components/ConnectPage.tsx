@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { css } from "../../styled-system/css";
 import { useRouter } from "next/navigation";
-import { useHID } from "./HIDContext";
+import { useHID } from "./provider/HIDContext";
 
 const style = {
   container: css({

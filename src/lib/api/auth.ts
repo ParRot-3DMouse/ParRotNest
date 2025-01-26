@@ -1,4 +1,4 @@
-import NextAuth, { Account, NextAuthConfig, Session, User } from "next-auth";
+import NextAuth, { NextAuthConfig, Session } from "next-auth";
 import Google from "next-auth/providers/google";
 import { Provider } from "next-auth/providers";
 import { JWT, JWTDecodeParams, JWTEncodeParams } from "next-auth/jwt";
@@ -78,29 +78,11 @@ export const config: NextAuthConfig = {
     async redirect({ url }) {
       return url;
     },
-    async jwt({
-      token,
-      account,
-      user,
-    }: {
-      token: JWT;
-      account: Account | null;
-      user: User;
-    }) {
-      if (user && account) {
-        token.access_token = account.access_token;
-        token.refresh_token = account.refresh_token;
-        token.id_token = account.id_token;
-        token.user = user;
-      }
+    async jwt({ token }: { token: JWT }) {
       return token;
     },
 
-    async session({ session, token }: { session: Session; token: JWT }) {
-      session.access_token = token.access_token;
-      session.refresh_token = token.refresh_token;
-      session.id_token = token.id_token;
-      session.user = token.user;
+    async session({ session }: { session: Session }) {
       return session;
     },
   },

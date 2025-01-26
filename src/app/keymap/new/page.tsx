@@ -5,7 +5,7 @@ import { KeymapCollection } from "../../../lib/device/types";
 import { initialState } from "../../../lib/device/reducer";
 import { KeymapComponent } from "../../../components/KeymapComponent";
 import { css } from "../../../../styled-system/css";
-import { useHID } from "../../../components/HIDContext";
+import { useHID } from "../../../components/provider/HIDContext";
 import { useRouter } from "next/navigation";
 
 const card = css({

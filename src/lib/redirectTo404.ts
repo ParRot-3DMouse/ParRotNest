@@ -1,5 +1,5 @@
-import router from "next/router";
+import { notFound } from "next/navigation";
 
 export const redirectTo404 = () => {
-  router.push("/404");
+  notFound();
 };
