@@ -37,17 +37,19 @@ const users = new Hono<{
         .all();
 
       if (results && results.length > 0) {
-        return c.json({ status: "existing_user" });
+        const existing_user_id = results[0].user_id;
+        return c.json({ status: "existing_user", user_id: existing_user_id });
       }
-      const user_id = v4();
+
+      const new_user_id = v4();
 
       await process.env.DB.prepare(
         `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
       )
-        .bind(user_id, user_email, user_name)
+        .bind(new_user_id, user_email, user_name)
         .run();
 
-      return c.json({ status: "new_user" });
+      return c.json({ status: "new_user", user_id: new_user_id });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);

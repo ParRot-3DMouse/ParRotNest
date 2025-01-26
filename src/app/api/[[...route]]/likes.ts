@@ -3,7 +3,7 @@ import { Bindings, Variables } from "./route";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { getUserID } from "../../../lib/api/getUserId";
-import { User } from "../types";
+import { KeymapToShare, User } from "../types";
 
 const postLikeSchema = z.object({
   share_id: z.string().uuid(),
@@ -97,8 +97,10 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   // GET /likes/user/:user_id
   .get("/user/:user_id", async (c) => {
+    console.log("get likes by user");
     try {
       const authUserId = await getUserID(c);
+      console.log(authUserId);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -106,15 +108,19 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       const { user_id } = getLikesByUserSchema.parse({
         user_id: c.req.param("user_id"),
       });
+      console.log(user_id);
       if (authUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const { results }: { results: User[] } = await process.env.DB.prepare(
-        `SELECT shares.share_id, shares.share_name, shares.share_json FROM likes JOIN shares ON likes.share_id = shares.share_id WHERE likes.user_id = ?1`
-      )
-        .bind(user_id)
-        .all();
+      const { results }: { results: KeymapToShare[] } =
+        await process.env.DB.prepare(
+          `SELECT keymaps_to_share.share_id, keymaps_to_share.keymap_name, keymaps_to_share.keymap_json, keymaps_to_share.author_id, keymaps_to_share.created_at, keymaps_to_share.update_at FROM likes JOIN keymaps_to_share ON likes.share_id = keymaps_to_share.share_id WHERE likes.user_id = ?1`
+        )
+          .bind(user_id)
+          .all();
+
+      console.log(results);
 
       return c.json({ results });
     } catch (err) {
@@ -126,7 +132,6 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   // DELETE /likes/
   .delete("/", zValidator("json", deleteLikeSchema), async (c) => {
-    console.log("delete");
     try {
       const user_id = await getUserID(c);
       if (!user_id) {
