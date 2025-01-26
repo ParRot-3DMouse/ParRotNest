@@ -7,7 +7,10 @@ import { User } from "../types";
 
 const postLikeSchema = z.object({
   share_id: z.string().uuid(),
-  user_id: z.string().uuid(),
+});
+
+const getLikesCheckSchema = z.object({
+  share_id: z.string().uuid(),
 });
 
 const getLikesByShareSchema = z.object({
@@ -20,21 +23,17 @@ const getLikesByUserSchema = z.object({
 
 const deleteLikeSchema = z.object({
   share_id: z.string().uuid(),
-  user_id: z.string().uuid(),
 });
 
 const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   // POST /likes
   .post("/", zValidator("json", postLikeSchema), async (c) => {
     try {
-      const authUserId = await getUserID(c);
-      if (!authUserId) {
+      const user_id = await getUserID(c);
+      if (!user_id) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-      const { share_id, user_id } = postLikeSchema.parse(await c.req.json());
-      if (authUserId !== user_id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+      const { share_id } = postLikeSchema.parse(await c.req.json());
 
       await process.env.DB.prepare(
         `INSERT INTO likes (share_id, user_id) VALUES (?1, ?2) ON CONFLICT DO NOTHING`
@@ -43,6 +42,31 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
         .run();
 
       return c.json({ status: "created" });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return c.json({ error: "Invalid input", details: err.errors }, 400);
+      }
+      return c.json({ error: err }, 500);
+    }
+  })
+  // GET /likes/check/:share_id
+  .get("/check/:share_id", async (c) => {
+    try {
+      const user_id = await getUserID(c);
+      if (!user_id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      const { share_id } = getLikesCheckSchema.parse({
+        share_id: c.req.param("share_id"),
+      });
+      const { results }: { results: { count: number }[] } =
+        await process.env.DB.prepare(
+          `SELECT COUNT(*) AS count FROM likes WHERE share_id = ?1 AND user_id = ?2`
+        )
+          .bind(share_id, user_id)
+          .all();
+
+      return c.json({ is_liked: results[0].count > 0 });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
@@ -102,15 +126,13 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   // DELETE /likes/
   .delete("/", zValidator("json", deleteLikeSchema), async (c) => {
+    console.log("delete");
     try {
-      const authUserId = await getUserID(c);
-      if (!authUserId) {
+      const user_id = await getUserID(c);
+      if (!user_id) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-      const { share_id, user_id } = deleteLikeSchema.parse(await c.req.json());
-      if (authUserId !== user_id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+      const { share_id } = deleteLikeSchema.parse(await c.req.json());
 
       await process.env.DB.prepare(
         `DELETE FROM likes WHERE share_id = ?1 AND user_id = ?2`

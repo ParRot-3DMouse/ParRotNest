@@ -5,17 +5,10 @@ import { User } from "../../../app/api/types";
 export const LikesAPI = () => {
   const appClient = hc<AppType>("/");
   return {
-    postLike: async ({
-      share_id,
-      user_id,
-    }: {
-      share_id: string;
-      user_id: string;
-    }) => {
+    postLike: async ({ share_id }: { share_id: string }) => {
       const res = await appClient.api.likes.$post({
         json: {
           share_id: share_id,
-          user_id: user_id,
         },
       });
       if (res.ok) {
@@ -24,6 +17,23 @@ export const LikesAPI = () => {
         throw new Error(await res.text());
       }
     },
+    // 投稿に対するいいねを取得
+    getLikesCheck: async ({
+      share_id,
+    }: {
+      share_id: string;
+    }): Promise<boolean> => {
+      const res = await appClient.api.likes.check[":share_id"].$get({
+        param: { share_id: share_id },
+      });
+      if (res.ok) {
+        const { is_liked }: { is_liked: boolean } = await res.json();
+        return is_liked;
+      } else {
+        throw new Error(await res.text());
+      }
+    },
+    // 投稿に対するいいねの一覧を取得
     getLikesByShare: async ({
       share_id,
     }: {
@@ -56,17 +66,10 @@ export const LikesAPI = () => {
         throw new Error(await res.text());
       }
     },
-    deleteLike: async ({
-      share_id,
-      user_id,
-    }: {
-      share_id: string;
-      user_id: string;
-    }) => {
+    deleteLike: async ({ share_id }: { share_id: string }) => {
       const res = await appClient.api.likes.$delete({
         json: {
           share_id: share_id,
-          user_id: user_id,
         },
       });
       if (res.ok) {

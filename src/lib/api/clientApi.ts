@@ -1,5 +1,6 @@
 import { KeymapsAPI } from "./handlers/keymaps";
 import { KeymapsToShareAPI } from "./handlers/keymaps_to_share";
+import { LikesAPI } from "./handlers/likes";
 import { UsersAPI } from "./handlers/users";
 
 export const clientApi = () => {
@@ -12,6 +13,9 @@ export const clientApi = () => {
     },
     keymaps_to_share: {
       ...KeymapsToShareAPI(),
+    },
+    likes: {
+      ...LikesAPI(),
     },
   };
 };
