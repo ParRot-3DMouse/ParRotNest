@@ -50,7 +50,7 @@ export type AppType = typeof app;
 
 export const runtime = "edge";
 
-export async function handleRequest(nextReq: NextRequest) {
+async function handleHonoRequest(nextReq: NextRequest) {
   const token = await getToken({
     req: nextReq,
     raw: true,
@@ -68,9 +68,18 @@ export async function handleRequest(nextReq: NextRequest) {
   return handle(app)(honoRequest);
 }
 
-export {
-  handleRequest as POST,
-  handleRequest as GET,
-  handleRequest as PUT,
-  handleRequest as DELETE,
-};
+export async function GET(nextReq: NextRequest) {
+  return handleHonoRequest(nextReq);
+}
+
+export async function POST(nextReq: NextRequest) {
+  return handleHonoRequest(nextReq);
+}
+
+export async function PUT(nextReq: NextRequest) {
+  return handleHonoRequest(nextReq);
+}
+
+export async function DELETE(nextReq: NextRequest) {
+  return handleHonoRequest(nextReq);
+}
