@@ -11,7 +11,7 @@ export interface User {
 export interface Keymap {
   keymap_id: string;
   keymap_name: string;
-  keymap_json: KeymapCollection;
+  keymap_json: string;
   user_id: string;
   created_at: string;
   updated_at: string;

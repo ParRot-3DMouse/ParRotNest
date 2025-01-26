@@ -77,8 +77,7 @@ export default function KeymapPage() {
   }, [connectedDevice, router]);
 
   if (connectedDevice === null) {
-    router.push("/");
-    return;
+    return null;
   }
 
   return (

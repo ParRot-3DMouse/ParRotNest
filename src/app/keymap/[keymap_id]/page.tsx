@@ -33,7 +33,6 @@ export default function KeymapPage({
       });
       if (res) {
         const receivedKeymap = res.keymap_json;
-        console.log("res.keymap_json", res.keymap_json);
         setKeymapCollection(receivedKeymap);
       }
     } catch (error) {
