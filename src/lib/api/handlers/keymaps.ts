@@ -44,6 +44,7 @@ export const KeymapsAPI = () => {
       if (res.ok) {
         try {
           const data = await res.json();
+          console.log(data);
           return {
             keymap_id: data[0].keymap_id,
             keymap_name: data[0].keymap_name,
