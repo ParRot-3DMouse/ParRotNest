@@ -155,13 +155,13 @@ export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
 
     // 全てのバイト配列を結合
     const allBytes = [
+      ...thumbKey1Byte,
+      ...thumbKey2Byte,
+      ...monitorKeyByte,
       ...column1Bytes,
       ...column2Bytes,
       ...column3Bytes,
       ...column4Bytes,
-      ...thumbKey1Byte,
-      ...thumbKey2Byte,
-      ...monitorKeyByte,
     ];
 
     const allBytesWithPrefix = [
