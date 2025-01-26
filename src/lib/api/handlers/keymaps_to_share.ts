@@ -1,6 +1,7 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
 import { KeymapCollection } from "../../device/types";
+import { redirectTo404 } from "../../redirectTo404";
 
 export const KeymapsToShareAPI = () => {
   const appClient = hc<AppType>("/");
@@ -41,8 +42,14 @@ export const KeymapsToShareAPI = () => {
         param: { author_id: author_id },
       });
       if (res.ok) {
-        return await res.json();
+        try {
+          return await res.json();
+        } catch (error) {
+          redirectTo404();
+          throw error;
+        }
       } else {
+        redirectTo404();
         throw new Error(await res.text());
       }
     },

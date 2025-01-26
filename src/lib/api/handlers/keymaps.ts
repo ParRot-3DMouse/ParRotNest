@@ -20,9 +20,13 @@ export const KeymapsAPI = () => {
         },
       });
       if (res.ok) {
-        return await res.json();
+        try {
+          return await res.json();
+        } catch (error) {
+          throw error;
+        }
       } else {
-        throw new Error(await res.text());
+        throw new Error(`Error: ${res.status} - ${await res.text()}`);
       }
     },
     getKeymapById: async ({
@@ -38,17 +42,22 @@ export const KeymapsAPI = () => {
         param: { keymap_id: keymap_id },
       });
       if (res.ok) {
-        const data = await res.json();
-        return {
-          keymap_id: data[0].keymap_id,
-          keymap_name: data[0].keymap_name,
-          keymap_json: JSON.parse(
-            JSON.parse(JSON.stringify(data[0].keymap_json))
-          ),
-        };
+        try {
+          const data = await res.json();
+          return {
+            keymap_id: data[0].keymap_id,
+            keymap_name: data[0].keymap_name,
+            keymap_json: JSON.parse(data[0].keymap_json),
+          };
+        } catch (error) {
+          if (res.status === 404) {
+            redirectTo404();
+          }
+          throw error;
+        }
       } else {
         redirectTo404();
-        throw new Error(await res.text());
+        throw new Error(`Error: ${res.status} - ${await res.text()}`);
       }
     },
     getKeymapsByUser: async ({
@@ -66,18 +75,23 @@ export const KeymapsAPI = () => {
         param: { user_id: user_id },
       });
       if (res.ok) {
-        const data = await res.json();
-        const formattedData = data.map((item) => ({
-          keymap_id: item.keymap_id,
-          keymap_name: item.keymap_name,
-          keymap_json: JSON.parse(JSON.parse(JSON.stringify(item.keymap_json))),
-        }));
-        return formattedData;
+        try {
+          const data = await res.json();
+          const formattedData = data.map((item) => ({
+            keymap_id: item.keymap_id,
+            keymap_name: item.keymap_name,
+            keymap_json: JSON.parse(item.keymap_json),
+          }));
+          return formattedData;
+        } catch (error) {
+          redirectTo404();
+          throw error;
+        }
       } else {
-        throw new Error(await res.text());
+        redirectTo404();
+        throw new Error(`Error: ${res.status} - ${await res.text()}`);
       }
     },
-
     putKeymap: async ({
       keymap_id,
       keymap_name,
@@ -95,7 +109,11 @@ export const KeymapsAPI = () => {
         },
       });
       if (res.ok) {
-        return await res.json();
+        try {
+          return await res.json();
+        } catch (error) {
+          throw error;
+        }
       } else {
         throw new Error(await res.text());
       }
