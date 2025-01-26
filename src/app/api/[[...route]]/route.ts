@@ -50,7 +50,7 @@ export type AppType = typeof app;
 
 export const runtime = "edge";
 
-export async function GET(nextReq: NextRequest) {
+export async function handleRequest(nextReq: NextRequest) {
   const token = await getToken({
     req: nextReq,
     raw: true,
@@ -68,21 +68,9 @@ export async function GET(nextReq: NextRequest) {
   return handle(app)(honoRequest);
 }
 
-export async function POST(nextReq: NextRequest) {
-  const token = await getToken({
-    req: nextReq,
-    raw: true,
-    secureCookie: process.env.APP_ENV === "production",
-  });
-  const clonedHeaders = new Headers(nextReq.headers);
-  if (token) {
-    clonedHeaders.set("Authorization", `Bearer ${token}`);
-  }
-  const honoRequest = new Request(nextReq.url, {
-    method: nextReq.method,
-    headers: clonedHeaders,
-    body: nextReq.body,
-  });
-
-  return handle(app)(honoRequest);
-}
+export {
+  handleRequest as POST,
+  handleRequest as GET,
+  handleRequest as PUT,
+  handleRequest as DELETE,
+};

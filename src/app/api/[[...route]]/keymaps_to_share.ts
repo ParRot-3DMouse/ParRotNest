@@ -4,6 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { getUserID } from "../../../lib/api/getUserId";
 import { v4 } from "uuid";
+import { KeymapToShare } from "../types";
 
 const postKeymapToShareSchema = z.object({
   keymap_name: z.string(),
@@ -54,11 +55,12 @@ const keymaps_to_share = new Hono<{
       const { share_id } = getKeymapToShareIdSchema.parse({
         share_id: c.req.param("share_id"),
       });
-      const { results } = await process.env.DB.prepare(
-        `SELECT * FROM keymaps_to_share WHERE share_id = ?1`
-      )
-        .bind(share_id)
-        .all();
+      const { results }: { results: KeymapToShare[] } =
+        await process.env.DB.prepare(
+          `SELECT * FROM keymaps_to_share WHERE share_id = ?1`
+        )
+          .bind(share_id)
+          .all();
       return c.json(results);
     } catch (err) {
       if (err instanceof z.ZodError) {

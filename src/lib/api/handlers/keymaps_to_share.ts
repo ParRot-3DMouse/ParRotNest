@@ -25,6 +25,37 @@ export const KeymapsToShareAPI = () => {
         throw new Error(await res.text());
       }
     },
+    getKeymapToShareById: async ({
+      share_id,
+    }: {
+      share_id: string;
+    }): Promise<{
+      share_id: string;
+      keymap_name: string;
+      keymap_json: KeymapCollection;
+    }> => {
+      const res = await appClient.api.keymaps_to_share[":share_id"].$get({
+        param: { share_id: share_id },
+      });
+      if (res.ok) {
+        try {
+          const data = await res.json();
+          return {
+            share_id: data[0].share_id,
+            keymap_name: data[0].keymap_name,
+            keymap_json: JSON.parse(data[0].keymap_json),
+          };
+        } catch (error) {
+          if (res.status === 404) {
+            redirectTo404();
+          }
+          throw error;
+        }
+      } else {
+        redirectTo404();
+        throw new Error(await res.text());
+      }
+    },
     getKeymapsToShareByUser: async ({
       author_id,
     }: {
