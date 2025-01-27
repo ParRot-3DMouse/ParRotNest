@@ -93,6 +93,7 @@ const keymaps = new Hono<{
       });
 
       const authUserId = await getUserID(c);
+      console.log("authUserId:", authUserId);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -103,6 +104,11 @@ const keymaps = new Hono<{
         .bind(keymap_id, authUserId)
         .all();
 
+      console.log("results:", results);
+      if (!results || results.length === 0) {
+        // DBに該当するKeymapがない場合は404を返すなど
+        return c.json({ error: "Not found" }, 404);
+      }
       return c.json(results);
     } catch (err) {
       if (err instanceof z.ZodError) {
