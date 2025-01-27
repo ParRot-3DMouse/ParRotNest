@@ -1,58 +1,62 @@
+"use client";
+
+import { css } from "../../styled-system/css";
+import { useRouter } from "next/navigation";
+
 export const runtime = "edge";
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
-    <>
-      <title>404: This page could not be found.</title>
-      <div style={styles.error}>
-        <div>
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}`,
-            }}
-          />
-          <h1 className="next-error-h1" style={styles.h1}>
-            404
-          </h1>
-          <div style={styles.desc}>
-            <h2 style={styles.h2}>This page could not be found!</h2>
-          </div>
-        </div>
-      </div>
-    </>
+    <div className={styles.container}>
+      <h1 className={styles.title}>404 - ページが見つかりません</h1>
+      <p className={styles.message}>
+        お探しのページが見つかりませんでした。URLが正しいかをご確認ください。
+      </p>
+      <button onClick={() => router.push("/")} className={styles.primaryButton}>
+        トップページに戻る
+      </button>
+    </div>
   );
 }
 
 const styles = {
-  error: {
-    fontFamily:
-      'system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
-    height: "100vh",
-    textAlign: "center",
+  container: css({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  desc: {
-    display: "inline-block",
-  },
-
-  h1: {
-    display: "inline-block",
-    margin: "0 20px 0 0",
-    padding: "0 23px 0 0",
-    fontSize: 24,
-    fontWeight: 500,
-    verticalAlign: "top",
-    lineHeight: "49px",
-  },
-
-  h2: {
-    fontSize: 14,
-    fontWeight: 400,
-    lineHeight: "49px",
-    margin: 0,
-  },
-} as const;
+    textAlign: "center",
+    height: "100vh",
+    color: "#f7fafc",
+    padding: "0 20px",
+  }),
+  title: css({
+    fontSize: "2rem",
+    fontWeight: "bold",
+    marginBottom: "1rem",
+    color: "#f7fafc",
+  }),
+  message: css({
+    fontSize: "1rem",
+    marginBottom: "1.5rem",
+    color: "#f7fafc",
+  }),
+  primaryButton: css({
+    backgroundColor: "#3182ce",
+    color: "white",
+    padding: "10px 20px",
+    borderRadius: "0.375rem",
+    fontSize: "1rem",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+    _hover: {
+      backgroundColor: "#2b6cb0",
+    },
+    _active: {
+      backgroundColor: "#2c5282",
+    },
+  }),
+};
