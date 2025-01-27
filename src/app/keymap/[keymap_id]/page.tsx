@@ -8,7 +8,7 @@ export const runtime = "edge";
 export default async function KeymapPage({
   params,
 }: {
-  params: { keymap_id: string };
+  params: Promise<{ keymap_id: string }>;
 }) {
   const api = clientApi();
 
@@ -19,7 +19,7 @@ export default async function KeymapPage({
   } | null = null;
 
   try {
-    const { keymap_id } = params;
+    const { keymap_id } = await params;
     data = await api.keymaps.getKeymapById({ keymap_id });
   } catch {
     return notFound();

@@ -9,9 +9,10 @@ export const runtime = "edge";
 export default async function SharePage({
   params,
 }: {
-  params: { share_id: string };
+  params: Promise<{ share_id: string }>;
 }) {
   const api = clientApi();
+  const { share_id } = await params;
 
   let fetchedData: {
     share_id: string;
@@ -20,7 +21,7 @@ export default async function SharePage({
 
   try {
     fetchedData = await api.keymaps_to_share.getKeymapToShareById({
-      share_id: params.share_id,
+      share_id: share_id,
     });
   } catch (error) {
     console.error("Failed to fetch keymap:", error);
