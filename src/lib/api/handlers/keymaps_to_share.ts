@@ -1,7 +1,7 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
 import { KeymapCollection } from "../../device/types";
-import { redirectTo404 } from "../../redirectTo404";
+import { notFound } from "next/navigation";
 
 export const KeymapsToShareAPI = () => {
   const appClient = hc<AppType>("/");
@@ -47,12 +47,12 @@ export const KeymapsToShareAPI = () => {
           };
         } catch (error) {
           if (res.status === 404) {
-            redirectTo404();
+            notFound();
           }
           throw error;
         }
       } else {
-        redirectTo404();
+        notFound();
         throw new Error(await res.text());
       }
     },
@@ -76,11 +76,11 @@ export const KeymapsToShareAPI = () => {
         try {
           return await res.json();
         } catch (error) {
-          redirectTo404();
+          notFound();
           throw error;
         }
       } else {
-        redirectTo404();
+        notFound();
         throw new Error(await res.text());
       }
     },

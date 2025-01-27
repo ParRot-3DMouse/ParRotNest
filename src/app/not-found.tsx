@@ -15,7 +15,7 @@ export default function NotFound() {
             404
           </h1>
           <div style={styles.desc}>
-            <h2 style={styles.h2}>This page could not be found.</h2>
+            <h2 style={styles.h2}>This page could not be found!</h2>
           </div>
         </div>
       </div>
