@@ -16,7 +16,7 @@ export default function KeymapPage() {
     layer3: initialState,
   });
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
-  const { connectedDevice, disconnect } = useHID();
+  const { connectedDevice, connect, disconnect } = useHID();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,6 +32,11 @@ export default function KeymapPage() {
   return (
     <div>
       <div>
+        <DeviceCard
+          connectedDevice={connectedDevice}
+          connect={connect}
+          disconnect={disconnect}
+        />
         <KeymapComponent
           pageKinds="new"
           keymapCollection={keymapCollection}
@@ -40,7 +45,6 @@ export default function KeymapPage() {
           setActiveLayer={setActiveLayer}
         />
       </div>
-      <DeviceCard connectedDevice={connectedDevice} disconnect={disconnect} />
     </div>
   );
 }
