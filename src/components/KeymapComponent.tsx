@@ -8,6 +8,7 @@ import UniqueKeyMenu from "./UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
+import { useHID } from "./provider/HIDContext";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -69,6 +70,10 @@ const successButton = css({
     backgroundColor: "teal.500",
   },
   width: "fit-content",
+  _disabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
+  },
 });
 
 const primaryButton = css({
@@ -98,11 +103,10 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   setActiveLayer,
   pageKinds,
 }) => {
+  const { connectedDevice } = useHID();
   const router = useRouter();
   const handleWrite = () => {
-    sendKeymapCollection(keymapCollection).catch((err) => {
-      throw Error(err instanceof Error ? err.message : "Failed to send keymap");
-    });
+    sendKeymapCollection(keymapCollection);
   };
 
   const handleSave = async () => {
@@ -191,7 +195,11 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                 Reset
               </button>
             ))}
-          <button onClick={handleWrite} className={successButton}>
+          <button
+            onClick={handleWrite}
+            className={successButton}
+            disabled={!connectedDevice}
+          >
             Write
           </button>
           {pageKinds === "edit" ||
