@@ -1,62 +1,38 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { notFound } from "next/navigation";
+import { KeymapClient } from "./KeymapClient";
 import { KeymapCollection } from "../../../lib/device/types";
-import { initialState } from "../../../lib/device/reducer";
-// import { css } from "../../../../styled-system/css";
-import { KeymapComponent } from "../../../components/KeymapComponent";
 import { clientApi } from "../../../lib/api/clientApi";
-import { useRouter } from "next/navigation";
 
-export default function KeymapPage({
+export const runtime = "edge";
+
+export default async function KeymapPage({
   params,
 }: {
   params: Promise<{ keymap_id: string }>;
 }) {
-  const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
-    appName: "",
-    layer1: initialState,
-    layer2: initialState,
-    layer3: initialState,
-  });
-  const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
-  const [keymap_id, setKeymap_id] = useState<string>("");
-  const router = useRouter();
   const api = clientApi();
 
-  const fetchKeymap = async () => {
-    try {
-      const { keymap_id } = await params;
-      setKeymap_id(keymap_id);
-      const res = await api.keymaps.getKeymapById({
-        keymap_id: keymap_id,
-      });
-      if (res) {
-        const receivedKeymap = res.keymap_json;
-        setKeymapCollection(receivedKeymap);
-      }
-    } catch (error) {
-      router.push("/");
-      console.error("Failed to fetch keymap:", error);
-    }
-  };
+  let data: {
+    keymap_id: string;
+    keymap_name: string;
+    keymap_json: KeymapCollection;
+  } | null = null;
 
-  useEffect(() => {
-    fetchKeymap();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  try {
+    const { keymap_id } = await params;
+    data = await api.keymaps.getKeymapById({ keymap_id });
+  } catch {
+    return notFound();
+  }
+
+  if (!data || !data.keymap_json) {
+    return notFound();
+  }
 
   return (
-    <div>
-      <KeymapComponent
-        pageKinds="edit"
-        keymap_id={keymap_id}
-        keymapCollection={keymapCollection}
-        setKeymapCollection={setKeymapCollection}
-        activeLayer={activeLayer}
-        setActiveLayer={setActiveLayer}
-      />
-    </div>
+    <KeymapClient
+      keymap_id={data.keymap_id}
+      initialKeymapCollection={data.keymap_json}
+    />
   );
 }
-export const runtime = "edge";

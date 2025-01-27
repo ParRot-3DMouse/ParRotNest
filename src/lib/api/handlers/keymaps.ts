@@ -1,7 +1,7 @@
 import { hc } from "hono/client";
 import { AppType } from "../../../app/api/[[...route]]/route";
 import { KeymapCollection } from "../../device/types";
-import { redirectTo404 } from "../../redirectTo404";
+import { notFound } from "next/navigation";
 
 export const KeymapsAPI = () => {
   const appClient = hc<AppType>("/");
@@ -38,11 +38,12 @@ export const KeymapsAPI = () => {
       keymap_name: string;
       keymap_json: KeymapCollection;
     }> => {
-      const res = await appClient.api.keymaps[":keymap_id"].$get({
-        param: { keymap_id: keymap_id },
-      });
-      if (res.ok) {
-        try {
+      try {
+        const res = await appClient.api.keymaps[":keymap_id"].$get({
+          param: { keymap_id: keymap_id },
+        });
+        console.log(res);
+        if (res.ok) {
           const data = await res.json();
           console.log(data);
           return {
@@ -50,15 +51,11 @@ export const KeymapsAPI = () => {
             keymap_name: data[0].keymap_name,
             keymap_json: JSON.parse(data[0].keymap_json),
           };
-        } catch (error) {
-          if (res.status === 404) {
-            redirectTo404();
-          }
-          throw error;
+        } else {
+          throw new Error(`Error: ${res.status} - ${await res.text()}`);
         }
-      } else {
-        redirectTo404();
-        throw new Error(`Error: ${res.status} - ${await res.text()}`);
+      } catch {
+        throw new Error("Failed to fetch keymap");
       }
     },
     getKeymapsByUser: async ({
@@ -85,11 +82,11 @@ export const KeymapsAPI = () => {
           }));
           return formattedData;
         } catch (error) {
-          redirectTo404();
+          notFound();
           throw error;
         }
       } else {
-        redirectTo404();
+        notFound();
         throw new Error(`Error: ${res.status} - ${await res.text()}`);
       }
     },
