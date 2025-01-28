@@ -1,68 +1,9 @@
-"use client";
-
-import { useState } from "react";
 import { Key, KeyColumn, KeymapCollection, KeymapType } from "./types";
 import { getKeyUsageID, Uint8 } from "./usageId";
 
-let connectedDevice: HIDDevice | null = null;
-
-async function connectHIDDevice(): Promise<void> {
-  try {
-    const devices = await navigator.hid.requestDevice({
-      filters: [
-        {
-          usagePage: 0x01,
-        },
-      ],
-    });
-
-    if (devices.length === 0) {
-      throw new Error("No devices selected");
-    }
-
-    connectedDevice = devices[0];
-    // 明示的にデバイスを開く
-    if (!connectedDevice.opened) {
-      await connectedDevice.open();
-    }
-  } catch (error) {
-    console.error("Failed to connect device", error);
-    throw error;
-  }
-}
-
-/**
- * キーマップをデバイスに送信する
- * @param keymap 送信するキーマップ
- */
-export async function sendKeymap(keymap: KeymapType): Promise<void> {
-  if (!connectedDevice) {
-    throw new Error("Device not connected");
-  }
-
-  try {
-    // KeymapTypeをバイト配列に変換
-    const data = convertKeymapToBytes(keymap);
-
-    if (!connectedDevice.opened) {
-      await connectedDevice.open();
-    }
-
-    // レポートIDを0x05として送信
-    await connectedDevice.sendReport(0x1f, data);
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "NotAllowedError") {
-      throw new Error(
-        "デバイスへの書き込み権限がありません。デバイスを再接続してください。"
-      );
-    }
-    console.error("Failed to send key map", error);
-    throw error;
-  }
-}
-
 export async function sendKeymapCollection(
-  keymapCollection: KeymapCollection
+  keymapCollection: KeymapCollection,
+  connectedDevice: HIDDevice | null
 ): Promise<void> {
   if (!connectedDevice) {
     throw new Error("Device not connected");
@@ -85,49 +26,6 @@ export async function sendKeymapCollection(
     console.error("Failed to send key map", error);
     throw error;
   }
-}
-
-async function disconnectHIDDevice(): Promise<void> {
-  if (connectedDevice) {
-    await connectedDevice.close();
-    connectedDevice = null;
-  }
-}
-
-export function getConnectedDevice(): HIDDevice | null {
-  return connectedDevice;
-}
-
-export function useHIDConnection() {
-  const [connectedDevice, setConnectedDevice] = useState<HIDDevice | null>(
-    null
-  );
-  const [error, setError] = useState<string>("");
-
-  const connect = async () => {
-    try {
-      await connectHIDDevice();
-      const device = getConnectedDevice();
-      if (device) {
-        setConnectedDevice(device);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect device");
-    }
-  };
-
-  const disconnect = async () => {
-    try {
-      await disconnectHIDDevice();
-      setConnectedDevice(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to disconnect device"
-      );
-    }
-  };
-
-  return { connectedDevice, connect, disconnect, error, setError };
 }
 
 export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {

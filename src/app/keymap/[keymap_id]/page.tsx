@@ -7,8 +7,6 @@ import { initialState } from "../../../lib/device/reducer";
 import { KeymapComponent } from "../../../components/KeymapComponent";
 import { clientApi } from "../../../lib/api/clientApi";
 import { useRouter } from "next/navigation";
-import { DeviceCard } from "../../../components/DeviceCard";
-import { useHID } from "../../../components/provider/HIDContext";
 
 export default function KeymapPage({
   params,
@@ -25,7 +23,6 @@ export default function KeymapPage({
   const [keymap_id, setKeymap_id] = useState<string>("");
   const router = useRouter();
   const api = clientApi();
-  const { connectedDevice, connect, disconnect } = useHID();
 
   const fetchKeymap = async () => {
     try {
@@ -51,11 +48,6 @@ export default function KeymapPage({
 
   return (
     <div>
-      <DeviceCard
-        connectedDevice={connectedDevice}
-        connect={connect}
-        disconnect={disconnect}
-      />
       <KeymapComponent
         pageKinds="edit"
         keymap_id={keymap_id}
