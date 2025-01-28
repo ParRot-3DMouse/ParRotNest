@@ -25,9 +25,9 @@ export const HIDProvider: React.FC<{ children: React.ReactNode }> = ({
       const devices = await navigator.hid.requestDevice({
         filters: [
           {
-            usagePage:
-              // 0x01 ||
-              0xff00,
+            usagePage: 0x01,
+            // ||
+            // 0xff00,
           },
         ],
       });
