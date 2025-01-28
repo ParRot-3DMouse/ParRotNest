@@ -94,21 +94,21 @@ export function convertKeymapCollectionToBytes(
   const layer1Bytes = convertKeymapToBytes(keymapCollection.layer1);
 
   // layer2, layer3 は存在する場合のみ変換
-  const layer2Bytes = keymapCollection.layer2
-    ? convertKeymapToBytes(keymapCollection.layer2)
-    : new Uint8Array(32);
+  // const layer2Bytes = keymapCollection.layer2
+  //   ? convertKeymapToBytes(keymapCollection.layer2)
+  //   : new Uint8Array(32);
 
-  const layer3Bytes = keymapCollection.layer3
-    ? convertKeymapToBytes(keymapCollection.layer3)
-    : new Uint8Array(32);
+  // const layer3Bytes = keymapCollection.layer3
+  //   ? convertKeymapToBytes(keymapCollection.layer3)
+  //   : new Uint8Array(32);
 
   const totalSize = 96 + appNameBytes.length;
 
   const allBytes = new Uint8Array(totalSize);
   allBytes.set(layer1Bytes, 0); // 先頭0～31
-  allBytes.set(layer2Bytes, 32); // 32～63
-  allBytes.set(layer3Bytes, 64); // 64～95
-  allBytes.set(appNameBytes, 96);
+  // allBytes.set(layer2Bytes, 32); // 32～63
+  // allBytes.set(layer3Bytes, 64); // 64～95
+  // allBytes.set(appNameBytes, 96);
 
   return allBytes;
 }

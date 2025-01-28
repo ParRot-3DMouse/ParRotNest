@@ -26,10 +26,10 @@ export const HIDProvider: React.FC<{ children: React.ReactNode }> = ({
         filters: [{ usagePage: 0x01 }],
       });
       if (devices.length === 0) throw new Error("No devices selected");
-      const device = devices[0];
+      const connectedDevice = devices[0];
 
-      if (!device.opened) await device.open();
-      setConnectedDevice(device);
+      if (!connectedDevice.opened) await connectedDevice.open();
+      setConnectedDevice(connectedDevice);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect device");
     }
