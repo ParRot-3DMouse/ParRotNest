@@ -89,32 +89,28 @@ export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
 export function convertKeymapCollectionToBytes(
   keymapCollection: KeymapCollection
 ): Uint8Array {
-  const appNameBytes = stringToByteArray(keymapCollection.appName);
+  // const appNameBytes = stringToByteArray(keymapCollection.appName);
 
   const layer1Bytes = convertKeymapToBytes(keymapCollection.layer1);
 
-  const layer2Bytes = keymapCollection.layer2
-    ? convertKeymapToBytes(keymapCollection.layer2)
-    : new Uint8Array(32);
+  const layer2Bytes = convertKeymapToBytes(keymapCollection.layer2);
 
-  const layer3Bytes = keymapCollection.layer3
-    ? convertKeymapToBytes(keymapCollection.layer3)
-    : new Uint8Array(32);
+  // const layer3Bytes = convertKeymapToBytes(keymapCollection.layer3);
 
   // const totalSize = 96 + appNameBytes.length;
 
   const allBytes = new Uint8Array(64);
   allBytes.set(layer1Bytes, 0); // 先頭0～31
   allBytes.set(layer2Bytes, 32); // 32～63
-  allBytes.set(layer3Bytes, 64); // 64～95
-  allBytes.set(appNameBytes, 96);
+  // allBytes.set(layer3Bytes, 64); // 64～95
+  // allBytes.set(appNameBytes, 96);
 
   console.log("size of allBytes", allBytes.length);
 
   return allBytes;
 }
 
-function stringToByteArray(str: string): Uint8Array {
-  const encoder = new TextEncoder();
-  return encoder.encode(str);
-}
+// function stringToByteArray(str: string): Uint8Array {
+//   const encoder = new TextEncoder();
+//   return encoder.encode(str);
+// }
