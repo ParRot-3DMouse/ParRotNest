@@ -101,7 +101,7 @@ export default function KeymapPage() {
 
   return (
     <div className={container}>
-      <h1 className={title}>Likes</h1>
+      <h1 className={title}>Keymaps</h1>
       {ownKeymaps.length === 0 ? (
         <p className={message}>まだ保存したキーマップがありません。</p>
       ) : (

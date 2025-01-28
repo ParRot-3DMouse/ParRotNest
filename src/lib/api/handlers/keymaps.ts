@@ -99,7 +99,7 @@ export const KeymapsAPI = () => {
     }: {
       keymap_id: string;
       keymap_name: string;
-      keymap_json: KeymapCollection;
+      keymap_json: string;
     }) => {
       const res = await appClient.api.keymaps[":keymap_id"].$put({
         param: { keymap_id: keymap_id },

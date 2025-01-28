@@ -122,7 +122,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
         await clientApi().keymaps.putKeymap({
           keymap_id: keymap_id,
           keymap_name: keymapCollection.appName,
-          keymap_json: keymapCollection,
+          keymap_json: JSON.stringify(keymapCollection),
         });
         router.push(`/keymap/${keymap_id}`);
       }
@@ -198,6 +198,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
           {pageKinds === "edit" ||
             (pageKinds === "new" && (
               <button onClick={handleReset} className={dangerButton}>
+                {" "}
                 Reset
               </button>
             ))}
@@ -208,12 +209,11 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
           >
             Write
           </button>
-          {pageKinds === "edit" ||
-            (pageKinds === "new" && (
-              <button onClick={handleSave} className={primaryButton}>
-                Save
-              </button>
-            ))}
+          {(pageKinds === "edit" || pageKinds === "new") && (
+            <button onClick={handleSave} className={primaryButton}>
+              Save
+            </button>
+          )}
           {pageKinds === "edit" && (
             <button onClick={handlePost} className={primaryButton}>
               Post
