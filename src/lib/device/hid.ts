@@ -15,18 +15,22 @@ export async function sendKeymapCollection(
     console.log("data", data);
 
     if (!connectedDevice.opened) {
+      console.log("open");
       await connectedDevice.open();
+      console.log("opened");
     }
-
+    console.log("sendReport");
     await connectedDevice.sendReport(0x1f, data);
+    console.log("sendReport done");
   } catch (error) {
+    console.log("error", error);
     if (error instanceof DOMException && error.name === "NotAllowedError") {
       throw new Error(
         "デバイスへの書き込み権限がありません。デバイスを再接続してください。"
       );
     }
-    console.error("Failed to send key map", error);
-    throw error;
+    // console.error("Failed to send key map", error);
+    // throw error;
   }
 }
 
