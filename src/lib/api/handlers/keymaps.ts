@@ -65,6 +65,9 @@ export const KeymapsAPI = () => {
         keymap_id: string;
         keymap_name: string;
         keymap_json: KeymapCollection;
+        user_id: string;
+        created_at: string;
+        updated_at: string;
       }[]
     > => {
       const res = await appClient.api.keymaps.user[":user_id"].$get({
@@ -77,6 +80,9 @@ export const KeymapsAPI = () => {
             keymap_id: item.keymap_id,
             keymap_name: item.keymap_name,
             keymap_json: JSON.parse(item.keymap_json),
+            user_id: item.user_id,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
           }));
           return formattedData;
         } catch (error) {
