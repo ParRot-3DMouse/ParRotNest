@@ -109,6 +109,8 @@ export function convertKeymapCollectionToBytes(
   allBytes.set(layer3Bytes, 64); // 64～95
   allBytes.set(appNameBytes, 96);
 
+  console.log("size of allBytes", allBytes.length);
+
   return allBytes;
 }
 
