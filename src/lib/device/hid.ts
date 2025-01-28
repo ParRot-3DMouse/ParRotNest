@@ -5,12 +5,14 @@ export async function sendKeymapCollection(
   keymapCollection: KeymapCollection,
   connectedDevice: HIDDevice | null
 ): Promise<void> {
+  console.log("connectedDevice", connectedDevice);
   if (!connectedDevice) {
     throw new Error("Device not connected");
   }
 
   try {
     const data = convertKeymapCollectionToBytes(keymapCollection);
+    console.log("data", data);
 
     if (!connectedDevice.opened) {
       await connectedDevice.open();
