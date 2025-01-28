@@ -101,9 +101,9 @@ export function convertKeymapCollectionToBytes(
     ? convertKeymapToBytes(keymapCollection.layer3)
     : new Uint8Array(32);
 
-  const totalSize = 96 + appNameBytes.length;
+  // const totalSize = 96 + appNameBytes.length;
 
-  const allBytes = new Uint8Array(totalSize);
+  const allBytes = new Uint8Array(128);
   allBytes.set(layer1Bytes, 0); // 先頭0～31
   allBytes.set(layer2Bytes, 32); // 32～63
   allBytes.set(layer3Bytes, 64); // 64～95
