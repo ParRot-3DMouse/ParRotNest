@@ -89,7 +89,7 @@ export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
 export function convertKeymapCollectionToBytes(
   keymapCollection: KeymapCollection
 ): Uint8Array {
-  const appNameBytes = stringToByteArray(keymapCollection.appName);
+  // const appNameBytes = stringToByteArray(keymapCollection.appName);
   // layer1 は必須
   const layer1Bytes = convertKeymapToBytes(keymapCollection.layer1);
 
@@ -102,9 +102,10 @@ export function convertKeymapCollectionToBytes(
   //   ? convertKeymapToBytes(keymapCollection.layer3)
   //   : new Uint8Array(32);
 
-  const totalSize = 96 + appNameBytes.length;
+  // const totalSize = 96 + appNameBytes.length;
 
-  const allBytes = new Uint8Array(totalSize);
+  // const allBytes = new Uint8Array(totalSize);
+  const allBytes = new Uint8Array(32);
   allBytes.set(layer1Bytes, 0); // 先頭0～31
   // allBytes.set(layer2Bytes, 32); // 32～63
   // allBytes.set(layer3Bytes, 64); // 64～95
@@ -113,7 +114,7 @@ export function convertKeymapCollectionToBytes(
   return allBytes;
 }
 
-function stringToByteArray(str: string): Uint8Array {
-  const encoder = new TextEncoder();
-  return encoder.encode(str);
-}
+// function stringToByteArray(str: string): Uint8Array {
+//   const encoder = new TextEncoder();
+//   return encoder.encode(str);
+// }
