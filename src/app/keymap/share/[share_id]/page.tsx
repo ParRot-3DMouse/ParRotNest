@@ -7,8 +7,6 @@ import { clientApi } from "../../../../lib/api/clientApi";
 import { initialState } from "../../../../lib/device/reducer";
 import { KeymapCollection } from "../../../../lib/device/types";
 import { css } from "../../../../../styled-system/css";
-import { DeviceCard } from "../../../../components/DeviceCard";
-import { useHID } from "../../../../components/provider/HIDContext";
 
 export default function KeymapPage({
   params,
@@ -26,7 +24,6 @@ export default function KeymapPage({
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const router = useRouter();
   const api = clientApi();
-  const { connectedDevice, connect, disconnect } = useHID();
 
   const fetchKeymap = async () => {
     try {
@@ -85,11 +82,6 @@ export default function KeymapPage({
 
   return (
     <div>
-      <DeviceCard
-        connectedDevice={connectedDevice}
-        connect={connect}
-        disconnect={disconnect}
-      />
       <KeymapComponent
         pageKinds="share"
         keymap_id={share_id}
