@@ -9,6 +9,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
 import { useHID } from "./provider/HIDContext";
+import { DeviceCard } from "./DeviceCard";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -103,10 +104,10 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   setActiveLayer,
   pageKinds,
 }) => {
-  const { connectedDevice } = useHID();
+  const { connectedDevice, connect, disconnect } = useHID();
   const router = useRouter();
   const handleWrite = () => {
-    sendKeymapCollection(keymapCollection);
+    sendKeymapCollection(keymapCollection, connectedDevice);
   };
 
   const handleSave = async () => {
@@ -161,6 +162,11 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   return (
     <div className={css({ maxWidth: "500px", margin: "0 auto" })}>
       <DndProvider backend={HTML5Backend}>
+        <DeviceCard
+          connectedDevice={connectedDevice}
+          connect={connect}
+          disconnect={disconnect}
+        />
         <input
           type="text"
           placeholder="Keymap Name"
