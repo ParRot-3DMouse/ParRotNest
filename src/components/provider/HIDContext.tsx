@@ -23,7 +23,7 @@ export const HIDProvider: React.FC<{ children: React.ReactNode }> = ({
   const connect = async () => {
     try {
       const devices = await navigator.hid.requestDevice({
-        filters: [{ usagePage: 0x01 }],
+        filters: [{ usagePage: 0x01 || 0xff00 }],
       });
       if (devices.length === 0) throw new Error("No devices selected");
       const connectedDevice = devices[0];
