@@ -58,7 +58,6 @@ export const LikesAPI = () => {
       const res = await appClient.api.likes.user[":user_id"].$get({
         param: { user_id: user_id },
       });
-      console.log(res);
       if (res.ok) {
         const { results }: { results: KeymapToShare[] } = await res.json();
 

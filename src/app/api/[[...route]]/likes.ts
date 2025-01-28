@@ -97,10 +97,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   // GET /likes/user/:user_id
   .get("/user/:user_id", async (c) => {
-    console.log("get likes by user");
     try {
       const authUserId = await getUserID(c);
-      console.log(authUserId);
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -108,7 +106,6 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       const { user_id } = getLikesByUserSchema.parse({
         user_id: c.req.param("user_id"),
       });
-      console.log(user_id);
       if (authUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -119,8 +116,6 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
         )
           .bind(user_id)
           .all();
-
-      console.log(results);
 
       return c.json({ results });
     } catch (err) {

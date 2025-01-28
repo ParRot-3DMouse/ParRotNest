@@ -88,7 +88,6 @@ export default function KeymapPage() {
           user_id: userId,
         });
         if (res) {
-          console.log(res);
           setOwnKeymaps(res);
         }
       } catch (error) {

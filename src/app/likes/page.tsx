@@ -79,7 +79,6 @@ export default function LikesPage() {
         if (!userId) return;
         const res = await api.likes.getLikesByUser({ user_id: userId });
         if (res) {
-          console.log(res);
           setLikeKeymaps(res);
         }
       } catch (error) {

@@ -11,10 +11,6 @@ export const UsersAPI = () => {
       user_email: string;
       user_name: string;
     }) => {
-      console.log("appClient", appClient);
-      console.log("appClient.api", appClient.api);
-      console.log("appClient.api.users", appClient.api.users);
-      console.log("appClient.api.users.$post", appClient.api.users.$post);
       const res = await appClient.api.users.$post({
         json: {
           user_email: user_email,

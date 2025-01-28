@@ -60,8 +60,6 @@ async function handleHonoRequest(nextReq: NextRequest) {
   if (token) {
     clonedHeaders.set("Authorization", `Bearer ${token}`);
   }
-  console.log("nextReq.url", nextReq.url);
-  console.log("nextReq.headers", nextReq.headers);
   const honoRequest = new Request(nextReq.url, {
     method: nextReq.method,
     headers: clonedHeaders,
