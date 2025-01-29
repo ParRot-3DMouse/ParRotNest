@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-// import { jwt, JwtVariables } from "hono/jwt";
 import users from "./users";
 import { D1Database } from "@cloudflare/workers-types";
 import { handle } from "hono/vercel";
