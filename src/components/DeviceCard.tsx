@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { css } from "../../styled-system/css";
+import { sendKeymapCollection } from "../lib/device/hid";
+import { KeymapCollection } from "../lib/device/types";
 
 const card = css({
   border: "1px solid",
@@ -72,15 +75,51 @@ const primaryButton = css({
   cursor: "pointer",
 });
 
+const successButton = css({
+  backgroundColor: "teal.400",
+  color: "white",
+  padding: "10px 20px",
+  borderRadius: "0.375rem",
+  fontSize: "16px",
+  fontWeight: "500",
+  cursor: "pointer",
+  transition: "background-color 0.3s",
+  _hover: {
+    backgroundColor: "teal.500",
+  },
+  width: "fit-content",
+  _disabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
+  },
+});
+
+const selectStyle = css({
+  padding: "0.375rem",
+  borderRadius: "0.375rem",
+  backgroundColor: "gray.700",
+  color: "white",
+  border: "1px solid gray.600",
+  cursor: "pointer",
+  fontSize: "0.875rem",
+});
+
 export const DeviceCard = ({
+  keymapCollection,
   connectedDevice,
   connect,
   disconnect,
 }: {
+  keymapCollection: KeymapCollection;
   connectedDevice: HIDDevice | null;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
 }) => {
+  const [selectedSlot, setSelectedSlot] = useState<1 | 2 | 3>(1);
+  const handleWrite = () => {
+    sendKeymapCollection(keymapCollection, connectedDevice, selectedSlot);
+  };
+
   return (
     <div className={card}>
       {connectedDevice ? (
@@ -95,6 +134,24 @@ export const DeviceCard = ({
           <div className={buttonGroup}>
             <button onClick={disconnect} className={dangerButton}>
               切断
+            </button>
+            <select
+              className={selectStyle}
+              value={selectedSlot}
+              onChange={(e) =>
+                setSelectedSlot(Number(e.target.value) as 1 | 2 | 3)
+              }
+            >
+              <option value={1}>Slot 1</option>
+              <option value={2}>Slot 2</option>
+              <option value={3}>Slot 3</option>
+            </select>
+            <button
+              onClick={handleWrite}
+              className={successButton}
+              disabled={!connectedDevice}
+            >
+              Write
             </button>
           </div>
         </>

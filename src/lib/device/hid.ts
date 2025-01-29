@@ -3,7 +3,8 @@ import { getKeyUsageID, Uint8 } from "./usageId";
 
 export async function sendKeymapCollection(
   keymapCollection: KeymapCollection,
-  connectedDevice: HIDDevice | null
+  connectedDevice: HIDDevice | null,
+  selectedSlot: 1 | 2 | 3
 ): Promise<void> {
   console.log("connectedDevice", connectedDevice);
   if (!connectedDevice) {
@@ -11,17 +12,63 @@ export async function sendKeymapCollection(
   }
 
   try {
-    const data = convertKeymapCollectionToBytes(keymapCollection);
-    console.log("data", data);
-
     if (!connectedDevice.opened) {
-      console.log("open");
       await connectedDevice.open();
-      console.log("opened");
     }
-    console.log("sendReport");
-    await connectedDevice.sendReport(0x1f, data);
-    console.log("sendReport done");
+
+    let appNum: 0x00 | 0x01 | 0x02;
+
+    switch (selectedSlot) {
+      case 1:
+        appNum = 0x00;
+        break;
+      case 2:
+        appNum = 0x01;
+        break;
+      case 3:
+        appNum = 0x02;
+        break;
+      default:
+        throw new Error("Invalid slot number");
+    }
+
+    const appNameBytes = stringToByteArray(keymapCollection.appName, appNum);
+    console.log("appNameBytes", appNameBytes);
+    console.log("Byte length", appNameBytes.length);
+    await connectedDevice.sendReport(0x1f, appNameBytes);
+    console.log("App name sent");
+
+    const layer1Bytes = convertKeymapToBytes(
+      keymapCollection.layer1,
+      appNum,
+      0x00
+    );
+    console.log("layer1Bytes", layer1Bytes);
+    console.log("layer1Bytes length", layer1Bytes.length);
+    await connectedDevice.sendReport(0x1f, layer1Bytes);
+    console.log("Layer 1 sent");
+
+    const layer2Bytes = convertKeymapToBytes(
+      keymapCollection.layer2,
+      appNum,
+      0x01
+    );
+    console.log("layer2Bytes", layer2Bytes);
+    console.log("layer2Bytes length", layer2Bytes.length);
+    await connectedDevice.sendReport(0x1f, layer2Bytes);
+    console.log("Layer 2 sent");
+
+    const layer3Bytes = convertKeymapToBytes(
+      keymapCollection.layer3,
+      appNum,
+      0x02
+    );
+    console.log("layer3Bytes", layer3Bytes);
+    console.log("layer3Bytes length", layer3Bytes.length);
+    await connectedDevice.sendReport(0x1f, layer3Bytes);
+    console.log("Layer 3 sent");
+
+    console.log("All data sent successfully");
   } catch (error) {
     console.log("error", error);
     if (error instanceof DOMException && error.name === "NotAllowedError") {
@@ -29,12 +76,31 @@ export async function sendKeymapCollection(
         "デバイスへの書き込み権限がありません。デバイスを再接続してください。"
       );
     }
-    // console.error("Failed to send key map", error);
-    // throw error;
+    console.error("Failed to send key map", error);
+    throw error;
   }
 }
 
-export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
+function stringToByteArray(
+  str: string,
+  appNum: 0x00 | 0x01 | 0x02
+): Uint8Array {
+  const encoder = new TextEncoder();
+  const res = encoder.encode(str);
+
+  const allBytesWithPrefix = [0x04, appNum, ...res];
+
+  const allBytes = new Uint8Array(63);
+  allBytes.set(allBytesWithPrefix);
+
+  return allBytes;
+}
+
+export const convertKeymapToBytes = (
+  keymap: KeymapType,
+  appNum: 0x00 | 0x01 | 0x02,
+  layerNum: 0x00 | 0x01 | 0x02
+): Uint8Array => {
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);
     return [modifier, character];
@@ -68,16 +134,10 @@ export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
       ...column4Bytes,
     ];
 
-    const allBytesWithPrefix = [
-      // 0x05,
-      ...allBytes,
-    ];
+    const allBytesWithPrefix = [0x05, appNum, layerNum, ...allBytes];
 
-    const paddedBytes = new Uint8Array(32);
-    paddedBytes.set(
-      allBytesWithPrefix
-      // .slice(0, 32)
-    );
+    const paddedBytes = new Uint8Array(63);
+    paddedBytes.set(allBytesWithPrefix);
 
     return paddedBytes;
   } catch (error) {
@@ -86,31 +146,26 @@ export const convertKeymapToBytes = (keymap: KeymapType): Uint8Array => {
   }
 };
 
-export function convertKeymapCollectionToBytes(
-  keymapCollection: KeymapCollection
-): Uint8Array {
-  // const appNameBytes = stringToByteArray(keymapCollection.appName);
+// export function convertKeymapCollectionToBytes(
+//   keymapCollection: KeymapCollection
+// ): Uint8Array {
+//   const appNameBytes = stringToByteArray(keymapCollection.appName);
 
-  const layer1Bytes = convertKeymapToBytes(keymapCollection.layer1);
+//   const layer1Bytes = convertKeymapToBytes(keymapCollection.layer1);
 
-  // const layer2Bytes = convertKeymapToBytes(keymapCollection.layer2);
+//   const layer2Bytes = convertKeymapToBytes(keymapCollection.layer2);
 
-  // const layer3Bytes = convertKeymapToBytes(keymapCollection.layer3);
+//   const layer3Bytes = convertKeymapToBytes(keymapCollection.layer3);
 
-  // const totalSize = 96 + appNameBytes.length;
+//   const totalSize = 96 + appNameBytes.length;
 
-  const allBytes = new Uint8Array(64);
-  allBytes.set(layer1Bytes, 0); // 先頭0～31
-  // allBytes.set(layer2Bytes, 32); // 32～63
-  // allBytes.set(layer3Bytes, 64); // 64～95
-  // allBytes.set(appNameBytes, 96);
+//   const allBytes = new Uint8Array(63);
+//   allBytes.set(layer1Bytes, 0); // 先頭0～31
+//   // allBytes.set(layer2Bytes, 32); // 32～63
+//   // allBytes.set(layer3Bytes, 64); // 64～95
+//   // allBytes.set(appNameBytes, 96);
 
-  console.log("size of allBytes", allBytes.length);
+//   console.log("size of allBytes", allBytes.length);
 
-  return allBytes;
-}
-
-// function stringToByteArray(str: string): Uint8Array {
-//   const encoder = new TextEncoder();
-//   return encoder.encode(str);
+//   return allBytes;
 // }

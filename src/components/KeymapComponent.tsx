@@ -2,7 +2,6 @@ import { css } from "../../styled-system/css";
 import Device from "./device";
 import { KeymapCollection } from "../lib/device/types";
 import { clientApi } from "../lib/api/clientApi";
-import { sendKeymapCollection } from "../lib/device/hid";
 import { initialState } from "../lib/device/reducer";
 import UniqueKeyMenu from "./UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
@@ -58,25 +57,6 @@ const dangerButton = css({
   cursor: "pointer",
 });
 
-const successButton = css({
-  backgroundColor: "teal.400",
-  color: "white",
-  padding: "10px 20px",
-  borderRadius: "0.375rem",
-  fontSize: "16px",
-  fontWeight: "500",
-  cursor: "pointer",
-  transition: "background-color 0.3s",
-  _hover: {
-    backgroundColor: "teal.500",
-  },
-  width: "fit-content",
-  _disabled: {
-    opacity: 0.6,
-    cursor: "not-allowed",
-  },
-});
-
 const primaryButton = css({
   backgroundColor: "blue.600",
   color: "white",
@@ -106,9 +86,6 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
 }) => {
   const { connectedDevice, connect, disconnect } = useHID();
   const router = useRouter();
-  const handleWrite = () => {
-    sendKeymapCollection(keymapCollection, connectedDevice);
-  };
 
   const handleSave = async () => {
     try {
@@ -163,6 +140,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     <div className={css({ maxWidth: "500px", margin: "0 auto" })}>
       <DndProvider backend={HTML5Backend}>
         <DeviceCard
+          keymapCollection={keymapCollection}
           connectedDevice={connectedDevice}
           connect={connect}
           disconnect={disconnect}
@@ -202,13 +180,6 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                 Reset
               </button>
             ))}
-          <button
-            onClick={handleWrite}
-            className={successButton}
-            disabled={!connectedDevice}
-          >
-            Write
-          </button>
           {(pageKinds === "edit" || pageKinds === "new") && (
             <button onClick={handleSave} className={primaryButton}>
               Save
