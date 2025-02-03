@@ -111,11 +111,13 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   const handlePost = async () => {
     try {
       if (pageKinds === "edit") {
-        await clientApi().keymaps_to_share.postKeymapToShare({
+        const res = await clientApi().keymaps_to_share.postKeymapToShare({
           keymap_name: keymapCollection.appName,
           keymap_json: keymapCollection,
         });
-        router.push(`/keymap/share/${keymap_id}`);
+
+        const share_id = res.share_id;
+        router.push(`/keymap/share/${share_id}`);
       }
     } catch (err) {
       throw Error(err instanceof Error ? err.message : "Failed to post keymap");
