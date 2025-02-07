@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { css } from "../../styled-system/css";
-import Link from "next/link";
 
 const container = css({
   margin: "20px",
@@ -18,7 +17,6 @@ const title = css({
   fontWeight: "bold",
   marginBottom: "1.5rem",
   textAlign: "center",
-  color: "white",
 });
 
 const alert = css({
@@ -37,28 +35,7 @@ const bulletList = css({
   marginTop: "0.5rem",
   marginLeft: "1.5rem",
   listStyle: "disc",
-  color: "yellow.100",
-});
-
-const primaryButton = css({
-  backgroundColor: "blue.600",
-  color: "white",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  paddingTop: "0.5rem",
-  paddingBottom: "0.5rem",
-  borderRadius: "0.375rem",
-  fontWeight: "500",
-  _hover: {
-    backgroundColor: "blue.700",
-  },
-  _active: {
-    backgroundColor: "blue.800",
-  },
-  width: "fit-content",
-  marginLeft: "auto",
-  marginRight: "auto",
-  cursor: "pointer",
+  // color: "yellow.100",
 });
 
 export default function Page() {
@@ -75,7 +52,7 @@ export default function Page() {
   }
   return (
     <div className={container}>
-      <h1 className={title}>HIDデバイス接続</h1>
+      <h1 className={title}>ParRotNestへようこそ！</h1>
 
       {!isSupported ? (
         <div className={`${alert} ${warningAlert}`}>
@@ -100,9 +77,18 @@ export default function Page() {
             maxWidth: "1000px",
           })}
         >
-          <Link href="/keymap/new" className={primaryButton}>
-            新しいキーマップを作成
-          </Link>
+          <p>
+            ParRotNestは、WebHID
+            APIを使用して、あなたのParRotのキーマップを変更するためのツールです。
+          </p>
+          <p>
+            まずは、ParRotをUSBで接続して、左のデバイスカードから接続してください！
+          </p>
+          <br />
+          <p>
+            接続できたら、早速「New
+            Keymap」からオリジナルのキーマップを作成してみましょう！
+          </p>
         </div>
       )}
     </div>

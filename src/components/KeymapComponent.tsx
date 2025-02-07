@@ -3,12 +3,11 @@ import Device from "./device";
 import { KeymapCollection } from "../lib/device/types";
 import { clientApi } from "../lib/api/clientApi";
 import { initialState } from "../lib/device/reducer";
-import UniqueKeyMenu from "./UniqueKeyMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
-import { useHID } from "./provider/HIDContext";
-import { DeviceCard } from "./DeviceCard";
+import UniqueKeyMenu from "./UniqueKeyMenu";
+import { useState } from "react";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -31,15 +30,13 @@ interface ExistingKeymapProps extends KeymapComponentBaseProps {
 type KeymapComponentProps = NewKeymapProps | ExistingKeymapProps;
 
 const buttonContainer = css({
-  margin: "30px",
   textAlign: "center",
   display: "flex",
   gap: "1rem",
   justifyContent: "center",
 });
 const dangerButton = css({
-  backgroundColor: "red.600",
-  color: "white",
+  backgroundColor: "#b13d57",
   paddingLeft: "0.75rem",
   paddingRight: "0.75rem",
   paddingTop: "0.375rem",
@@ -48,18 +45,17 @@ const dangerButton = css({
   fontSize: "0.875rem",
   fontWeight: "500",
   _hover: {
-    backgroundColor: "red.700",
+    // backgroundColor: "red.700",
   },
   _active: {
-    backgroundColor: "red.800",
+    // backgroundColor: "red.800",
   },
   width: "fit-content",
   cursor: "pointer",
 });
 
-const primaryButton = css({
-  backgroundColor: "blue.600",
-  color: "white",
+const saveButton = css({
+  backgroundColor: "#177b3a",
   paddingLeft: "1rem",
   paddingRight: "1rem",
   paddingTop: "0.5rem",
@@ -67,10 +63,28 @@ const primaryButton = css({
   borderRadius: "0.375rem",
   fontWeight: "500",
   _hover: {
-    backgroundColor: "blue.700",
+    // backgroundColor: "blue.700",
   },
   _active: {
-    backgroundColor: "blue.800",
+    // backgroundColor: "blue.800",
+  },
+  width: "fit-content",
+  cursor: "pointer",
+});
+
+const postButton = css({
+  backgroundColor: "#145991",
+  paddingLeft: "1rem",
+  paddingRight: "1rem",
+  paddingTop: "0.5rem",
+  paddingBottom: "0.5rem",
+  borderRadius: "0.375rem",
+  fontWeight: "500",
+  _hover: {
+    // backgroundColor: "blue.700",
+  },
+  _active: {
+    // backgroundColor: "blue.800",
   },
   width: "fit-content",
   cursor: "pointer",
@@ -84,8 +98,8 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   setActiveLayer,
   pageKinds,
 }) => {
-  const { connectedDevice, connect, disconnect } = useHID();
   const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleSave = async () => {
     try {
@@ -139,61 +153,120 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     }
   };
   return (
-    <div className={css({ maxWidth: "500px", margin: "0 auto" })}>
+    <div>
       <DndProvider backend={HTML5Backend}>
-        <DeviceCard
-          keymapCollection={keymapCollection}
-          connectedDevice={connectedDevice}
-          connect={connect}
-          disconnect={disconnect}
-        />
-        <input
-          type="text"
-          placeholder="Keymap Name"
-          value={keymapCollection.appName}
-          onChange={(e) =>
-            setKeymapCollection((prev) => {
-              return { ...prev, appName: e.target.value };
-            })
-          }
-          disabled={pageKinds === "share"}
+        <div
           className={css({
-            width: "100%",
-            padding: "8px",
-            marginBottom: "1rem",
-            borderRadius: "0.375rem",
-            border: "1px solid gray",
-            backgroundColor: "gray.800",
-            color: "white",
+            display: "flex",
+            justifyContent: "center",
+            // alignItems: "center",
+            flexDirection: "column",
+            gap: "20px",
           })}
-        />
-        <Device
-          pageKinds={pageKinds}
-          keymapCollection={keymapCollection}
-          setKeymapCollection={setKeymapCollection}
-          activeLayer={activeLayer}
-          setActiveLayer={setActiveLayer}
-        />
-        <div className={buttonContainer}>
-          {pageKinds === "edit" ||
-            (pageKinds === "new" && (
-              <button onClick={handleReset} className={dangerButton}>
-                {" "}
-                Reset
-              </button>
-            ))}
-          {(pageKinds === "edit" || pageKinds === "new") && (
-            <button onClick={handleSave} className={primaryButton}>
-              Save
+        >
+          <div
+            className={css({
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "40px",
+              paddingTop: "50px",
+            })}
+          >
+            <input
+              type="text"
+              placeholder="Keymap Name"
+              value={keymapCollection.appName}
+              onChange={(e) =>
+                setKeymapCollection((prev) => {
+                  return { ...prev, appName: e.target.value };
+                })
+              }
+              disabled={pageKinds === "share"}
+              className={css({
+                width: "400px",
+                maxWidth: "400px",
+                padding: "8px",
+                borderRadius: "0.375rem",
+                border: "1px solid",
+                backgroundColor: "#f5ebe3",
+                color: "#2b2727",
+              })}
+            />
+            <Device
+              pageKinds={pageKinds}
+              keymapCollection={keymapCollection}
+              setKeymapCollection={setKeymapCollection}
+              activeLayer={activeLayer}
+              setActiveLayer={setActiveLayer}
+            />
+            <div className={buttonContainer}>
+              {pageKinds === "edit" ||
+                (pageKinds === "new" && (
+                  <button onClick={handleReset} className={dangerButton}>
+                    {" "}
+                    Reset
+                  </button>
+                ))}
+              {(pageKinds === "edit" || pageKinds === "new") && (
+                <button onClick={handleSave} className={saveButton}>
+                  Save
+                </button>
+              )}
+              {pageKinds === "edit" && (
+                <button onClick={handlePost} className={postButton}>
+                  Post
+                </button>
+              )}
+            </div>
+          </div>
+          <div
+            className={css({
+              position: "fixed",
+              bottom: 0,
+              right: 0,
+              height: "250px",
+              transform: isCollapsed ? "translateY(200px)" : "translateY(0px)",
+              transition: "transform 0.3s ease",
+              width: "calc(100dvw - 350px)",
+            })}
+          >
+            <div
+              className={css({
+                height: "100%",
+                padding: "20px",
+                overflowY: "auto",
+              })}
+            >
+              {pageKinds !== "share" && (
+                <>
+                  <h2>Unique Key</h2>
+                  <UniqueKeyMenu />
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={css({
+                position: "absolute",
+                top: "-25px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "50px",
+                height: "50px",
+                borderRadius: "50%",
+                backgroundColor: "#606060",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+              })}
+            >
+              {isCollapsed ? "▲" : "▼"}
             </button>
-          )}
-          {pageKinds === "edit" && (
-            <button onClick={handlePost} className={primaryButton}>
-              Post
-            </button>
-          )}
+          </div>
         </div>
-        {!(pageKinds === "share") && <UniqueKeyMenu />}
       </DndProvider>
     </div>
   );

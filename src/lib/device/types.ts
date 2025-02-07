@@ -192,7 +192,6 @@ export type KeymapType = {
   column1: KeyColumn;
   column2: KeyColumn;
   column3: KeyColumn;
-  column4: KeyColumn;
   thumbKey1: Key;
   thumbKey2: Key;
   monitorKey: Key;

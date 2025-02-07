@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { KeymapCollection } from "../../../lib/device/types";
-import { initialState } from "../../../lib/device/reducer";
 import { KeymapComponent } from "../../../components/KeymapComponent";
+import { useKeymap } from "../../../components/provider/KeymapContext";
 
 export default function KeymapPage() {
-  const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
-    appName: "",
-    layer1: initialState,
-    layer2: initialState,
-    layer3: initialState,
-  });
+  const { keymapCollection, setKeymapCollection } = useKeymap();
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
 
   return (

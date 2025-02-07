@@ -6,9 +6,8 @@ const headerContainer = css({
   alignItems: "center",
   justifyContent: "space-between",
   padding: "1rem 2rem",
-  backgroundColor: "#2c2c2c",
-  color: "white",
-  borderBottom: "1px solid gray",
+  backgroundColor: "#2b2727",
+  borderBottom: "1px solid #606060",
   position: "sticky",
   top: "0",
   zIndex: "1000",
@@ -26,11 +25,10 @@ const navLinks = css({
 });
 
 const linkStyle = css({
-  color: "white",
   textDecoration: "none",
   transition: "color 0.3s",
   _hover: {
-    color: "teal.400",
+    // color: "teal.400",
   },
 });
 
