@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { css } from "../../styled-system/css";
-import Link from "next/link";
 
 const container = css({
   margin: "20px",
@@ -27,9 +26,9 @@ const alert = css({
 });
 
 const warningAlert = css({
-  // backgroundColor: "yellow.900",
-  // borderColor: "yellow.700",
-  // color: "yellow.100",
+  backgroundColor: "yellow.900",
+  borderColor: "yellow.700",
+  color: "yellow.100",
 });
 
 const bulletList = css({
@@ -37,26 +36,6 @@ const bulletList = css({
   marginLeft: "1.5rem",
   listStyle: "disc",
   // color: "yellow.100",
-});
-
-const primaryButton = css({
-  // backgroundColor: "blue.600",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  paddingTop: "0.5rem",
-  paddingBottom: "0.5rem",
-  borderRadius: "0.375rem",
-  fontWeight: "500",
-  _hover: {
-    // backgroundColor: "blue.700",
-  },
-  _active: {
-    // backgroundColor: "blue.800",
-  },
-  width: "fit-content",
-  marginLeft: "auto",
-  marginRight: "auto",
-  cursor: "pointer",
 });
 
 export default function Page() {
