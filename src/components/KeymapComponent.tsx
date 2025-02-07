@@ -6,8 +6,15 @@ import { initialState } from "../lib/device/reducer";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
-import UniqueKeyMenu from "./UniqueKeyMenu";
 import { useState } from "react";
+import {
+  axisLockKeys,
+  dpiKeys,
+  KeyMenu,
+  layerKeys,
+  movementKeys,
+  sloyKeys,
+} from "./UniqueKeyMenu";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -228,7 +235,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
               bottom: 0,
               right: 0,
               height: "250px",
-              transform: isCollapsed ? "translateY(200px)" : "translateY(0px)",
+              transform: isCollapsed ? "translateY(210px)" : "translateY(0px)",
               transition: "transform 0.3s ease",
               width: "calc(100dvw - 350px)",
             })}
@@ -237,13 +244,38 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
               className={css({
                 height: "100%",
                 padding: "20px",
-                overflowY: "auto",
               })}
             >
               {pageKinds !== "share" && (
                 <>
-                  <h2>Unique Key</h2>
-                  <UniqueKeyMenu />
+                  <div
+                    className={css({
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: "20px",
+                    })}
+                  >
+                    <div>
+                      <h2>Movement Key</h2>
+                      <KeyMenu keys={movementKeys} />
+                    </div>
+                    <div>
+                      <h2>DPI Key</h2>
+                      <KeyMenu keys={dpiKeys} />
+                    </div>
+                    <div>
+                      <h2>Layer Key</h2>
+                      <KeyMenu keys={layerKeys} />
+                    </div>
+                    <div>
+                      <h2>Slot Key</h2>
+                      <KeyMenu keys={sloyKeys} />
+                    </div>
+                    <div>
+                      <h2>Axis Lock Key</h2>
+                      <KeyMenu keys={axisLockKeys} />
+                    </div>
+                  </div>
                 </>
               )}
             </div>

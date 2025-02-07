@@ -108,14 +108,27 @@ export function getModifierUsageID(keys: ModifierKey[]): Uint8 {
 
 export function getUniqueKeyUsageID(uniqueKey: UniqueKey): Uint8 {
   const usageIDMap: { [K in UniqueKey]: number } = {
-    SWITCH_MOVEMENT: 0x11,
-    DPI: 0x22,
-    LAYER: 0x33,
-    APP: 0x44,
-    X_ONLY: 0x51,
-    Y_ONLY: 0x52,
-    Z_ONLY: 0x53,
+    "MOVEMENT MODE TOGGLE": 0x11,
+    "MOVEMENT MODE HOLD": 0x12,
+
+    "DPI CYCLE": 0x22,
+
+    "LAYER CYCLE": 0x33,
+    "LAYER HOLD 1": 0x34,
+    "LAYER HOLD 2": 0x35,
+    "LAYER HOLD 3": 0x36,
+
+    "SLOT CYCLE": 0x44,
+
+    "AXIS LOCK X": 0x51,
+    "AXIS LOCK Y": 0x52,
+    "AXIS LOCK Z": 0x53,
+
+    "AXIS LOCK X HOLD": 0x54,
+    "AXIS LOCK Y HOLD": 0x55,
+    "AXIS LOCK Z HOLD": 0x56,
   };
+
   const usageID = usageIDMap[uniqueKey] || 0x00;
   return usageID as Uint8;
 }
