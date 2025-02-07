@@ -8,22 +8,22 @@ const inputKeyStyle = css({
   margin: "5px",
   padding: "5px",
   textAlign: "center",
-  backgroundColor: "#f0f0f0",
-  color: "#333",
+  // backgroundColor: "#f0f0f0",
+  // color: "#333",
   border: "none",
   borderRadius: "5px",
-  boxShadow: "0 4px 0 #999, 0 5px 5px rgba(0,0,0,0.3)",
+  // boxShadow: "0 4px 0 #999, 0 5px 5px rgba(0,0,0,0.3)",
   fontWeight: "bold",
   fontSize: "16px",
   transition: "all 0.1s",
   cursor: "pointer",
   "&:active": {
-    boxShadow: "0 1px 0 #999",
+    // boxShadow: "0 1px 0 #999",
     transform: "translateY(3px)",
   },
   "&:focus": {
     outline: "none",
-    backgroundColor: "#e0e0e0",
+    // backgroundColor: "#e0e0e0",
   },
 });
 interface DraggableKeyPropsBase {

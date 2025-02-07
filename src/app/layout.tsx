@@ -18,7 +18,8 @@ export default function RootLayout({
     <html lang="ja">
       <body
         className={css({
-          backgroundColor: "#2c2c2c",
+          color: "#f5ebe3",
+          backgroundColor: "#2b2727",
         })}
       >
         <HeaderMenu />

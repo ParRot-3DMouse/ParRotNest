@@ -36,8 +36,8 @@ const DraggableKey: React.FC<{ uniqueKey: UniqueKey }> = ({ uniqueKey }) => {
       ref={drag as unknown as React.Ref<HTMLDivElement>}
       style={{
         padding: "8px",
-        backgroundColor: "#f0f0f0",
-        border: "1px solid #ccc",
+        // backgroundColor: "#f0f0f0",
+        // border: "1px solid #ccc",
         borderRadius: "4px",
         cursor: "grab",
       }}

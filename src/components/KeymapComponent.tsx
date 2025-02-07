@@ -38,8 +38,7 @@ const buttonContainer = css({
   justifyContent: "center",
 });
 const dangerButton = css({
-  backgroundColor: "red.600",
-  color: "white",
+  // backgroundColor: "red.600",
   paddingLeft: "0.75rem",
   paddingRight: "0.75rem",
   paddingTop: "0.375rem",
@@ -48,18 +47,17 @@ const dangerButton = css({
   fontSize: "0.875rem",
   fontWeight: "500",
   _hover: {
-    backgroundColor: "red.700",
+    // backgroundColor: "red.700",
   },
   _active: {
-    backgroundColor: "red.800",
+    // backgroundColor: "red.800",
   },
   width: "fit-content",
   cursor: "pointer",
 });
 
 const primaryButton = css({
-  backgroundColor: "blue.600",
-  color: "white",
+  // backgroundColor: "blue.600",
   paddingLeft: "1rem",
   paddingRight: "1rem",
   paddingTop: "0.5rem",
@@ -67,10 +65,10 @@ const primaryButton = css({
   borderRadius: "0.375rem",
   fontWeight: "500",
   _hover: {
-    backgroundColor: "blue.700",
+    // backgroundColor: "blue.700",
   },
   _active: {
-    backgroundColor: "blue.800",
+    // backgroundColor: "blue.800",
   },
   width: "fit-content",
   cursor: "pointer",
@@ -162,9 +160,8 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
             padding: "8px",
             marginBottom: "1rem",
             borderRadius: "0.375rem",
-            border: "1px solid gray",
-            backgroundColor: "gray.800",
-            color: "white",
+            // border: "1px solid gray",
+            // backgroundColor: "gray.800",
           })}
         />
         <Device

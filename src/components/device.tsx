@@ -240,9 +240,11 @@ const Device: React.FC<DeviceProps> = ({
           disabled={activeLayer === 1}
           className={css({
             padding: "0.5rem 1rem",
-            backgroundColor: activeLayer === 1 ? "teal.500" : "gray.600",
+            backgroundColor:
+              activeLayer === 1
+                ? "" // "teal.500"
+                : "", //  "gray.600"
             borderRadius: "0.25rem",
-            color: "white",
             cursor: "pointer",
           })}
         >
@@ -253,9 +255,11 @@ const Device: React.FC<DeviceProps> = ({
           disabled={activeLayer === 2}
           className={css({
             padding: "0.5rem 1rem",
-            backgroundColor: activeLayer === 2 ? "teal.500" : "gray.600",
+            backgroundColor:
+              activeLayer === 2
+                ? "" // "teal.500"
+                : "", //  "gray.600"
             borderRadius: "0.25rem",
-            color: "white",
             cursor: "pointer",
           })}
         >
@@ -266,9 +270,11 @@ const Device: React.FC<DeviceProps> = ({
           disabled={activeLayer === 3}
           className={css({
             padding: "0.5rem 1rem",
-            backgroundColor: activeLayer === 3 ? "teal.500" : "gray.600",
+            backgroundColor:
+              activeLayer === 3
+                ? "" // "teal.500"
+                : "", //  "gray.600"
             borderRadius: "0.25rem",
-            color: "white",
             cursor: "pointer",
           })}
         >

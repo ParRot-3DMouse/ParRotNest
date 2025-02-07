@@ -93,8 +93,7 @@ export default function KeymapPage({
       <div className={css({ display: "flex", justifyContent: "center" })}>
         <button
           className={css({
-            backgroundColor: "teal.400",
-            color: "white",
+            // backgroundColor: "teal.400",
             padding: "10px 20px",
             borderRadius: "0.375rem",
             fontSize: "16px",
@@ -102,7 +101,7 @@ export default function KeymapPage({
             cursor: "pointer",
             transition: "background-color 0.3s",
             _hover: {
-              backgroundColor: "teal.500",
+              // backgroundColor: "teal.500",
             },
             width: "fit-content",
           })}

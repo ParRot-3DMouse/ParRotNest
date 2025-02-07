@@ -18,7 +18,6 @@ const title = css({
   fontWeight: "bold",
   marginBottom: "1.5rem",
   textAlign: "center",
-  color: "white",
 });
 
 const alert = css({
@@ -28,21 +27,20 @@ const alert = css({
 });
 
 const warningAlert = css({
-  backgroundColor: "yellow.900",
-  borderColor: "yellow.700",
-  color: "yellow.100",
+  // backgroundColor: "yellow.900",
+  // borderColor: "yellow.700",
+  // color: "yellow.100",
 });
 
 const bulletList = css({
   marginTop: "0.5rem",
   marginLeft: "1.5rem",
   listStyle: "disc",
-  color: "yellow.100",
+  // color: "yellow.100",
 });
 
 const primaryButton = css({
-  backgroundColor: "blue.600",
-  color: "white",
+  // backgroundColor: "blue.600",
   paddingLeft: "1rem",
   paddingRight: "1rem",
   paddingTop: "0.5rem",
@@ -50,10 +48,10 @@ const primaryButton = css({
   borderRadius: "0.375rem",
   fontWeight: "500",
   _hover: {
-    backgroundColor: "blue.700",
+    // backgroundColor: "blue.700",
   },
   _active: {
-    backgroundColor: "blue.800",
+    // backgroundColor: "blue.800",
   },
   width: "fit-content",
   marginLeft: "auto",
