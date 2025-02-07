@@ -1,32 +1,8 @@
 import { Key, KeyColumn, KeymapType, UniqueKey } from "../lib/device/types";
 import { useDrop } from "react-dnd";
-import { css } from "../../styled-system/css";
 
-const inputKeyStyle = css({
-  width: "60px",
-  height: "60px",
-  margin: "5px",
-  padding: "5px",
-  textAlign: "center",
-  // backgroundColor: "#f0f0f0",
-  // color: "#333",
-  border: "none",
-  borderRadius: "5px",
-  // boxShadow: "0 4px 0 #999, 0 5px 5px rgba(0,0,0,0.3)",
-  fontWeight: "bold",
-  fontSize: "16px",
-  transition: "all 0.1s",
-  cursor: "pointer",
-  "&:active": {
-    // boxShadow: "0 1px 0 #999",
-    transform: "translateY(3px)",
-  },
-  "&:focus": {
-    outline: "none",
-    // backgroundColor: "#e0e0e0",
-  },
-});
 interface DraggableKeyPropsBase {
+  className: string;
   keyValue: Key;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => Key;
   getDisplayValue: (key: Key) => string;
@@ -53,6 +29,7 @@ interface DraggableKeyPropsSubKey extends DraggableKeyPropsBase {
 type DraggableKeyProps = DraggableKeyPropsRegular | DraggableKeyPropsSubKey;
 
 export const DraggableKey: React.FC<DraggableKeyProps> = ({
+  className,
   keyValue,
   row,
   col,
@@ -102,7 +79,7 @@ export const DraggableKey: React.FC<DraggableKeyProps> = ({
         }
       }}
       readOnly
-      className={inputKeyStyle}
+      className={className}
     />
   );
 };

@@ -16,11 +16,6 @@ export const initialState: KeymapType = {
     key2: { type: "standard", character: "", modifiers: [] },
     key3: { type: "standard", character: "", modifiers: [] },
   },
-  column4: {
-    key1: { type: "standard", character: "", modifiers: [] },
-    key2: { type: "standard", character: "", modifiers: [] },
-    key3: { type: "standard", character: "", modifiers: [] },
-  },
   thumbKey1: { type: "standard", character: "", modifiers: [] },
   thumbKey2: { type: "standard", character: "", modifiers: [] },
   monitorKey: { type: "standard", character: "", modifiers: [] },

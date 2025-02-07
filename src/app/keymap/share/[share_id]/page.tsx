@@ -4,21 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeymapComponent } from "../../../../components/KeymapComponent";
 import { clientApi } from "../../../../lib/api/clientApi";
-import { initialState } from "../../../../lib/device/reducer";
-import { KeymapCollection } from "../../../../lib/device/types";
 import { css } from "../../../../../styled-system/css";
+import { useKeymap } from "../../../../components/provider/KeymapContext";
 
 export default function KeymapPage({
   params,
 }: {
   params: Promise<{ share_id: string }>;
 }) {
-  const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
-    appName: "",
-    layer1: initialState,
-    layer2: initialState,
-    layer3: initialState,
-  });
+  const { keymapCollection, setKeymapCollection } = useKeymap();
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
   const [share_id, setshare_id] = useState<string>("");
   const [isLiked, setIsLiked] = useState<boolean>(false);

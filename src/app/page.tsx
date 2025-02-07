@@ -73,7 +73,7 @@ export default function Page() {
   }
   return (
     <div className={container}>
-      <h1 className={title}>HIDデバイス接続</h1>
+      <h1 className={title}>ParRotNestへようこそ！</h1>
 
       {!isSupported ? (
         <div className={`${alert} ${warningAlert}`}>
@@ -98,9 +98,18 @@ export default function Page() {
             maxWidth: "1000px",
           })}
         >
-          <Link href="/keymap/new" className={primaryButton}>
-            新しいキーマップを作成
-          </Link>
+          <p>
+            ParRotNestは、WebHID
+            APIを使用して、あなたのParRotのキーマップを変更するためのツールです。
+          </p>
+          <p>
+            まずは、ParRotをUSBで接続して、左のデバイスカードから接続してください！
+          </p>
+          <br />
+          <p>
+            接続できたら、早速「New
+            Keymap」からオリジナルのキーマップを作成してみましょう！
+          </p>
         </div>
       )}
     </div>

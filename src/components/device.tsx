@@ -20,6 +20,32 @@ const trackBallStyle = css({
     "radial-gradient(circle at 30% 30%, #b13d57, #932e44 40%, #7a2639 70%, #611e2e 100%)",
   boxShadow: "0 0 20px rgba(0,0,0,0.3)",
 });
+
+const inputKeyStyle = css({
+  width: "60px",
+  height: "60px",
+  margin: "5px",
+  padding: "5px",
+  textAlign: "center",
+  backgroundColor: "#f5ebe3",
+  color: "#2b2727",
+  border: "none",
+  borderRadius: "5px",
+  boxShadow: "0 4px 0 #b3a393, 0 5px 5px rgba(0,0,0,0.3)",
+  fontWeight: "bold",
+  fontSize: "16px",
+  transition: "all 0.1s",
+  cursor: "pointer",
+  "&:active": {
+    boxShadow: "0 1px 0",
+    transform: "translateY(3px)",
+  },
+  "&:focus": {
+    outline: "none",
+    backgroundColor: "#a9a096",
+  },
+});
+
 interface DeviceProps {
   pageKinds: "new" | "edit" | "share";
   keymapCollection: KeymapCollection;
@@ -204,6 +230,7 @@ const Device: React.FC<DeviceProps> = ({
         const keyValue = tempState[column][key];
         return (
           <DraggableKey
+            className={inputKeyStyle}
             key={`${column}-${key}`}
             keyValue={keyValue}
             row={key}
@@ -231,7 +258,6 @@ const Device: React.FC<DeviceProps> = ({
         className={css({
           display: "flex",
           gap: "1rem",
-          marginBottom: "1rem",
           justifyContent: "center",
         })}
       >
@@ -240,10 +266,7 @@ const Device: React.FC<DeviceProps> = ({
           disabled={activeLayer === 1}
           className={css({
             padding: "0.5rem 1rem",
-            backgroundColor:
-              activeLayer === 1
-                ? "" // "teal.500"
-                : "", //  "gray.600"
+            backgroundColor: activeLayer === 1 ? "#b13d57" : "#606060",
             borderRadius: "0.25rem",
             cursor: "pointer",
           })}
@@ -255,10 +278,7 @@ const Device: React.FC<DeviceProps> = ({
           disabled={activeLayer === 2}
           className={css({
             padding: "0.5rem 1rem",
-            backgroundColor:
-              activeLayer === 2
-                ? "" // "teal.500"
-                : "", //  "gray.600"
+            backgroundColor: activeLayer === 2 ? "#b13d57" : "#606060",
             borderRadius: "0.25rem",
             cursor: "pointer",
           })}
@@ -270,10 +290,7 @@ const Device: React.FC<DeviceProps> = ({
           disabled={activeLayer === 3}
           className={css({
             padding: "0.5rem 1rem",
-            backgroundColor:
-              activeLayer === 3
-                ? "" // "teal.500"
-                : "", //  "gray.600"
+            backgroundColor: activeLayer === 3 ? "#b13d57" : "#606060",
             borderRadius: "0.25rem",
             cursor: "pointer",
           })}
@@ -297,27 +314,25 @@ const Device: React.FC<DeviceProps> = ({
             alignItems: "center",
           })}
         >
-          {(["column4", "column3", "column2", "column1"] as const).map(
-            (column) => (
+          {(["column3", "column2", "column1"] as const).map((column) => (
+            <div
+              key={column}
+              className={css({
+                display: "flex",
+                alignItems: "center",
+              })}
+            >
               <div
-                key={column}
                 className={css({
                   display: "flex",
-                  alignItems: "center",
+                  flexDirection: "column",
+                  justifyContent: "center",
                 })}
               >
-                <div
-                  className={css({
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                  })}
-                >
-                  {renderKeyInputs(column)}
-                </div>
+                {renderKeyInputs(column)}
               </div>
-            )
-          )}
+            </div>
+          ))}
         </div>
         <div
           className={css({
@@ -331,6 +346,19 @@ const Device: React.FC<DeviceProps> = ({
           <div className={trackBallStyle}></div>
           <div>
             <DraggableKey
+              className={`${inputKeyStyle} ${css({ width: "120px" })}`}
+              keyValue={tempState.monitorKey}
+              handleKeyDown={handleKeyDown}
+              getDisplayValue={getDisplayValue}
+              pageKinds={pageKinds}
+              onKeyChange={handleMonitorKeyChange}
+            />
+          </div>
+        </div>
+        <div>
+          <div>
+            <DraggableKey
+              className={inputKeyStyle}
               keyValue={tempState.thumbKey1}
               handleKeyDown={handleKeyDown}
               getDisplayValue={getDisplayValue}
@@ -340,20 +368,12 @@ const Device: React.FC<DeviceProps> = ({
           </div>
           <div>
             <DraggableKey
+              className={inputKeyStyle}
               keyValue={tempState.thumbKey2}
               handleKeyDown={handleKeyDown}
               getDisplayValue={getDisplayValue}
               pageKinds={pageKinds}
               onKeyChange={handleThumbKey2Change}
-            />
-          </div>
-          <div>
-            <DraggableKey
-              keyValue={tempState.monitorKey}
-              handleKeyDown={handleKeyDown}
-              getDisplayValue={getDisplayValue}
-              pageKinds={pageKinds}
-              onKeyChange={handleMonitorKeyChange}
             />
           </div>
         </div>

@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { css } from "../../styled-system/css";
 import { sendKeymapCollection } from "../lib/device/hid";
 import { KeymapCollection } from "../lib/device/types";
@@ -13,7 +15,6 @@ const card = css({
   flexDirection: "column",
   gap: "0.75rem",
   height: "fit-content",
-  margin: "20px",
 });
 
 const normal = css({
@@ -35,13 +36,11 @@ const buttonGroup = css({
 });
 
 const dangerButton = css({
-  // backgroundColor: "red.600",
-  paddingLeft: "0.75rem",
-  paddingRight: "0.75rem",
-  paddingTop: "0.375rem",
-  paddingBottom: "0.375rem",
+  // backgroundColor: "#611e2e",
+  backgroundColor: "#b13d57",
+  padding: "6px 12px",
   borderRadius: "0.375rem",
-  fontSize: "0.875rem",
+  fontSize: "14px",
   fontWeight: "500",
   _hover: {
     // backgroundColor: "red.700",
@@ -54,7 +53,7 @@ const dangerButton = css({
 });
 
 const primaryButton = css({
-  // backgroundColor: "blue.600",
+  backgroundColor: "#b13d57",
   paddingLeft: "1rem",
   paddingRight: "1rem",
   paddingTop: "0.5rem",
@@ -64,41 +63,146 @@ const primaryButton = css({
   _hover: {
     // backgroundColor: "blue.700",
   },
-  _active: {
-    // backgroundColor: "blue.800",
-  },
   width: "fit-content",
   marginLeft: "auto",
   marginRight: "auto",
   cursor: "pointer",
 });
 
-const successButton = css({
-  // backgroundColor: "teal.400",
-  padding: "10px 20px",
+const splitButtonContainer = css({
+  display: "inline-flex",
+  position: "relative", // ドロップダウンメニューの絶対配置用
   borderRadius: "0.375rem",
-  fontSize: "16px",
+  border: "1px solid #177b3a",
+});
+
+const mainButton = css({
+  backgroundColor: "#177b3a",
+  color: "#f5ebe3",
+  padding: "6px 12px",
+  border: "none",
+  fontSize: "14px",
   fontWeight: "500",
   cursor: "pointer",
   transition: "background-color 0.3s",
   _hover: {
-    // backgroundColor: "teal.500",
+    backgroundColor: "#1e8a50",
   },
-  width: "fit-content",
-  _disabled: {
-    opacity: 0.6,
-    cursor: "not-allowed",
+  borderRight: "1px solid #1e8a50",
+});
+
+// ── ドロップダウントグル部分 ──
+const dropdownToggle = css({
+  backgroundColor: "#177b3a",
+  color: "#f5ebe3",
+  padding: "6px",
+  border: "none",
+  fontSize: "16px",
+  fontWeight: "500",
+  cursor: "pointer",
+  transition: "background-color 0.3s",
+  // ホバー時の色調整
+  _hover: {
+    backgroundColor: "#1e8a50",
   },
 });
 
-const selectStyle = css({
-  padding: "0.375rem",
+// ── ドロップダウンメニュー（絶対配置） ──
+const dropdownMenu = css({
+  position: "absolute",
+  top: "100%",
+  right: 0,
+  backgroundColor: "#606060",
+  border: "1px solid #606060",
   borderRadius: "0.375rem",
-  // backgroundColor: "gray.700",
-  // border: "1px solid gray.600",
-  cursor: "pointer",
-  fontSize: "0.875rem",
+  marginTop: "4px",
+  zIndex: 10,
+  minWidth: "100px",
+  overflow: "hidden",
 });
+
+// ── ドロップダウンメニューの各項目 ──
+const dropdownItem = css({
+  padding: "8px 12px",
+  backgroundColor: "#606060",
+  color: "#f5ebe3",
+  fontSize: "0.875rem",
+  cursor: "pointer",
+  transition: "background-color 0.2s",
+  _hover: {
+    backgroundColor: "#1e8a50",
+  },
+});
+
+// ── スプリットボタンコンポーネント ──
+interface WriteButtonWithSlotProps {
+  selectedSlot: 1 | 2 | 3;
+  setSelectedSlot: (slot: 1 | 2 | 3) => void;
+  onWrite: () => void;
+}
+
+const WriteButtonWithSlot = ({
+  selectedSlot,
+  setSelectedSlot,
+  onWrite,
+}: WriteButtonWithSlotProps) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const toggleDropdown = (e: React.MouseEvent) => {
+    console.log("toggleDropdown");
+    e.stopPropagation(); // メインアクションと分離
+    console.log("isDropdownOpen", isDropdownOpen);
+    setIsDropdownOpen((prev) => !prev);
+    console.log("isDropdownOpen", isDropdownOpen);
+  };
+
+  const handleSelect = (slot: 1 | 2 | 3) => {
+    setSelectedSlot(slot);
+    setIsDropdownOpen(false);
+  };
+
+  // コンポーネント外をクリックした場合、ドロップダウンを閉じる
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className={splitButtonContainer}>
+      {/* メインボタン */}
+      <button className={mainButton} onClick={onWrite}>
+        Write (Slot {selectedSlot})
+      </button>
+      {/* ドロップダウントグル */}
+      <button className={dropdownToggle} onClick={toggleDropdown}>
+        ▼
+      </button>
+      {/* ドロップダウンメニュー */}
+      {isDropdownOpen && (
+        <ul className={dropdownMenu}>
+          {[1, 2, 3].map((slot) => (
+            <li
+              key={slot}
+              className={dropdownItem}
+              onClick={() => handleSelect(slot as 1 | 2 | 3)}
+            >
+              Slot {slot}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 export const DeviceCard = ({
   keymapCollection,
@@ -117,49 +221,40 @@ export const DeviceCard = ({
   };
 
   return (
-    <div className={card}>
+    <div>
+      <div className={card}>
+        <p className={normal}>Device</p>
+        {connectedDevice ? (
+          <>
+            <p className={normal}>{connectedDevice.productName}</p>
+            <p className={small}>
+              VendorID: 0x{connectedDevice.vendorId.toString(16)}, ProductID: 0x
+              {connectedDevice.productId.toString(16)}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className={normal}>No device connected</p>
+          </>
+        )}
+      </div>
       {connectedDevice ? (
-        <>
-          <p className={normal}>
-            接続中のデバイス: {connectedDevice.productName}
-          </p>
-          <p className={small}>
-            VendorID: 0x{connectedDevice.vendorId.toString(16)}, ProductID: 0x
-            {connectedDevice.productId.toString(16)}
-          </p>
-          <div className={buttonGroup}>
-            <button onClick={disconnect} className={dangerButton}>
-              切断
-            </button>
-            <select
-              className={selectStyle}
-              value={selectedSlot}
-              onChange={(e) =>
-                setSelectedSlot(Number(e.target.value) as 1 | 2 | 3)
-              }
-            >
-              <option value={1}>Slot 1</option>
-              <option value={2}>Slot 2</option>
-              <option value={3}>Slot 3</option>
-            </select>
-            <button
-              onClick={handleWrite}
-              className={successButton}
-              disabled={!connectedDevice}
-            >
-              Write
-            </button>
-          </div>
-        </>
+        <div className={buttonGroup}>
+          <button onClick={disconnect} className={dangerButton}>
+            Disconnect
+          </button>
+          <WriteButtonWithSlot
+            selectedSlot={selectedSlot}
+            setSelectedSlot={setSelectedSlot}
+            onWrite={handleWrite}
+          />
+        </div>
       ) : (
-        <>
-          <p className={normal}>デバイスが接続されていません。</p>
-          <div className={buttonGroup}>
-            <button onClick={connect} className={primaryButton}>
-              接続
-            </button>
-          </div>
-        </>
+        <div className={buttonGroup}>
+          <button onClick={connect} className={primaryButton}>
+            接続
+          </button>
+        </div>
       )}
     </div>
   );

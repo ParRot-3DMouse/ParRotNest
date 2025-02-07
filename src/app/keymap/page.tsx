@@ -28,7 +28,6 @@ const title = css({
 
 const message = css({
   fontSize: "16px",
-  // color: "#A0AEC0", // gray.400
   textAlign: "center",
 });
 

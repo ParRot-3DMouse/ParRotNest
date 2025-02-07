@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
 import { HIDProvider } from "./HIDContext";
 import { UserProvider } from "./UserContext";
+import { KeymapProvider } from "./KeymapContext";
 
 type ProviderProps = {
   children: ReactNode;
@@ -15,8 +16,10 @@ function Provider({ children }: ProviderProps) {
     <SessionProvider>
       <HIDProvider>
         <UserProvider>
-          <SyncUser />
-          {children}
+          <KeymapProvider>
+            <SyncUser />
+            {children}
+          </KeymapProvider>
         </UserProvider>
       </HIDProvider>
     </SessionProvider>

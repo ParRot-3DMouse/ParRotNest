@@ -118,7 +118,6 @@ export const convertKeymapToBytes = (
     const column1Bytes = processColumn(keymap.column1);
     const column2Bytes = processColumn(keymap.column2);
     const column3Bytes = processColumn(keymap.column3);
-    const column4Bytes = processColumn(keymap.column4);
     const thumbKey1Byte = processKey(keymap.thumbKey1);
     const thumbKey2Byte = processKey(keymap.thumbKey2);
     const monitorKeyByte = processKey(keymap.monitorKey);
@@ -131,7 +130,6 @@ export const convertKeymapToBytes = (
       ...column1Bytes,
       ...column2Bytes,
       ...column3Bytes,
-      ...column4Bytes,
     ];
 
     const allBytesWithPrefix = [0x05, appNum, layerNum, ...allBytes];
