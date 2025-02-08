@@ -101,6 +101,7 @@ export const convertKeymapToBytes = (
   appNum: 0x00 | 0x01 | 0x02,
   layerNum: 0x00 | 0x01 | 0x02
 ): Uint8Array => {
+  console.log("keymap", keymap);
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);
     return [modifier, character];
