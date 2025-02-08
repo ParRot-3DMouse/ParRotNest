@@ -167,13 +167,20 @@ export interface StandardKey {
   character: KeyboardInput;
 }
 export type UniqueKey =
-  | "SWITCH_MOVEMENT"
-  | "DPI"
-  | "LAYER"
-  | "APP"
-  | "X_ONLY"
-  | "Y_ONLY"
-  | "Z_ONLY";
+  | "MOVEMENT MODE TOGGLE"
+  | "MOVEMENT MODE HOLD"
+  | "DPI CYCLE"
+  | "LAYER CYCLE"
+  | "LAYER HOLD 1"
+  | "LAYER HOLD 2"
+  | "LAYER HOLD 3"
+  | "SLOT CYCLE"
+  | "AXIS LOCK X"
+  | "AXIS LOCK Y"
+  | "AXIS LOCK Z"
+  | "AXIS LOCK X HOLD"
+  | "AXIS LOCK Y HOLD"
+  | "AXIS LOCK Z HOLD";
 
 export interface CustomKey {
   type: "custom";
