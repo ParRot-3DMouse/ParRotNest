@@ -130,6 +130,11 @@ export function getUniqueKeyUsageID(uniqueKey: UniqueKey): Uint8 {
   };
 
   const usageID = usageIDMap[uniqueKey] || 0x00;
+
+  console.log("uniqueKey", uniqueKey);
+  console.log("usageIDMap", usageIDMap[uniqueKey]);
+  console.log("usageID", usageID);
+
   return usageID as Uint8;
 }
 
