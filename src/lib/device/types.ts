@@ -166,6 +166,27 @@ export interface StandardKey {
   modifiers: ModifierKey[];
   character: KeyboardInput;
 }
+
+export type SwitchMovementKey = "MOVEMENT MODE TOGGLE" | "MOVEMENT MODE HOLD";
+
+export type DPIKey = "DPI CYCLE";
+
+export type LayerKey =
+  | "LAYER CYCLE"
+  | "LAYER HOLD 1"
+  | "LAYER HOLD 2"
+  | "LAYER HOLD 3";
+
+export type SlotKey = "SLOT CYCLE";
+
+export type AxisLockKey =
+  | "AXIS LOCK X"
+  | "AXIS LOCK Y"
+  | "AXIS LOCK Z"
+  | "AXIS LOCK X HOLD"
+  | "AXIS LOCK Y HOLD"
+  | "AXIS LOCK Z HOLD";
+
 export type UniqueKey =
   | "MOVEMENT MODE TOGGLE"
   | "MOVEMENT MODE HOLD"
@@ -199,7 +220,6 @@ export type KeymapType = {
   column1: KeyColumn;
   column2: KeyColumn;
   column3: KeyColumn;
-  column4: KeyColumn;
   thumbKey1: Key;
   thumbKey2: Key;
   monitorKey: Key;

@@ -22,14 +22,12 @@ const container = css({
 const title = css({
   fontSize: "32px",
   fontWeight: "bold",
-  color: "#FFFFFF", // white
   textAlign: "center",
   marginBottom: "16px",
 });
 
 const message = css({
   fontSize: "16px",
-  color: "#A0AEC0", // gray.400
   textAlign: "center",
 });
 
@@ -42,17 +40,16 @@ const listContainer = css({
 });
 
 const keymapItem = css({
-  border: "1px solid #4A5568", // gray.700
+  // border: "1px solid #4A5568", // gray.700
   padding: "16px",
   borderRadius: "6px",
-  backgroundColor: "#2D3748", // gray.800
+  // backgroundColor: "#2D3748", // gray.800
   transition: "background-color 0.3s",
 });
 
 const keymapLink = css({
   display: "block",
   textDecoration: "none",
-  color: "#FFFFFF", // white
 });
 
 const keymapTitle = css({
@@ -63,7 +60,7 @@ const keymapTitle = css({
 
 const keymapAuthor = css({
   fontSize: "14px",
-  color: "#CBD5E0", // gray.300
+  // color: "#CBD5E0", // gray.300
 });
 
 export default function KeymapPage() {

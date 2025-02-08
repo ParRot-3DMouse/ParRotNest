@@ -3,6 +3,7 @@ import "./globals.css";
 import { css } from "../../styled-system/css";
 import Provider from "../components/provider/provider";
 import { HeaderMenu } from "../components/HeaderMenu";
+import { ClientLayout } from "../components/clientLayout";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,11 +19,14 @@ export default function RootLayout({
     <html lang="ja">
       <body
         className={css({
-          backgroundColor: "#2c2c2c",
+          color: "#f5ebe3",
+          backgroundColor: "#2b2727",
         })}
       >
         <HeaderMenu />
-        <Provider>{children}</Provider>
+        <Provider>
+          <ClientLayout>{children}</ClientLayout>
+        </Provider>
       </body>
     </html>
   );

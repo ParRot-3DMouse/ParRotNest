@@ -1,24 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { KeymapCollection } from "../../../lib/device/types";
-import { initialState } from "../../../lib/device/reducer";
 // import { css } from "../../../../styled-system/css";
 import { KeymapComponent } from "../../../components/KeymapComponent";
 import { clientApi } from "../../../lib/api/clientApi";
 import { useRouter } from "next/navigation";
+import { useKeymap } from "../../../components/provider/KeymapContext";
 
 export default function KeymapPage({
   params,
 }: {
   params: Promise<{ keymap_id: string }>;
 }) {
-  const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
-    appName: "",
-    layer1: initialState,
-    layer2: initialState,
-    layer3: initialState,
-  });
+  const { keymapCollection, setKeymapCollection } = useKeymap();
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
   const [keymap_id, setKeymap_id] = useState<string>("");
   const router = useRouter();
