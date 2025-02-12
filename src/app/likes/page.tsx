@@ -91,7 +91,9 @@ export default function LikesPage() {
     <div className={styles.container}>
       <h1 className={styles.title}>Likes</h1>
       {likeKeymaps.length === 0 ? (
-        <p className={styles.message}>まだ「いいね」がありません。</p>
+        <p className={styles.message}>
+          まだ「いいね」したキーマップがありません。
+        </p>
       ) : (
         <div className={styles.listContainer}>
           {likeKeymaps.map((keymap) => (

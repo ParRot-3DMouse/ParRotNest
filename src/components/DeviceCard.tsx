@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { css } from "../../styled-system/css";
 import { sendKeymapCollection } from "../lib/device/hid";
 import { KeymapCollection } from "../lib/device/types";
+import { Usb } from "lucide-react";
 
 const card = css({
   border: "1px solid",
@@ -223,7 +224,16 @@ export const DeviceCard = ({
   return (
     <div>
       <div className={card}>
-        <p className={normal}>Device</p>
+        <div
+          className={css({
+            display: "flex",
+            gap: "8px",
+            flexDirection: "row",
+          })}
+        >
+          <Usb />
+          <p className={normal}>Device</p>
+        </div>
         {connectedDevice ? (
           <>
             <p className={normal}>{connectedDevice.productName}</p>
