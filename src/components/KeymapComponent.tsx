@@ -15,6 +15,7 @@ import {
   movementKeys,
   sloyKeys,
 } from "./UniqueKeyMenu";
+import { Copy } from "lucide-react";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -79,7 +80,7 @@ const saveButton = css({
   cursor: "pointer",
 });
 
-const postButton = css({
+const shareButton = css({
   backgroundColor: "#145991",
   paddingLeft: "1rem",
   paddingRight: "1rem",
@@ -107,6 +108,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
 }) => {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
 
   const handleSave = async () => {
     try {
@@ -129,7 +131,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     }
   };
 
-  const handlePost = async () => {
+  const handleShare = async () => {
     try {
       if (pageKinds === "edit") {
         const res = await clientApi().keymaps_to_share.postKeymapToShare({
@@ -138,10 +140,13 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
         });
 
         const share_id = res.share_id;
-        router.push(`/keymap/share/${share_id}`);
+        const url = `${window.location.origin}/keymap/share/${share_id}`;
+        setShareLink(url);
       }
     } catch (err) {
-      throw Error(err instanceof Error ? err.message : "Failed to post keymap");
+      throw Error(
+        err instanceof Error ? err.message : "Failed to share keymap"
+      );
     }
   };
 
@@ -223,8 +228,8 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                 </button>
               )}
               {pageKinds === "edit" && (
-                <button onClick={handlePost} className={postButton}>
-                  Post
+                <button onClick={handleShare} className={shareButton}>
+                  Share
                 </button>
               )}
             </div>
@@ -276,30 +281,134 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                       <KeyMenu keys={axisLockKeys} />
                     </div>
                   </div>
+                  <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className={css({
+                      position: "absolute",
+                      top: "-25px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "50%",
+                      backgroundColor: "#606060",
+                      color: "#fff",
+                      border: "none",
+                      cursor: "pointer",
+                    })}
+                  >
+                    {isCollapsed ? "▲" : "▼"}
+                  </button>
                 </>
               )}
             </div>
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className={css({
-                position: "absolute",
-                top: "-25px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "50px",
-                height: "50px",
-                borderRadius: "50%",
-                backgroundColor: "#606060",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-              })}
-            >
-              {isCollapsed ? "▲" : "▼"}
-            </button>
           </div>
         </div>
       </DndProvider>
+      {shareLink && (
+        <div
+          className={css({
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          })}
+        >
+          <div
+            className={css({
+              backgroundColor: "#2b2727",
+              padding: "24px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              minWidth: "320px",
+              fontFamily: "monospace",
+              position: "relative",
+            })}
+          >
+            <div
+              className={css({
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              })}
+            >
+              <h2
+                className={css({
+                  margin: 0,
+                  fontSize: "18px",
+                })}
+              >
+                Copy the link to share!
+              </h2>
+            </div>
+            <pre
+              className={css({
+                backgroundColor: "#2d2d2d",
+                padding: "12px",
+                borderRadius: "4px",
+                overflowX: "auto",
+                fontSize: "14px",
+                margin: 0,
+              })}
+            >
+              <code
+                className={css({
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "8px",
+                })}
+              >
+                <div className={css({ overflowX: "scroll" })}>{shareLink}</div>
+                <button
+                  className={css({
+                    cursor: "pointer",
+                    _hover: {
+                      color: "#a0a0a0",
+                    },
+                    _active: {
+                      color: "#606060",
+                      transform: "scale(0.95)",
+                    },
+                  })}
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareLink);
+                  }}
+                >
+                  <Copy size={24} />
+                </button>
+              </code>
+            </pre>
+            <div
+              className={css({
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: "16px",
+              })}
+            >
+              <button
+                onClick={() => setShareLink(null)}
+                className={css({
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  backgroundColor: "#b13d57",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                })}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
