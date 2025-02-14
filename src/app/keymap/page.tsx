@@ -43,7 +43,7 @@ const keymapItem = css({
   // border: "1px solid #4A5568", // gray.700
   padding: "16px",
   borderRadius: "6px",
-  // backgroundColor: "#2D3748", // gray.800
+  backgroundColor: "#606060", // gray.800
   transition: "background-color 0.3s",
 });
 
@@ -108,9 +108,9 @@ export default function KeymapPage() {
                 <h2 className={keymapTitle}>
                   {keymap.keymap_name || "Keymap"}
                 </h2>
-                <p className={keymapAuthor}>作成日: {keymap.created_at}</p>
+                <p className={keymapAuthor}>Created: {keymap.created_at}</p>
                 {keymap.updated_at && (
-                  <p className={keymapAuthor}>更新日: {keymap.updated_at}</p>
+                  <p className={keymapAuthor}>Updated: {keymap.updated_at}</p>
                 )}
               </Link>
             </div>

@@ -88,6 +88,7 @@ export default function KeymapPage({
         <button
           className={css({
             // backgroundColor: "teal.400",
+            backgroundColor: isLiked ? "#b13d57" : "#177b3a",
             padding: "10px 20px",
             borderRadius: "0.375rem",
             fontSize: "16px",
