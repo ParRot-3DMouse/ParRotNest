@@ -75,8 +75,12 @@ export const config: NextAuthConfig = {
   debug: process.env.APP_ENV !== "production",
   trustHost: true,
   callbacks: {
-    async redirect({ url }) {
-      return url;
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
     async jwt({ token }: { token: JWT }) {
       return token;
