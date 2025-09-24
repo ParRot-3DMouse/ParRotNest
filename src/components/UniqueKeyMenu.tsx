@@ -2,7 +2,6 @@ import React from "react";
 import { useDrag } from "react-dnd";
 import {
   AxisLockKey,
-  DPIKey,
   LayerKey,
   SlotKey,
   SwitchMovementKey,
@@ -31,7 +30,12 @@ export const movementKeys: SwitchMovementKey[] = [
   "MOVEMENT MODE HOLD",
 ];
 
-export const dpiKeys: DPIKey[] = ["DPI CYCLE"];
+export const dpiKeys: UniqueKey[] = [
+  "DPI CYCLE",
+  "DPI SLOT 1",
+  "DPI SLOT 2",
+  "DPI SLOT 3",
+];
 
 export const layerKeys: LayerKey[] = [
   "LAYER CYCLE",
@@ -40,7 +44,14 @@ export const layerKeys: LayerKey[] = [
   "LAYER HOLD 3",
 ];
 
-export const sloyKeys: SlotKey[] = ["SLOT CYCLE"];
+export const slotKeys: SlotKey[] = ["SLOT CYCLE"];
+
+export const applicationKeys: UniqueKey[] = [
+  "APP CYCLE",
+  "APP 1 SELECT",
+  "APP 2 SELECT",
+  "APP 3 SELECT",
+];
 
 export const axisLockKeys: AxisLockKey[] = [
   "AXIS LOCK X",
@@ -49,6 +60,23 @@ export const axisLockKeys: AxisLockKey[] = [
   "AXIS LOCK X HOLD",
   "AXIS LOCK Y HOLD",
   "AXIS LOCK Z HOLD",
+];
+
+export const viewCubeKeys: UniqueKey[] = [
+  "VIEWCUBE HOME",
+  "VIEWCUBE NEAREST FACE",
+  "VIEWCUBE UP",
+  "VIEWCUBE DOWN",
+  "VIEWCUBE LEFT",
+  "VIEWCUBE RIGHT",
+  "VIEWCUBE FRONT",
+  "VIEWCUBE BACK",
+  "VIEWCUBE ROTATE X +90",
+  "VIEWCUBE ROTATE X -90",
+  "VIEWCUBE ROTATE Y +90",
+  "VIEWCUBE ROTATE Y -90",
+  "VIEWCUBE ROTATE Z +90",
+  "VIEWCUBE ROTATE Z -90",
 ];
 
 const DraggableKey: React.FC<{ uniqueKey: UniqueKey }> = ({ uniqueKey }) => {

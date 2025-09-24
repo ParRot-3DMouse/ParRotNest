@@ -1,5 +1,6 @@
-import { Key, KeyColumn, KeymapCollection, KeymapType } from "./types";
+import { Key, KeyColumn, KeymapCollection, KeymapConfig, KeymapType } from "./types";
 import { getKeyUsageID, Uint8 } from "./usageId";
+import { initialConfig } from "./reducer";
 
 export async function sendKeymapCollection(
   keymapCollection: KeymapCollection,
@@ -31,6 +32,13 @@ export async function sendKeymapCollection(
       default:
         throw new Error("Invalid slot number");
     }
+
+    const configBytes = convertConfigToBytes(
+      keymapCollection.config ?? initialConfig,
+      appNum
+    );
+    await connectedDevice.sendReport(0x1f, configBytes as BufferSource);
+    console.log("Config sent");
 
     const appNameBytes = stringToByteArray(keymapCollection.appName, appNum);
     console.log("appNameBytes", appNameBytes);
@@ -79,6 +87,50 @@ export async function sendKeymapCollection(
     console.error("Failed to send key map", error);
     throw error;
   }
+}
+
+function convertConfigToBytes(
+  config: KeymapConfig,
+  appNum: 0x00 | 0x01 | 0x02
+): Uint8Array {
+  const reportLength = 63;
+  const bytes = new Uint8Array(reportLength);
+  bytes[0] = 0x03;
+  bytes[1] = appNum;
+
+  const flags = [
+    config.xFlip,
+    config.yFlip,
+    config.zFlip,
+    config.xMirror,
+    config.yMirror,
+    config.zMirror,
+  ];
+
+  flags.forEach((flag, index) => {
+    bytes[2 + index] = flag ? 0x01 : 0x00;
+  });
+
+  const clampDpiValue = (value: number) => {
+    if (!Number.isFinite(value)) return 0;
+    const clamped = Math.max(0, Math.min(0xffff, Math.round(value)));
+    return clamped;
+  };
+
+  const dpiValues = [config.dpiSlot1, config.dpiSlot2, config.dpiSlot3];
+
+  dpiValues.forEach((dpi, index) => {
+    const baseIndex = 8 + index * 2;
+    const clamped = clampDpiValue(dpi);
+    bytes[baseIndex] = clamped & 0xff;
+    bytes[baseIndex + 1] = (clamped >> 8) & 0xff;
+  });
+
+  if (typeof config.ledConfig === "number") {
+    bytes[14] = Math.max(0, Math.min(0xff, Math.round(config.ledConfig)));
+  }
+
+  return bytes;
 }
 
 function stringToByteArray(

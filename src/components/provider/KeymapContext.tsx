@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { KeymapCollection } from "../../lib/device/types";
-import { initialState } from "../../lib/device/reducer";
+import { initialConfig, initialState } from "../../lib/device/reducer";
 
 interface KeymapContextType {
   keymapCollection: KeymapCollection;
@@ -14,6 +14,7 @@ const KeymapContext = createContext<KeymapContextType | undefined>(undefined);
 export const KeymapProvider = ({ children }: { children: ReactNode }) => {
   const [keymapCollection, setKeymapCollection] = useState<KeymapCollection>({
     appName: "",
+    config: initialConfig,
     layer1: initialState,
     layer2: initialState,
     layer3: initialState,

@@ -2,7 +2,6 @@ import { css } from "../../styled-system/css";
 import Device from "./device";
 import { KeymapCollection } from "../lib/device/types";
 import { clientApi } from "../lib/api/clientApi";
-import { initialState } from "../lib/device/reducer";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
@@ -13,9 +12,12 @@ import {
   KeyMenu,
   layerKeys,
   movementKeys,
-  sloyKeys,
+  slotKeys,
+  applicationKeys,
+  viewCubeKeys,
 } from "./UniqueKeyMenu";
 import { Copy } from "lucide-react";
+import { normalizeKeymapCollection } from "../lib/device/normalize";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -152,12 +154,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
 
   const handleReset = () => {
     try {
-      setKeymapCollection({
-        appName: "",
-        layer1: initialState,
-        layer2: initialState,
-        layer3: initialState,
-      });
+      setKeymapCollection(normalizeKeymapCollection({}));
     } catch (err) {
       throw Error(
         err instanceof Error ? err.message : "Failed to reset keymap"
@@ -274,11 +271,19 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                     </div>
                     <div>
                       <h2>Slot Key</h2>
-                      <KeyMenu keys={sloyKeys} />
+                      <KeyMenu keys={slotKeys} />
+                    </div>
+                    <div>
+                      <h2>Application Key</h2>
+                      <KeyMenu keys={applicationKeys} />
                     </div>
                     <div>
                       <h2>Axis Lock Key</h2>
                       <KeyMenu keys={axisLockKeys} />
+                    </div>
+                    <div>
+                      <h2>ViewCube Key</h2>
+                      <KeyMenu keys={viewCubeKeys} />
                     </div>
                   </div>
                   <button

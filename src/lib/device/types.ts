@@ -191,17 +191,51 @@ export type UniqueKey =
   | "MOVEMENT MODE TOGGLE"
   | "MOVEMENT MODE HOLD"
   | "DPI CYCLE"
+  | "DPI SLOT 1"
+  | "DPI SLOT 2"
+  | "DPI SLOT 3"
   | "LAYER CYCLE"
   | "LAYER HOLD 1"
   | "LAYER HOLD 2"
   | "LAYER HOLD 3"
+  | "APP CYCLE"
+  | "APP 1 SELECT"
+  | "APP 2 SELECT"
+  | "APP 3 SELECT"
   | "SLOT CYCLE"
   | "AXIS LOCK X"
   | "AXIS LOCK Y"
   | "AXIS LOCK Z"
   | "AXIS LOCK X HOLD"
   | "AXIS LOCK Y HOLD"
-  | "AXIS LOCK Z HOLD";
+  | "AXIS LOCK Z HOLD"
+  | "VIEWCUBE HOME"
+  | "VIEWCUBE NEAREST FACE"
+  | "VIEWCUBE UP"
+  | "VIEWCUBE DOWN"
+  | "VIEWCUBE LEFT"
+  | "VIEWCUBE RIGHT"
+  | "VIEWCUBE FRONT"
+  | "VIEWCUBE BACK"
+  | "VIEWCUBE ROTATE X +90"
+  | "VIEWCUBE ROTATE X -90"
+  | "VIEWCUBE ROTATE Y +90"
+  | "VIEWCUBE ROTATE Y -90"
+  | "VIEWCUBE ROTATE Z +90"
+  | "VIEWCUBE ROTATE Z -90";
+
+export type KeymapConfig = {
+  xFlip: boolean;
+  yFlip: boolean;
+  zFlip: boolean;
+  xMirror: boolean;
+  yMirror: boolean;
+  zMirror: boolean;
+  dpiSlot1: number;
+  dpiSlot2: number;
+  dpiSlot3: number;
+  ledConfig?: number;
+};
 
 export interface CustomKey {
   type: "custom";
@@ -227,6 +261,7 @@ export type KeymapType = {
 
 export type KeymapCollection = {
   appName: string;
+  config: KeymapConfig;
   layer1: KeymapType;
   layer2: KeymapType;
   layer3: KeymapType;
