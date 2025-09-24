@@ -6,16 +6,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  axisLockKeys,
-  dpiKeys,
-  KeyMenu,
-  layerKeys,
-  movementKeys,
-  slotKeys,
-  applicationKeys,
-  viewCubeKeys,
-} from "./UniqueKeyMenu";
+import { KeyMenu, uniqueKeyGroups } from "./UniqueKeyMenu";
 import { Copy } from "lucide-react";
 import { normalizeKeymapCollection } from "../lib/device/normalize";
 
@@ -255,36 +246,15 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                       display: "flex",
                       flexDirection: "row",
                       gap: "20px",
+                      flexWrap: "wrap",
                     })}
                   >
-                    <div>
-                      <h2>Movement Key</h2>
-                      <KeyMenu keys={movementKeys} />
-                    </div>
-                    <div>
-                      <h2>DPI Key</h2>
-                      <KeyMenu keys={dpiKeys} />
-                    </div>
-                    <div>
-                      <h2>Layer Key</h2>
-                      <KeyMenu keys={layerKeys} />
-                    </div>
-                    <div>
-                      <h2>Slot Key</h2>
-                      <KeyMenu keys={slotKeys} />
-                    </div>
-                    <div>
-                      <h2>Application Key</h2>
-                      <KeyMenu keys={applicationKeys} />
-                    </div>
-                    <div>
-                      <h2>Axis Lock Key</h2>
-                      <KeyMenu keys={axisLockKeys} />
-                    </div>
-                    <div>
-                      <h2>ViewCube Key</h2>
-                      <KeyMenu keys={viewCubeKeys} />
-                    </div>
+                    {uniqueKeyGroups.map((group) => (
+                      <div key={group.id} className={css({ minWidth: "200px" })}>
+                        <h2>{group.title}</h2>
+                        <KeyMenu keys={group.keys} />
+                      </div>
+                    ))}
                   </div>
                   <button
                     onClick={() => setIsCollapsed(!isCollapsed)}

@@ -1,4 +1,6 @@
-import { Key, KeyboardInput, ModifierKey, UniqueKey } from "./types";
+import { Key, KeyboardInput, ModifierKey } from "./types";
+import { uniqueKeyUsageMap } from "./unique-keys";
+import type { UniqueKey } from "./unique-keys";
 
 export type Uint8 = number & { __brand: "uint8" };
 export type Uint16 = [Uint8, Uint8];
@@ -107,55 +109,13 @@ export function getModifierUsageID(keys: ModifierKey[]): Uint8 {
 }
 
 export function getUniqueKeyUsageID(uniqueKey: UniqueKey): [Uint8, Uint8] {
-  const usageIDMap: { [K in UniqueKey]: [number, number] } = {
-    "MOVEMENT MODE TOGGLE": [0x11, 0x01],
-    "MOVEMENT MODE HOLD": [0x11, 0x02],
+  const usageIDs = uniqueKeyUsageMap.get(uniqueKey);
 
-    "DPI CYCLE": [0x12, 0x00],
-    "DPI SLOT 1": [0x12, 0x01],
-    "DPI SLOT 2": [0x12, 0x02],
-    "DPI SLOT 3": [0x12, 0x03],
+  if (!usageIDs) {
+    return [0x00 as Uint8, 0x00 as Uint8];
+  }
 
-    "LAYER CYCLE": [0x13, 0x00],
-    "LAYER HOLD 1": [0x13, 0x01],
-    "LAYER HOLD 2": [0x13, 0x02],
-    "LAYER HOLD 3": [0x13, 0x03],
-
-    "APP CYCLE": [0x14, 0x00],
-    "APP 1 SELECT": [0x14, 0x01],
-    "APP 2 SELECT": [0x14, 0x02],
-    "APP 3 SELECT": [0x14, 0x03],
-
-    "SLOT CYCLE": [0x15, 0x00],
-
-    "AXIS LOCK X": [0x15, 0x01],
-    "AXIS LOCK Y": [0x15, 0x02],
-    "AXIS LOCK Z": [0x15, 0x03],
-
-    "AXIS LOCK X HOLD": [0x15, 0x11],
-    "AXIS LOCK Y HOLD": [0x15, 0x12],
-    "AXIS LOCK Z HOLD": [0x15, 0x13],
-
-    "VIEWCUBE HOME": [0x16, 0x01],
-    "VIEWCUBE NEAREST FACE": [0x16, 0x02],
-    "VIEWCUBE UP": [0x16, 0x10],
-    "VIEWCUBE DOWN": [0x16, 0x11],
-    "VIEWCUBE LEFT": [0x16, 0x12],
-    "VIEWCUBE RIGHT": [0x16, 0x13],
-    "VIEWCUBE FRONT": [0x16, 0x14],
-    "VIEWCUBE BACK": [0x16, 0x15],
-    "VIEWCUBE ROTATE X +90": [0x16, 0x20],
-    "VIEWCUBE ROTATE X -90": [0x16, 0x21],
-    "VIEWCUBE ROTATE Y +90": [0x16, 0x22],
-    "VIEWCUBE ROTATE Y -90": [0x16, 0x23],
-    "VIEWCUBE ROTATE Z +90": [0x16, 0x24],
-    "VIEWCUBE ROTATE Z -90": [0x16, 0x25],
-  };
-
-  const fallback: [Uint8, Uint8] = [0x00 as Uint8, 0x00 as Uint8];
-  const usageIDs = usageIDMap[uniqueKey] ?? fallback;
-
-  return [usageIDs[0] as Uint8, usageIDs[1] as Uint8];
+  return [usageIDs.upper as Uint8, usageIDs.lower as Uint8];
 }
 
 export function getKeyUsageID(key: Key): Uint16 {

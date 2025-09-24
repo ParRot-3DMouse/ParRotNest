@@ -1,3 +1,6 @@
+import type { UniqueKey } from "./unique-keys";
+export type { UniqueKey } from "./unique-keys";
+
 // モディファイアキーの型定義
 export type ModifierKey = "Shift" | "Ctrl" | "Meta" | "Alt";
 
@@ -167,62 +170,32 @@ export interface StandardKey {
   character: KeyboardInput;
 }
 
-export type SwitchMovementKey = "MOVEMENT MODE TOGGLE" | "MOVEMENT MODE HOLD";
+export type SwitchMovementKey = Extract<
+  UniqueKey,
+  "MOVEMENT MODE TOGGLE" | "MOVEMENT MODE HOLD"
+>;
 
-export type DPIKey = "DPI CYCLE";
+export type DPIKey = Extract<
+  UniqueKey,
+  "DPI CYCLE" | "DPI SLOT 1" | "DPI SLOT 2" | "DPI SLOT 3"
+>;
 
-export type LayerKey =
-  | "LAYER CYCLE"
-  | "LAYER HOLD 1"
-  | "LAYER HOLD 2"
-  | "LAYER HOLD 3";
+export type LayerKey = Extract<
+  UniqueKey,
+  "LAYER CYCLE" | "LAYER HOLD 1" | "LAYER HOLD 2" | "LAYER HOLD 3"
+>;
 
-export type SlotKey = "SLOT CYCLE";
+export type SlotKey = Extract<UniqueKey, "SLOT CYCLE">;
 
-export type AxisLockKey =
-  | "AXIS LOCK X"
-  | "AXIS LOCK Y"
-  | "AXIS LOCK Z"
-  | "AXIS LOCK X HOLD"
-  | "AXIS LOCK Y HOLD"
-  | "AXIS LOCK Z HOLD";
-
-export type UniqueKey =
-  | "MOVEMENT MODE TOGGLE"
-  | "MOVEMENT MODE HOLD"
-  | "DPI CYCLE"
-  | "DPI SLOT 1"
-  | "DPI SLOT 2"
-  | "DPI SLOT 3"
-  | "LAYER CYCLE"
-  | "LAYER HOLD 1"
-  | "LAYER HOLD 2"
-  | "LAYER HOLD 3"
-  | "APP CYCLE"
-  | "APP 1 SELECT"
-  | "APP 2 SELECT"
-  | "APP 3 SELECT"
-  | "SLOT CYCLE"
+export type AxisLockKey = Extract<
+  UniqueKey,
   | "AXIS LOCK X"
   | "AXIS LOCK Y"
   | "AXIS LOCK Z"
   | "AXIS LOCK X HOLD"
   | "AXIS LOCK Y HOLD"
   | "AXIS LOCK Z HOLD"
-  | "VIEWCUBE HOME"
-  | "VIEWCUBE NEAREST FACE"
-  | "VIEWCUBE UP"
-  | "VIEWCUBE DOWN"
-  | "VIEWCUBE LEFT"
-  | "VIEWCUBE RIGHT"
-  | "VIEWCUBE FRONT"
-  | "VIEWCUBE BACK"
-  | "VIEWCUBE ROTATE X +90"
-  | "VIEWCUBE ROTATE X -90"
-  | "VIEWCUBE ROTATE Y +90"
-  | "VIEWCUBE ROTATE Y -90"
-  | "VIEWCUBE ROTATE Z +90"
-  | "VIEWCUBE ROTATE Z -90";
+>;
 
 export type KeymapConfig = {
   xFlip: boolean;
