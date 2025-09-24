@@ -35,7 +35,7 @@ export async function sendKeymapCollection(
     const appNameBytes = stringToByteArray(keymapCollection.appName, appNum);
     console.log("appNameBytes", appNameBytes);
     console.log("Byte length", appNameBytes.length);
-    await connectedDevice.sendReport(0x1f, appNameBytes);
+    await connectedDevice.sendReport(0x1f, appNameBytes as BufferSource);
     console.log("App name sent");
 
     const layer1Bytes = convertKeymapToBytes(
@@ -45,7 +45,7 @@ export async function sendKeymapCollection(
     );
     console.log("layer1Bytes", layer1Bytes);
     console.log("layer1Bytes length", layer1Bytes.length);
-    await connectedDevice.sendReport(0x1f, layer1Bytes);
+    await connectedDevice.sendReport(0x1f, layer1Bytes as BufferSource);
     console.log("Layer 1 sent");
 
     const layer2Bytes = convertKeymapToBytes(
@@ -55,7 +55,7 @@ export async function sendKeymapCollection(
     );
     console.log("layer2Bytes", layer2Bytes);
     console.log("layer2Bytes length", layer2Bytes.length);
-    await connectedDevice.sendReport(0x1f, layer2Bytes);
+    await connectedDevice.sendReport(0x1f, layer2Bytes as BufferSource);
     console.log("Layer 2 sent");
 
     const layer3Bytes = convertKeymapToBytes(
@@ -65,7 +65,7 @@ export async function sendKeymapCollection(
     );
     console.log("layer3Bytes", layer3Bytes);
     console.log("layer3Bytes length", layer3Bytes.length);
-    await connectedDevice.sendReport(0x1f, layer3Bytes);
+    await connectedDevice.sendReport(0x1f, layer3Bytes as BufferSource);
     console.log("Layer 3 sent");
 
     console.log("All data sent successfully");
@@ -86,12 +86,20 @@ function stringToByteArray(
   appNum: 0x00 | 0x01 | 0x02
 ): Uint8Array {
   const encoder = new TextEncoder();
-  const res = encoder.encode(str);
+  const encodedName = encoder.encode(str);
+  const reportLength = 63;
+  const prefixLength = 2; // 0x04 + appNum
+  const maxPayloadLength = reportLength - prefixLength;
 
-  const allBytesWithPrefix = [0x04, appNum, ...res];
+  if (encodedName.length > maxPayloadLength) {
+    throw new Error(
+      `Keymap name is too long. Limit to ${maxPayloadLength} bytes (current: ${encodedName.length} bytes).`
+    );
+  }
 
-  const allBytes = new Uint8Array(63);
-  allBytes.set(allBytesWithPrefix);
+  const allBytes = new Uint8Array(reportLength);
+  allBytes.set([0x04, appNum]);
+  allBytes.set(encodedName, prefixLength);
 
   return allBytes;
 }
@@ -135,7 +143,12 @@ export const convertKeymapToBytes = (
 
     const allBytesWithPrefix = [0x05, appNum, layerNum, ...allBytes];
 
-    const paddedBytes = new Uint8Array(63);
+    const reportLength = 63;
+    if (allBytesWithPrefix.length > reportLength) {
+      throw new Error("Keymap data is too large to fit into a single HID report.");
+    }
+
+    const paddedBytes = new Uint8Array(reportLength);
     paddedBytes.set(allBytesWithPrefix);
 
     return paddedBytes;
