@@ -108,11 +108,13 @@ export const uniqueKeyUsageMap = new Map<
   UNIQUE_KEY_DEFINITIONS.map(({ key, upper, lower }) => [key, { upper, lower }])
 );
 
-export const uniqueKeysByCategory = UNIQUE_KEY_CATEGORIES.map((category) => ({
+export const uniqueKeyGroups = UNIQUE_KEY_CATEGORIES.map((category) => ({
   ...category,
   keys: UNIQUE_KEY_DEFINITIONS.filter(
     (definition) => definition.categoryId === category.id
   ).map((definition) => definition.key),
 }));
+
+export const uniqueKeysByCategory = uniqueKeyGroups;
 
 export const uniqueKeyFamilies = UNIQUE_KEY_FAMILIES;

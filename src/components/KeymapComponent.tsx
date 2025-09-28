@@ -443,7 +443,6 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
             keymapCollection={collection}
             setKeymapCollection={updateCollection}
             activeLayer={activeLayer}
-            setActiveLayer={setActiveLayer}
           />
 
           {pageKinds !== "share" && (

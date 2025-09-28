@@ -19,30 +19,56 @@ const trackBallStyle = css({
   background:
     "radial-gradient(circle at 30% 30%, #b13d57, #932e44 40%, #7a2639 70%, #611e2e 100%)",
   boxShadow: "0 0 20px rgba(0,0,0,0.3)",
+  '@media (max-width: 1050px)': {
+    width: "170px",
+    height: "170px",
+  },
+  '@media (max-width: 820px)': {
+    width: "150px",
+    height: "150px",
+  },
 });
 
 const inputKeyStyle = css({
-  width: "60px",
-  height: "60px",
-  margin: "5px",
-  padding: "5px",
+  width: "72px",
+  height: "72px",
+  margin: "6px",
+  padding: "8px",
+  borderRadius: "14px",
+  border: "1px solid rgba(245,235,227,0.14)",
+  backgroundColor: "rgba(245,235,227,0.08)",
+  color: "#f5ebe3",
+  fontWeight: "600",
+  fontSize: "15px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   textAlign: "center",
-  backgroundColor: "#f5ebe3",
-  color: "#2b2727",
-  border: "none",
-  borderRadius: "5px",
-  boxShadow: "0 4px 0 #b3a393, 0 5px 5px rgba(0,0,0,0.3)",
-  fontWeight: "bold",
-  fontSize: "16px",
-  transition: "all 0.1s",
   cursor: "pointer",
-  "&:active": {
-    boxShadow: "0 1px 0",
-    transform: "translateY(3px)",
+  transition: "background 0.12s ease, border 0.12s ease, transform 0.12s ease",
+  boxShadow: "0 8px 16px rgba(0,0,0,0.25)",
+  _hover: {
+    backgroundColor: "rgba(245,235,227,0.18)",
+    borderColor: "rgba(245,235,227,0.28)",
   },
-  "&:focus": {
+  _active: {
+    transform: "translateY(1px)",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.18)",
+  },
+  _focus: {
     outline: "none",
-    backgroundColor: "#a9a096",
+    borderColor: "rgba(177,61,87,0.6)",
+    boxShadow: "0 0 0 2px rgba(177,61,87,0.35)",
+  },
+  '@media (max-width: 1050px)': {
+    width: "62px",
+    height: "62px",
+    fontSize: "13px",
+  },
+  '@media (max-width: 820px)': {
+    width: "54px",
+    height: "54px",
+    fontSize: "12px",
   },
 });
 
@@ -51,7 +77,6 @@ interface DeviceProps {
   keymapCollection: KeymapCollection;
   setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
-  setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
 }
 
 function getActiveLayerKeymap(
@@ -83,7 +108,6 @@ const Device: React.FC<DeviceProps> = ({
   keymapCollection,
   setKeymapCollection,
   activeLayer,
-  setActiveLayer,
 }) => {
   const tempState: KeymapType = getActiveLayerKeymap(
     keymapCollection,
@@ -254,50 +278,6 @@ const Device: React.FC<DeviceProps> = ({
         gap: "20px",
       })}
     >
-      <div
-        className={css({
-          display: "flex",
-          gap: "1rem",
-          justifyContent: "center",
-        })}
-      >
-        <button
-          onClick={() => setActiveLayer(1)}
-          disabled={activeLayer === 1}
-          className={css({
-            padding: "0.5rem 1rem",
-            backgroundColor: activeLayer === 1 ? "#b13d57" : "#606060",
-            borderRadius: "0.25rem",
-            cursor: "pointer",
-          })}
-        >
-          Layer 1
-        </button>
-        <button
-          onClick={() => setActiveLayer(2)}
-          disabled={activeLayer === 2}
-          className={css({
-            padding: "0.5rem 1rem",
-            backgroundColor: activeLayer === 2 ? "#b13d57" : "#606060",
-            borderRadius: "0.25rem",
-            cursor: "pointer",
-          })}
-        >
-          Layer 2
-        </button>
-        <button
-          onClick={() => setActiveLayer(3)}
-          disabled={activeLayer === 3}
-          className={css({
-            padding: "0.5rem 1rem",
-            backgroundColor: activeLayer === 3 ? "#b13d57" : "#606060",
-            borderRadius: "0.25rem",
-            cursor: "pointer",
-          })}
-        >
-          Layer 3
-        </button>
-      </div>
       <div
         className={css({
           display: "flex",
