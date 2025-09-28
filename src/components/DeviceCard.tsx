@@ -5,135 +5,224 @@ import { css } from "../../styled-system/css";
 import { sendKeymapCollection } from "../lib/device/hid";
 import type { KeymapCollection, KeymapConfig } from "../lib/device/types";
 import { ConfigPanel } from "./ConfigPanel";
-import { Usb } from "lucide-react";
+import { Usb, ChevronDown } from "lucide-react";
 
-const card = css({
-  border: "1px solid",
-  // borderColor: "gray.700",
-  padding: "1rem",
-  borderRadius: "0.5rem",
-  // backgroundColor: "gray.800",
+const containerStyle = css({
   display: "flex",
   flexDirection: "column",
-  gap: "0.75rem",
-  height: "fit-content",
+  gap: "24px",
 });
 
-const normal = css({
-  fontSize: "0.875rem",
-  // color: "gray.200",
+const devicePanel = css({
+  background: "rgba(245,235,227,0.05)",
+  border: "1px solid rgba(245,235,227,0.12)",
+  borderRadius: "16px",
+  padding: "20px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "18px",
+  color: "#f5ebe3",
 });
 
-const small = css({
-  fontSize: "0.75rem",
-  // color: "gray.400",
-  fontFamily: "monospace",
+const headerRow = css({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "16px",
 });
 
-const buttonGroup = css({
+const headerContent = css({
+  display: "flex",
+  gap: "12px",
+  alignItems: "center",
+});
+
+const iconBox = css({
+  width: "40px",
+  height: "40px",
+  borderRadius: "12px",
+  background: "rgba(177,61,87,0.16)",
+  display: "grid",
+  placeItems: "center",
+  color: "#f5ebe3",
+});
+
+const cardTitle = css({
+  fontSize: "16px",
+  fontWeight: "600",
+});
+
+const statusBadge = css({
+  fontSize: "12px",
+  fontWeight: "600",
+  padding: "4px 12px",
+  borderRadius: "999px",
+  letterSpacing: "0.01em",
+  background: "rgba(245,235,227,0.06)",
+  borderColor: "rgba(245,235,227,0.16)",
+  color: "rgba(245,235,227,0.65)",
+  border: "1px solid",
+});
+
+const deviceInfo = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "6px",
+});
+
+const deviceName = css({
+  fontSize: "15px",
+  fontWeight: "600",
+});
+
+const deviceMeta = css({
+  fontSize: "12px",
+  color: "rgba(245,235,227,0.65)",
+  fontFamily:
+    "ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+});
+
+const helperText = css({
+  fontSize: "13px",
+  lineHeight: "1.6",
+  color: "rgba(245,235,227,0.7)",
+});
+
+const buttonRowSingle = css({
+  display: "flex",
+  justifyContent: "flex-end",
+});
+
+const buttonRowConnected = css({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
-  marginTop: "4",
+  justifyContent: "flex-end",
+  gap: "12px",
+  flexWrap: "nowrap",
+  "@media (max-width: 540px)": {
+    justifyContent: "stretch",
+    gap: "10px",
+    flexDirection: "column",
+    alignItems: "stretch",
+    flexWrap: "nowrap",
+  },
 });
 
-const dangerButton = css({
-  // backgroundColor: "#611e2e",
-  backgroundColor: "#b13d57",
-  padding: "6px 12px",
-  borderRadius: "0.375rem",
+const buttonBase = css({
+  border: "none",
+  borderRadius: "12px",
+  padding: "10px 18px",
   fontSize: "14px",
-  fontWeight: "500",
+  fontWeight: "600",
+  cursor: "pointer",
+  color: "#f5ebe3",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  flexShrink: 0,
+  transition:
+    "transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease",
   _hover: {
-    // backgroundColor: "red.700",
+    transform: "translateY(-1px)",
+    boxShadow: "0 10px 24px rgba(0,0,0,0.25)",
   },
   _active: {
-    // backgroundColor: "red.800",
+    transform: "translateY(0)",
+    boxShadow: "0 6px 16px rgba(0,0,0,0.22)",
   },
-  width: "fit-content",
-  cursor: "pointer",
+  _disabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
+    boxShadow: "none",
+  },
 });
 
 const primaryButton = css({
-  backgroundColor: "#b13d57",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  paddingTop: "0.5rem",
-  paddingBottom: "0.5rem",
-  borderRadius: "0.375rem",
-  fontWeight: "500",
-  _hover: {
-    // backgroundColor: "blue.700",
-  },
-  width: "fit-content",
-  marginLeft: "auto",
-  marginRight: "auto",
-  cursor: "pointer",
+  background: "linear-gradient(135deg, #177b3a 0%, #1d9454 100%)",
+});
+
+const dangerButton = css({
+  background: "rgba(177,61,87,0.2)",
+  border: "1px solid rgba(177,61,87,0.45)",
 });
 
 const splitButtonContainer = css({
+  position: "relative",
   display: "inline-flex",
-  position: "relative", // ドロップダウンメニューの絶対配置用
-  borderRadius: "0.375rem",
-  border: "1px solid #177b3a",
+  borderRadius: "12px",
+  overflow: "hidden",
+  border: "1px solid rgba(23,123,58,0.35)",
+  background: "rgba(23,123,58,0.15)",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
 });
 
-const mainButton = css({
-  backgroundColor: "#177b3a",
-  color: "#f5ebe3",
-  padding: "6px 12px",
+const splitMainButton = css({
   border: "none",
+  background: "linear-gradient(135deg, #177b3a 0%, #1d9454 100%)",
+  color: "#f5ebe3",
   fontSize: "14px",
-  fontWeight: "500",
+  fontWeight: "600",
+  padding: "10px 20px",
   cursor: "pointer",
-  transition: "background-color 0.3s",
+  transition: "background 0.12s ease",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  whiteSpace: "nowrap",
   _hover: {
-    backgroundColor: "#1e8a50",
+    background: "linear-gradient(135deg, #1d9454 0%, #23ac63 100%)",
   },
-  borderRight: "1px solid #1e8a50",
 });
 
-// ── ドロップダウントグル部分 ──
-const dropdownToggle = css({
-  backgroundColor: "#177b3a",
-  color: "#f5ebe3",
-  padding: "6px",
+const splitToggleButton = css({
   border: "none",
-  fontSize: "16px",
-  fontWeight: "500",
+  background: "rgba(23,123,58,0.16)",
+  color: "#f5ebe3",
+  padding: "0 14px",
+  display: "grid",
+  placeItems: "center",
   cursor: "pointer",
-  transition: "background-color 0.3s",
-  // ホバー時の色調整
+  transition: "background 0.12s ease",
+  flexShrink: 0,
   _hover: {
-    backgroundColor: "#1e8a50",
+    background: "rgba(23,123,58,0.25)",
   },
 });
 
-// ── ドロップダウンメニュー（絶対配置） ──
 const dropdownMenu = css({
   position: "absolute",
-  top: "100%",
+  top: "calc(100% + 6px)",
   right: 0,
-  backgroundColor: "#606060",
-  border: "1px solid #606060",
-  borderRadius: "0.375rem",
-  marginTop: "4px",
-  zIndex: 10,
-  minWidth: "100px",
-  overflow: "hidden",
+  minWidth: "140px",
+  background: "#2b2727",
+  border: "1px solid rgba(245,235,227,0.12)",
+  borderRadius: "12px",
+  boxShadow: "0 24px 48px rgba(0,0,0,0.5)",
+  padding: "6px",
+  zIndex: 20,
 });
 
-// ── ドロップダウンメニューの各項目 ──
 const dropdownItem = css({
-  padding: "8px 12px",
-  backgroundColor: "#606060",
+  width: "100%",
+  border: "none",
+  background: "transparent",
   color: "#f5ebe3",
-  fontSize: "0.875rem",
+  fontSize: "13px",
+  fontWeight: "500",
+  padding: "8px 10px",
+  borderRadius: "8px",
+  textAlign: "left",
   cursor: "pointer",
-  transition: "background-color 0.2s",
+  transition: "background 0.12s ease",
   _hover: {
-    backgroundColor: "#1e8a50",
+    background: "rgba(245,235,227,0.08)",
   },
+});
+
+const dropdownItemActive = css({
+  background: "rgba(23,123,58,0.25)",
+  color: "#a5f0c1",
 });
 
 // ── スプリットボタンコンポーネント ──
@@ -151,12 +240,9 @@ const WriteButtonWithSlot = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const toggleDropdown = (e: React.MouseEvent) => {
-    console.log("toggleDropdown");
-    e.stopPropagation(); // メインアクションと分離
-    console.log("isDropdownOpen", isDropdownOpen);
+  const toggleDropdown = (event: React.MouseEvent) => {
+    event.stopPropagation();
     setIsDropdownOpen((prev) => !prev);
-    console.log("isDropdownOpen", isDropdownOpen);
   };
 
   const handleSelect = (slot: 1 | 2 | 3) => {
@@ -180,27 +266,37 @@ const WriteButtonWithSlot = ({
 
   return (
     <div ref={containerRef} className={splitButtonContainer}>
-      {/* メインボタン */}
-      <button className={mainButton} onClick={onWrite}>
+      <button type="button" className={splitMainButton} onClick={onWrite}>
         Write (Slot {selectedSlot})
       </button>
-      {/* ドロップダウントグル */}
-      <button className={dropdownToggle} onClick={toggleDropdown}>
-        ▼
+      <button
+        type="button"
+        className={splitToggleButton}
+        aria-haspopup="menu"
+        aria-expanded={isDropdownOpen}
+        onClick={toggleDropdown}
+      >
+        <ChevronDown size={16} />
       </button>
-      {/* ドロップダウンメニュー */}
       {isDropdownOpen && (
-        <ul className={dropdownMenu}>
-          {[1, 2, 3].map((slot) => (
-            <li
-              key={slot}
-              className={dropdownItem}
-              onClick={() => handleSelect(slot as 1 | 2 | 3)}
-            >
-              Slot {slot}
-            </li>
-          ))}
-        </ul>
+        <div className={dropdownMenu} role="menu">
+          {[1, 2, 3].map((slot) => {
+            const typedSlot = slot as 1 | 2 | 3;
+            const isActive = selectedSlot === typedSlot;
+            return (
+              <button
+                key={slot}
+                type="button"
+                role="menuitemradio"
+                aria-checked={isActive}
+                className={`${dropdownItem} ${isActive ? dropdownItemActive : ""}`}
+                onClick={() => handleSelect(typedSlot)}
+              >
+                Slot {slot}
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -225,60 +321,65 @@ export const DeviceCard = ({
 }) => {
   const [selectedSlot, setSelectedSlot] = useState<1 | 2 | 3>(1);
   const handleWrite = () => {
+    if (!connectedDevice) return;
     sendKeymapCollection(keymapCollection, connectedDevice, selectedSlot);
   };
 
+  const formatHex = (value: number) =>
+    value.toString(16).toUpperCase().padStart(4, "0");
+
   return (
-    <div
-      className={css({
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-      })}
-    >
-      <div className={card}>
-        <div
-          className={css({
-            display: "flex",
-            gap: "8px",
-            flexDirection: "row",
-          })}
-        >
-          <Usb />
-          <p className={normal}>Device</p>
+    <div className={containerStyle}>
+      <div className={devicePanel}>
+        <div className={headerRow}>
+          <div className={headerContent}>
+            <span className={iconBox}>
+              <Usb size={20} />
+            </span>
+            <p className={cardTitle}>ParRot</p>
+          </div>
         </div>
+
         {connectedDevice ? (
-          <>
-            <p className={normal}>{connectedDevice.productName}</p>
-            <p className={small}>
-              VendorID: 0x{connectedDevice.vendorId.toString(16)}, ProductID: 0x
-              {connectedDevice.productId.toString(16)}
+          <div className={deviceInfo}>
+            <p className={deviceName}>{connectedDevice.productName}</p>
+            <p className={deviceMeta}>
+              VendorID: 0x{formatHex(connectedDevice.vendorId)}, ProductID: 0x
+              {formatHex(connectedDevice.productId)}
             </p>
-          </>
+          </div>
         ) : (
-          <>
-            <p className={normal}>No device connected</p>
-          </>
+          <p className={helperText}>ParRotをUSBで接続してください</p>
+        )}
+
+        {connectedDevice ? (
+          <div className={buttonRowConnected}>
+            <WriteButtonWithSlot
+              selectedSlot={selectedSlot}
+              setSelectedSlot={setSelectedSlot}
+              onWrite={handleWrite}
+            />
+            <button
+              type="button"
+              onClick={disconnect}
+              className={`${buttonBase} ${dangerButton}`}
+            >
+              Disconnect
+            </button>
+          </div>
+        ) : (
+          <div className={buttonRowSingle}>
+            <button
+              type="button"
+              onClick={connect}
+              className={`${buttonBase} ${primaryButton}`}
+            >
+              Connect
+            </button>
+          </div>
         )}
       </div>
-      {connectedDevice ? (
-        <div className={buttonGroup}>
-          <button onClick={disconnect} className={dangerButton}>
-            Disconnect
-          </button>
-          <WriteButtonWithSlot
-            selectedSlot={selectedSlot}
-            setSelectedSlot={setSelectedSlot}
-            onWrite={handleWrite}
-          />
-        </div>
-      ) : (
-        <div className={buttonGroup}>
-          <button onClick={connect} className={primaryButton}>
-            接続
-          </button>
-        </div>
-      )}
+
       <ConfigPanel
         config={config}
         onConfigChange={onConfigChange}
