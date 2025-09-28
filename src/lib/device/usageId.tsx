@@ -1,4 +1,4 @@
-import { Key, KeyboardInput, ModifierKey } from "./types";
+import type { Key, KeyboardInput, ModifierKey } from "./types";
 import { uniqueKeyUsageMap } from "./unique-keys";
 import type { UniqueKey } from "./unique-keys";
 

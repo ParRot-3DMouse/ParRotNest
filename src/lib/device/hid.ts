@@ -1,11 +1,12 @@
-import {
+import type {
   Key,
   KeyColumn,
   KeymapCollection,
   KeymapConfig,
   KeymapType,
 } from "./types";
-import { getKeyUsageID, Uint8 } from "./usageId";
+import { getKeyUsageID } from "./usageId";
+import type { Uint8 } from "./usageId";
 import { initialConfig } from "./reducer";
 import {
   APP_NAME_HEADER_LENGTH,

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "../../styled-system/css";
 import { sendKeymapCollection } from "../lib/device/hid";
-import { KeymapCollection, KeymapConfig } from "../lib/device/types";
+import type { KeymapCollection, KeymapConfig } from "../lib/device/types";
 import { ConfigPanel } from "./ConfigPanel";
 import { Usb } from "lucide-react";
 

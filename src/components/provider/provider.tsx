@@ -2,7 +2,7 @@
 
 import SyncUser from "../SyncUser";
 import { SessionProvider } from "next-auth/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { HIDProvider } from "./HIDContext";
 import { UserProvider } from "./UserContext";
 import { KeymapProvider } from "./KeymapContext";

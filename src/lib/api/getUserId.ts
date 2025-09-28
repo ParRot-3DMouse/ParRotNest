@@ -1,4 +1,4 @@
-import { Context } from "hono";
+import type { Context } from "hono";
 
 export const getUserID = async (c: Context): Promise<string> => {
   const user_email = c.get("jwtPayload").email;

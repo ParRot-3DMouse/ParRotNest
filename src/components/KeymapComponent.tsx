@@ -4,9 +4,8 @@ import {
   useState,
   useMemo,
   useEffect,
-  Dispatch,
-  SetStateAction,
 } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { css } from "../../styled-system/css";
 import { Check, Copy, Library } from "lucide-react";
 import { DndProvider } from "react-dnd";
@@ -20,9 +19,9 @@ import { ShortcutDrawer } from "./ShortcutDrawer";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
-  setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
+  setKeymapCollection: Dispatch<SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
-  setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
+  setActiveLayer: Dispatch<SetStateAction<1 | 2 | 3>>;
   pageKinds: "new" | "edit" | "share";
 }
 

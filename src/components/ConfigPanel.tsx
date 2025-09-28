@@ -1,7 +1,7 @@
 "use client";
 
 import { css } from "../../styled-system/css";
-import type { KeymapCollection, KeymapConfig } from "../lib/device/types";
+import type { KeymapConfig } from "../lib/device/types";
 
 const panel = css({
   backgroundColor: "rgba(245,235,227,0.05)",

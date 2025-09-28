@@ -1,4 +1,4 @@
-import { Key, KeyColumn, KeymapType, UniqueKey } from "../lib/device/types";
+import type { Key, KeyColumn, KeymapType, UniqueKey } from "../lib/device/types";
 import { useDrop } from "react-dnd";
 
 interface DraggableKeyPropsBase {

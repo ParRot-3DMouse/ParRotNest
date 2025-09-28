@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { Bindings, Variables } from "./route";
+import type { Bindings, Variables } from "./route";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { getUserID } from "../../../lib/api/getUserId";
-import { KeymapToShare, User } from "../types";
+import type { KeymapToShare, User } from "../types";
 
 const postLikeSchema = z.object({
   share_id: z.string().uuid(),

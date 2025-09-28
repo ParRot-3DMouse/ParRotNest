@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { css } from "../../styled-system/css";
-import {
+import type {
   Key,
   KeyColumn,
   KeymapCollection,
@@ -8,8 +8,8 @@ import {
   KeyboardInput,
   ModifierKey,
   StandardKey,
-  isValidKey,
 } from "../lib/device/types";
+import { isValidKey } from "../lib/device/types";
 import { DraggableKey } from "./DraggableKeyInput";
 
 const trackBallStyle = css({

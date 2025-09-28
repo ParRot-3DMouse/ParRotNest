@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import { KeymapCollection } from "../../lib/device/types";
+import { createContext, useContext, useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { KeymapCollection } from "../../lib/device/types";
 import { initialConfig, initialState } from "../../lib/device/reducer";
 
 interface KeymapContextType {
   keymapCollection: KeymapCollection;
-  setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
+  setKeymapCollection: Dispatch<SetStateAction<KeymapCollection>>;
 }
 
 const KeymapContext = createContext<KeymapContextType | undefined>(undefined);

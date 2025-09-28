@@ -1,4 +1,4 @@
-import { KeymapCollection } from "./types";
+import type { KeymapCollection } from "./types";
 import { initialConfig, initialState } from "./reducer";
 
 export const normalizeKeymapCollection = (

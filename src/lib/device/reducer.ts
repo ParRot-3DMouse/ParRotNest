@@ -1,4 +1,4 @@
-import { KeymapConfig, KeymapType } from "./types";
+import type { KeymapConfig, KeymapType } from "./types";
 
 export const initialState: KeymapType = {
   column1: {
