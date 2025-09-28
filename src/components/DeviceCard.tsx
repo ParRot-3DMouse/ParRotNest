@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "../../styled-system/css";
 import { sendKeymapCollection } from "../lib/device/hid";
-import { KeymapCollection } from "../lib/device/types";
+import { KeymapCollection, KeymapConfig } from "../lib/device/types";
+import { ConfigPanel } from "./ConfigPanel";
 import { Usb } from "lucide-react";
 
 const card = css({
@@ -210,11 +211,17 @@ export const DeviceCard = ({
   connectedDevice,
   connect,
   disconnect,
+  config,
+  onConfigChange,
+  configDisabled = false,
 }: {
   keymapCollection: KeymapCollection;
   connectedDevice: HIDDevice | null;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
+  config: KeymapConfig;
+  onConfigChange: (updater: (prev: KeymapConfig) => KeymapConfig) => void;
+  configDisabled?: boolean;
 }) => {
   const [selectedSlot, setSelectedSlot] = useState<1 | 2 | 3>(1);
   const handleWrite = () => {
@@ -222,7 +229,13 @@ export const DeviceCard = ({
   };
 
   return (
-    <div>
+    <div
+      className={css({
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+      })}
+    >
       <div className={card}>
         <div
           className={css({
@@ -266,6 +279,11 @@ export const DeviceCard = ({
           </button>
         </div>
       )}
+      <ConfigPanel
+        config={config}
+        onConfigChange={onConfigChange}
+        disabled={configDisabled}
+      />
     </div>
   );
 };

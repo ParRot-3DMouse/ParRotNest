@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { css } from "../../styled-system/css";
 import { DeviceCard } from "./DeviceCard";
 import { useHID } from "./provider/HIDContext";
 import { useKeymap } from "./provider/KeymapContext";
 import { PanelLeftOpen, X } from "lucide-react";
+import type { KeymapConfig } from "../lib/device/types";
 
 type ClientLayoutProps = {
   children: React.ReactNode;
@@ -61,7 +63,7 @@ const drawerOverlay = css({
   zIndex: 2000,
 });
 
-const overlayBackdrop = css({
+const drawerBackdrop = css({
   flex: 1,
 });
 
@@ -104,11 +106,23 @@ const closeButton = css({
 
 export const ClientLayout = ({ children }: ClientLayoutProps) => {
   const { connectedDevice, connect, disconnect } = useHID();
-  const { keymapCollection } = useKeymap();
+  const { keymapCollection, setKeymapCollection } = useKeymap();
+  const pathname = usePathname() ?? "";
 
   const [isCompact, setIsCompact] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleConfigChange = useCallback(
+    (updater: (prev: KeymapConfig) => KeymapConfig) => {
+      setKeymapCollection((prev) => ({
+        ...prev,
+        config: updater(prev.config),
+      }));
+    },
+    [setKeymapCollection]
+  );
+
+  const isShareView = pathname.startsWith("/keymap/share");
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 950px)");
@@ -126,28 +140,13 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   useEffect(() => {
     if (!drawerOpen) return;
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setDrawerOpen(false);
       }
     };
-
-    const handlePointerDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (drawerRef.current && !drawerRef.current.contains(target)) {
-        setDrawerOpen(false);
-      }
-    };
-
-    const pointerOptions: AddEventListenerOptions = { capture: true };
-
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("pointerdown", handlePointerDown, pointerOptions);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("pointerdown", handlePointerDown, pointerOptions);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [drawerOpen]);
 
   const sidePanel = (
@@ -156,6 +155,9 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
       connectedDevice={connectedDevice}
       connect={connect}
       disconnect={disconnect}
+      config={keymapCollection.config}
+      onConfigChange={handleConfigChange}
+      configDisabled={isShareView}
     />
   );
 
@@ -173,11 +175,8 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
       {isCompact && drawerOpen && (
         <div className={drawerOverlay} role="dialog" aria-modal="true">
-          <div
-            className={overlayBackdrop}
-            onClick={() => setDrawerOpen(false)}
-          />
-          <div className={drawerPanel} ref={drawerRef}>
+          <div className={drawerBackdrop} onClick={() => setDrawerOpen(false)} />
+          <div className={drawerPanel}>
             <div className={drawerHeader}>
               <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
                 デバイス

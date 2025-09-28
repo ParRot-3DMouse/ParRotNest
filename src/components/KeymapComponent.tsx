@@ -14,9 +14,8 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
 import { clientApi } from "../lib/api/clientApi";
 import { normalizeKeymapCollection } from "../lib/device/normalize";
-import type { KeymapCollection, KeymapConfig } from "../lib/device/types";
+import type { KeymapCollection } from "../lib/device/types";
 import Device from "./device";
-import { ConfigPanel } from "./ConfigPanel";
 import { ShortcutDrawer } from "./ShortcutDrawer";
 
 interface KeymapComponentBaseProps {
@@ -171,12 +170,9 @@ const dangerButton = css({
 
 const layoutGrid = css({
   display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr) 320px",
+  gridTemplateColumns: "minmax(0, 1fr)",
   gap: "32px",
   alignItems: "start",
-  '@media (max-width: 1400px)': {
-    gridTemplateColumns: "minmax(0, 1fr)",
-  },
 });
 
 const workspaceCard = css({
@@ -322,15 +318,6 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     });
   };
 
-  const updateConfig = (
-    updater: (prev: KeymapConfig) => KeymapConfig
-  ) => {
-    updateCollection((prev) => ({
-      ...prev,
-      config: updater(prev.config),
-    }));
-  };
-
   const handleSave = async () => {
     try {
       if (pageKinds === "new") {
@@ -461,12 +448,6 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
             </div>
           )}
         </section>
-
-        <ConfigPanel
-          config={collection.config}
-          onConfigChange={updateConfig}
-          disabled={pageKinds === "share"}
-        />
       </div>
 
       {shareLink && (
