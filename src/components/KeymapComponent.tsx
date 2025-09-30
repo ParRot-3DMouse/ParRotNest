@@ -43,7 +43,7 @@ const pageContainer = css({
 
 const focusColumn = css({
   width: "100%",
-  maxWidth: "600px",
+  maxWidth: "700px",
   display: "flex",
   flexDirection: "column",
   gap: "32px",

@@ -271,7 +271,7 @@ const Device: React.FC<DeviceProps> = ({
 
   const containerStyle = css({
     width: "100%",
-    maxWidth: "600px",
+    maxWidth: "700px",
     margin: "0 auto",
     display: "flex",
     flexDirection: "column",
