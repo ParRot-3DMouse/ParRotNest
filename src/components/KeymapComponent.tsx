@@ -84,7 +84,6 @@ const layerTabs = css({
   borderRadius: "12px",
   padding: "4px",
   border: "1px solid rgba(245,235,227,0.14)",
-  boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
   gap: "8px",
   alignSelf: "flex-start",
 });
@@ -378,23 +377,21 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   }, [toastMessage]);
 
   const actionButtons =
-    pageKinds === "share"
-      ? null
-      : (
-          <div className={actionGroup}>
-            <button className={dangerButton} onClick={handleReset}>
-              すべてクリア
-            </button>
-            <button className={primaryButton} onClick={handleSave}>
-              保存する
-            </button>
-            {pageKinds === "edit" && (
-              <button className={secondaryButton} onClick={handleShare}>
-                共有リンクを作成
-              </button>
-            )}
-          </div>
-        );
+    pageKinds === "share" ? null : (
+      <div className={actionGroup}>
+        <button className={dangerButton} onClick={handleReset}>
+          すべてクリア
+        </button>
+        <button className={primaryButton} onClick={handleSave}>
+          保存する
+        </button>
+        {pageKinds === "edit" && (
+          <button className={secondaryButton} onClick={handleShare}>
+            共有リンクを作成
+          </button>
+        )}
+      </div>
+    );
 
   return (
     <DndProvider backend={HTML5Backend}>
