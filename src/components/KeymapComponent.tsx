@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useMemo,
-  useEffect,
-} from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { css } from "../../styled-system/css";
 import { Check, Copy, Library } from "lucide-react";
@@ -302,11 +298,14 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     }
   }, [isPaletteOpen]);
 
-  const collection = useMemo(() => normalizeKeymapCollection(keymapCollection), [
-    keymapCollection,
-  ]);
+  const collection = useMemo(
+    () => normalizeKeymapCollection(keymapCollection),
+    [keymapCollection]
+  );
 
-  const updateCollection: Dispatch<SetStateAction<KeymapCollection>> = (value) => {
+  const updateCollection: Dispatch<SetStateAction<KeymapCollection>> = (
+    value
+  ) => {
     setKeymapCollection((prev) => {
       const normalizedPrev = normalizeKeymapCollection(prev);
       if (typeof value === "function") {
@@ -371,109 +370,115 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     <DndProvider backend={HTML5Backend}>
       <div className={pageContainer}>
         <header className={headerRow}>
-        <div className={headline}>
-          <input
-            className={nameInput}
-            type="text"
-            placeholder="キーマップの名称"
-            value={collection.appName}
-            onChange={(event) =>
-              updateCollection((prev) => ({
-                ...prev,
-                appName: event.target.value,
-              }))
-            }
-            disabled={pageKinds === "share"}
-          />
-          <div className={layerTabs} role="tablist">
-            {[1, 2, 3].map((layer) => {
-              const isActive = activeLayer === layer;
-              return (
+          <div className={headline}>
+            <input
+              className={nameInput}
+              type="text"
+              placeholder="キーマップの名称"
+              value={collection.appName}
+              onChange={(event) =>
+                updateCollection((prev) => ({
+                  ...prev,
+                  appName: event.target.value,
+                }))
+              }
+              disabled={pageKinds === "share"}
+            />
+            <div className={layerTabs} role="tablist">
+              {[1, 2, 3].map((layer) => {
+                const isActive = activeLayer === layer;
+                return (
+                  <button
+                    key={layer}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveLayer(layer as 1 | 2 | 3)}
+                    className={`${layerButton} ${isActive ? layerButtonActive : ""}`}
+                    disabled={pageKinds === "share" && !isActive}
+                  >
+                    {layerLabels[layer as 1 | 2 | 3]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className={actionGroup}>
+            {pageKinds !== "share" && (
+              <button className={dangerButton} onClick={handleReset}>
+                すべてクリア
+              </button>
+            )}
+            {pageKinds !== "share" && (
+              <button className={primaryButton} onClick={handleSave}>
+                保存する
+              </button>
+            )}
+            {pageKinds === "edit" && (
+              <button className={secondaryButton} onClick={handleShare}>
+                共有リンクを作成
+              </button>
+            )}
+          </div>
+        </header>
+
+        <div className={layoutGrid}>
+          <section className={workspaceCard}>
+            <Device
+              pageKinds={pageKinds}
+              keymapCollection={collection}
+              setKeymapCollection={updateCollection}
+              activeLayer={activeLayer}
+            />
+
+            {pageKinds !== "share" && (
+              <div className={toolbar}>
                 <button
-                  key={layer}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveLayer(layer as 1 | 2 | 3)}
-                  className={`${layerButton} ${isActive ? layerButtonActive : ""}`}
-                  disabled={pageKinds === "share" && !isActive}
+                  type="button"
+                  className={paletteTrigger}
+                  onClick={() => setPaletteOpen(true)}
                 >
-                  {layerLabels[layer as 1 | 2 | 3]}
+                  <Library size={18} />
+                  ショートカットライブラリを開く
                 </button>
-              );
-            })}
-          </div>
+              </div>
+            )}
+          </section>
         </div>
-        <div className={actionGroup}>
-          {pageKinds !== "share" && (
-            <button className={dangerButton} onClick={handleReset}>
-              すべてクリア
-            </button>
-          )}
-          {pageKinds !== "share" && (
-            <button className={primaryButton} onClick={handleSave}>
-              保存する
-            </button>
-          )}
-          {pageKinds === "edit" && (
-            <button className={secondaryButton} onClick={handleShare}>
-              共有リンクを作成
-            </button>
-          )}
-        </div>
-      </header>
 
-      <div className={layoutGrid}>
-        <section className={workspaceCard}>
-          <Device
-            pageKinds={pageKinds}
-            keymapCollection={collection}
-            setKeymapCollection={updateCollection}
-            activeLayer={activeLayer}
-          />
-
-          {pageKinds !== "share" && (
-            <div className={toolbar}>
-              <button
-                type="button"
-                className={paletteTrigger}
-                onClick={() => setPaletteOpen(true)}
-              >
-                <Library size={18} />
-                ショートカットライブラリを開く
-              </button>
-              <p className={infoText}>
-                ドラッグ＆ドロップでキーに割り当て。検索で候補を素早く探せます。
-              </p>
-            </div>
-          )}
-        </section>
-      </div>
-
-      {shareLink && (
-        <div className={shareOverlay}>
-          <div className={shareDialog}>
-            <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
-              共有リンクをコピーしてください
-            </h2>
-            <div className={shareField}>
-              <span className={css({ flex: 1, overflow: "hidden", textOverflow: "ellipsis" })}>
-                {shareLink}
-              </span>
-              <button
-                className={secondaryButton}
-                onClick={() => navigator.clipboard.writeText(shareLink)}
-              >
-                <Copy size={16} /> コピー
-              </button>
-            </div>
-            <div className={shareButtonRow}>
-              <button className={secondaryButton} onClick={() => setShareLink(null)}>
-                閉じる
-              </button>
+        {shareLink && (
+          <div className={shareOverlay}>
+            <div className={shareDialog}>
+              <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
+                共有リンクをコピーしてください
+              </h2>
+              <div className={shareField}>
+                <span
+                  className={css({
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  })}
+                >
+                  {shareLink}
+                </span>
+                <button
+                  className={secondaryButton}
+                  onClick={() => navigator.clipboard.writeText(shareLink)}
+                >
+                  <Copy size={16} /> コピー
+                </button>
+              </div>
+              <div className={shareButtonRow}>
+                <button
+                  className={secondaryButton}
+                  onClick={() => setShareLink(null)}
+                >
+                  閉じる
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
         <ShortcutDrawer
           open={isPaletteOpen && pageKinds !== "share"}
