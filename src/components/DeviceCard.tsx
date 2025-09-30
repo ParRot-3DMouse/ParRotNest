@@ -95,24 +95,23 @@ const buttonRowSingle = css({
 
 const buttonRowConnected = css({
   display: "flex",
-  alignItems: "center",
   justifyContent: "flex-end",
-  gap: "12px",
+  alignItems: "center",
+  gap: "10px",
   flexWrap: "nowrap",
   "@media (max-width: 540px)": {
     justifyContent: "stretch",
-    gap: "10px",
     flexDirection: "column",
     alignItems: "stretch",
-    flexWrap: "nowrap",
+    gap: "10px",
   },
 });
 
 const buttonBase = css({
   border: "none",
   borderRadius: "12px",
-  padding: "10px 18px",
-  fontSize: "14px",
+  padding: "10px 16px",
+  fontSize: "13px",
   fontWeight: "600",
   cursor: "pointer",
   color: "#f5ebe3",
@@ -150,26 +149,33 @@ const splitButtonContainer = css({
   position: "relative",
   display: "inline-flex",
   borderRadius: "12px",
-  overflow: "hidden",
   border: "1px solid rgba(23,123,58,0.35)",
   background: "rgba(23,123,58,0.15)",
   whiteSpace: "nowrap",
-  flexShrink: 0,
+  flexShrink: 1,
+  minWidth: 0,
+  maxWidth: "100%",
 });
 
 const splitMainButton = css({
   border: "none",
   background: "linear-gradient(135deg, #177b3a 0%, #1d9454 100%)",
   color: "#f5ebe3",
-  fontSize: "14px",
+  fontSize: "13px",
   fontWeight: "600",
-  padding: "10px 20px",
+  padding: "10px 16px",
   cursor: "pointer",
   transition: "background 0.12s ease",
   display: "inline-flex",
   alignItems: "center",
   gap: "8px",
   whiteSpace: "nowrap",
+  flex: "1 1 auto",
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  borderTopLeftRadius: "12px",
+  borderBottomLeftRadius: "12px",
   _hover: {
     background: "linear-gradient(135deg, #1d9454 0%, #23ac63 100%)",
   },
@@ -179,12 +185,14 @@ const splitToggleButton = css({
   border: "none",
   background: "rgba(23,123,58,0.16)",
   color: "#f5ebe3",
-  padding: "0 14px",
+  padding: "0 12px",
   display: "grid",
   placeItems: "center",
   cursor: "pointer",
   transition: "background 0.12s ease",
   flexShrink: 0,
+  borderTopRightRadius: "12px",
+  borderBottomRightRadius: "12px",
   _hover: {
     background: "rgba(23,123,58,0.25)",
   },
@@ -201,6 +209,8 @@ const dropdownMenu = css({
   boxShadow: "0 24px 48px rgba(0,0,0,0.5)",
   padding: "6px",
   zIndex: 20,
+  display: "flex",
+  flexDirection: "column",
 });
 
 const dropdownItem = css({
@@ -215,6 +225,7 @@ const dropdownItem = css({
   textAlign: "left",
   cursor: "pointer",
   transition: "background 0.12s ease",
+  display: "block",
   _hover: {
     background: "rgba(245,235,227,0.08)",
   },
