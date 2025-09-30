@@ -38,18 +38,27 @@ const pageContainer = css({
   flexDirection: "column",
   gap: "32px",
   padding: "32px 40px 60px",
+  alignItems: "center",
+});
+
+const focusColumn = css({
+  width: "100%",
+  maxWidth: "600px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "32px",
 });
 
 const headerRow = css({
   display: "flex",
-  justifyContent: "space-between",
+  flexDirection: "column",
   alignItems: "flex-start",
-  flexWrap: "wrap",
-  gap: "24px",
+  gap: "16px",
+  width: "100%",
 });
 
 const nameInput = css({
-  width: "min(420px, 90vw)",
+  width: "min(420px, 100%)",
   padding: "12px 16px",
   borderRadius: "12px",
   border: "1px solid rgba(245,235,227,0.12)",
@@ -70,13 +79,14 @@ const nameInput = css({
 
 const layerTabs = css({
   display: "inline-flex",
-  marginTop: "16px",
+  marginTop: "12px",
   background: "rgba(245,235,227,0.06)",
   borderRadius: "12px",
   padding: "4px",
   border: "1px solid rgba(245,235,227,0.14)",
   boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
   gap: "8px",
+  alignSelf: "flex-start",
 });
 
 const layerButton = css({
@@ -108,12 +118,16 @@ const layerButtonActive = css({
 const headline = css({
   display: "flex",
   flexDirection: "column",
+  alignItems: "flex-start",
+  textAlign: "left",
 });
 
 const actionGroup = css({
   display: "flex",
   gap: "12px",
   flexWrap: "wrap",
+  justifyContent: "center",
+  marginTop: "24px",
 });
 
 const primaryButton = css({
@@ -170,13 +184,6 @@ const dangerButton = css({
   },
 });
 
-const layoutGrid = css({
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr)",
-  gap: "32px",
-  alignItems: "start",
-});
-
 const workspaceCard = css({
   background: "rgba(245,235,227,0.03)",
   borderRadius: "20px",
@@ -185,13 +192,15 @@ const workspaceCard = css({
   display: "flex",
   flexDirection: "column",
   gap: "24px",
+  width: "100%",
 });
 
 const toolbar = css({
   display: "flex",
-  justifyContent: "space-between",
+  flexDirection: "column",
   gap: "12px",
-  flexWrap: "wrap",
+  alignItems: "center",
+  textAlign: "center",
 });
 
 const paletteTrigger = css({
@@ -368,62 +377,64 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
     return () => window.clearTimeout(timeout);
   }, [toastMessage]);
 
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <div className={pageContainer}>
-        <header className={headerRow}>
-          <div className={headline}>
-            <input
-              className={nameInput}
-              type="text"
-              placeholder="キーマップの名称"
-              value={collection.appName}
-              onChange={(event) =>
-                updateCollection((prev) => ({
-                  ...prev,
-                  appName: event.target.value,
-                }))
-              }
-              disabled={pageKinds === "share"}
-            />
-            <div className={layerTabs} role="tablist">
-              {[1, 2, 3].map((layer) => {
-                const isActive = activeLayer === layer;
-                return (
-                  <button
-                    key={layer}
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setActiveLayer(layer as 1 | 2 | 3)}
-                    className={`${layerButton} ${isActive ? layerButtonActive : ""}`}
-                    disabled={pageKinds === "share" && !isActive}
-                  >
-                    {layerLabels[layer as 1 | 2 | 3]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+  const actionButtons =
+    pageKinds === "share"
+      ? null
+      : (
           <div className={actionGroup}>
-            {pageKinds !== "share" && (
-              <button className={dangerButton} onClick={handleReset}>
-                すべてクリア
-              </button>
-            )}
-            {pageKinds !== "share" && (
-              <button className={primaryButton} onClick={handleSave}>
-                保存する
-              </button>
-            )}
+            <button className={dangerButton} onClick={handleReset}>
+              すべてクリア
+            </button>
+            <button className={primaryButton} onClick={handleSave}>
+              保存する
+            </button>
             {pageKinds === "edit" && (
               <button className={secondaryButton} onClick={handleShare}>
                 共有リンクを作成
               </button>
             )}
           </div>
-        </header>
+        );
 
-        <div className={layoutGrid}>
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div className={pageContainer}>
+        <div className={focusColumn}>
+          <header className={headerRow}>
+            <div className={headline}>
+              <input
+                className={nameInput}
+                type="text"
+                placeholder="キーマップの名称"
+                value={collection.appName}
+                onChange={(event) =>
+                  updateCollection((prev) => ({
+                    ...prev,
+                    appName: event.target.value,
+                  }))
+                }
+                disabled={pageKinds === "share"}
+              />
+              <div className={layerTabs} role="tablist">
+                {[1, 2, 3].map((layer) => {
+                  const isActive = activeLayer === layer;
+                  return (
+                    <button
+                      key={layer}
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveLayer(layer as 1 | 2 | 3)}
+                      className={`${layerButton} ${isActive ? layerButtonActive : ""}`}
+                      disabled={pageKinds === "share" && !isActive}
+                    >
+                      {layerLabels[layer as 1 | 2 | 3]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </header>
+
           <section className={workspaceCard}>
             <Device
               pageKinds={pageKinds}
@@ -431,6 +442,8 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
               setKeymapCollection={updateCollection}
               activeLayer={activeLayer}
             />
+
+            {actionButtons}
 
             {pageKinds !== "share" && (
               <div className={toolbar}>

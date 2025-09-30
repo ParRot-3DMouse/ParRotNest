@@ -20,9 +20,9 @@ const sectionTitle = css({
   color: "#f5ebe3",
 });
 
-const toggleGrid = css({
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+const toggleGroup = css({
+  display: "flex",
+  flexDirection: "column",
   gap: "12px",
 });
 
@@ -117,10 +117,13 @@ interface ConfigPanelProps {
   disabled?: boolean;
 }
 
-const toggleItems: { key: keyof KeymapConfig; label: string }[] = [
+const flipItems: { key: keyof KeymapConfig; label: string }[] = [
   { key: "xFlip", label: "X 反転" },
   { key: "yFlip", label: "Y 反転" },
   { key: "zFlip", label: "Z 反転" },
+];
+
+const mirrorItems: { key: keyof KeymapConfig; label: string }[] = [
   { key: "xMirror", label: "X 平行反転" },
   { key: "yMirror", label: "Y 平行反転" },
   { key: "zMirror", label: "Z 平行反転" },
@@ -151,9 +154,34 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
   return (
     <aside className={panel}>
       <div>
-        <h3 className={sectionTitle}>軸反転・平行設定</h3>
-        <div className={toggleGrid}>
-          {toggleItems.map((item) => {
+        <h3 className={sectionTitle}>軸反転</h3>
+        <div className={toggleGroup}>
+          {flipItems.map((item) => {
+            const active = !!config[item.key];
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setToggle(item.key)}
+                className={`${toggleButton} ${!active ? toggleInactive : ""}`}
+                aria-pressed={active}
+                aria-disabled={disabled}
+                disabled={disabled}
+              >
+                <span>{item.label}</span>
+                <span className={`${toggleIndicator} ${active ? toggleIndicatorActive : ""}`}>
+                  <span className={`${toggleHandle} ${active ? toggleHandleActive : ""}`} />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <h3 className={sectionTitle}>平行反転</h3>
+        <div className={toggleGroup}>
+          {mirrorItems.map((item) => {
             const active = !!config[item.key];
             return (
               <button
