@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
-import { AppType } from "../../../app/api/[[...route]]/route";
-import { KeymapCollection } from "../../device/types";
+import type { AppType } from "../../../app/api/[[...route]]/route";
+import type { KeymapCollection } from "../../device/types";
 
 export const KeymapsAPI = () => {
   const appClient = hc<AppType>("/");

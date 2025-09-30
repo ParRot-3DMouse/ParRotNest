@@ -1,12 +1,34 @@
-import { Key, KeyColumn, KeymapCollection, KeymapType } from "./types";
-import { getKeyUsageID, Uint8 } from "./usageId";
+import type {
+  Key,
+  KeyColumn,
+  KeymapCollection,
+  KeymapConfig,
+  KeymapType,
+} from "./types";
+import { getKeyUsageID } from "./usageId";
+import type { Uint8 } from "./usageId";
+import { initialConfig } from "./reducer";
+import {
+  APP_NAME_HEADER_LENGTH,
+  APP_SLOT_IDS,
+  BYTES_PER_DPI_VALUE,
+  COMMAND_ID,
+  CONFIG_FLAG_COUNT,
+  CONFIG_HEADER_LENGTH,
+  DPI_SLOT_COUNT,
+  HID_REPORT_LENGTH,
+  LAYER_IDS,
+  LED_CONFIG_INDEX,
+  REPORT_ID,
+} from "./constants";
+import type { AppSlotId, LayerId } from "./constants";
+import { clampToUint16, clampToUint8 } from "./utils";
 
 export async function sendKeymapCollection(
   keymapCollection: KeymapCollection,
   connectedDevice: HIDDevice | null,
   selectedSlot: 1 | 2 | 3
 ): Promise<void> {
-  console.log("connectedDevice", connectedDevice);
   if (!connectedDevice) {
     throw new Error("Device not connected");
   }
@@ -16,61 +38,44 @@ export async function sendKeymapCollection(
       await connectedDevice.open();
     }
 
-    let appNum: 0x00 | 0x01 | 0x02;
+    const appIndex = selectedSlot - 1;
+    const appNum = APP_SLOT_IDS[appIndex];
 
-    switch (selectedSlot) {
-      case 1:
-        appNum = 0x00;
-        break;
-      case 2:
-        appNum = 0x01;
-        break;
-      case 3:
-        appNum = 0x02;
-        break;
-      default:
-        throw new Error("Invalid slot number");
+    if (appNum === undefined) {
+      throw new Error(`Invalid slot number: ${selectedSlot}`);
     }
 
-    const appNameBytes = stringToByteArray(keymapCollection.appName, appNum);
-    console.log("appNameBytes", appNameBytes);
-    console.log("Byte length", appNameBytes.length);
-    await connectedDevice.sendReport(0x1f, appNameBytes);
-    console.log("App name sent");
+    const send = async (payload: Uint8Array) => {
+      await connectedDevice.sendReport(REPORT_ID, payload as BufferSource);
+    };
 
-    const layer1Bytes = convertKeymapToBytes(
+    const configBytes = convertConfigToBytes(
+      keymapCollection.config ?? initialConfig,
+      appNum as AppSlotId
+    );
+    await send(configBytes);
+
+    const appNameBytes = stringToByteArray(
+      keymapCollection.appName,
+      appNum as AppSlotId
+    );
+    await send(appNameBytes);
+
+    const layers: KeymapType[] = [
       keymapCollection.layer1,
-      appNum,
-      0x00
-    );
-    console.log("layer1Bytes", layer1Bytes);
-    console.log("layer1Bytes length", layer1Bytes.length);
-    await connectedDevice.sendReport(0x1f, layer1Bytes);
-    console.log("Layer 1 sent");
-
-    const layer2Bytes = convertKeymapToBytes(
       keymapCollection.layer2,
-      appNum,
-      0x01
-    );
-    console.log("layer2Bytes", layer2Bytes);
-    console.log("layer2Bytes length", layer2Bytes.length);
-    await connectedDevice.sendReport(0x1f, layer2Bytes);
-    console.log("Layer 2 sent");
-
-    const layer3Bytes = convertKeymapToBytes(
       keymapCollection.layer3,
-      appNum,
-      0x02
-    );
-    console.log("layer3Bytes", layer3Bytes);
-    console.log("layer3Bytes length", layer3Bytes.length);
-    await connectedDevice.sendReport(0x1f, layer3Bytes);
-    console.log("Layer 3 sent");
+    ];
 
-    console.log("All data sent successfully");
+    for (const [index, layer] of LAYER_IDS.entries()) {
+      const layerBytes = convertKeymapToBytes(
+        layers[index],
+        appNum as AppSlotId,
+        layer as LayerId
+      );
+      await send(layerBytes);
+    }
   } catch (error) {
-    console.log("error", error);
     if (error instanceof DOMException && error.name === "NotAllowedError") {
       throw new Error(
         "デバイスへの書き込み権限がありません。デバイスを再接続してください。"
@@ -81,27 +86,67 @@ export async function sendKeymapCollection(
   }
 }
 
-function stringToByteArray(
-  str: string,
-  appNum: 0x00 | 0x01 | 0x02
+function convertConfigToBytes(
+  config: KeymapConfig,
+  appNum: AppSlotId
 ): Uint8Array {
+  const bytes = new Uint8Array(HID_REPORT_LENGTH);
+  bytes[0] = COMMAND_ID.CONFIG;
+  bytes[1] = appNum;
+
+  const flags = [
+    config.xFlip,
+    config.yFlip,
+    config.zFlip,
+    config.xMirror,
+    config.yMirror,
+    config.zMirror,
+  ];
+
+  flags.slice(0, CONFIG_FLAG_COUNT).forEach((flag, index) => {
+    bytes[CONFIG_HEADER_LENGTH + index] = flag ? 0x01 : 0x00;
+  });
+
+  const dpiValues = [config.dpiSlot1, config.dpiSlot2, config.dpiSlot3];
+  const dpiStartIndex = CONFIG_HEADER_LENGTH + CONFIG_FLAG_COUNT;
+
+  dpiValues.slice(0, DPI_SLOT_COUNT).forEach((dpi, index) => {
+    const clamped = clampToUint16(dpi);
+    const baseIndex = dpiStartIndex + index * BYTES_PER_DPI_VALUE;
+    bytes[baseIndex] = clamped & 0xff;
+    bytes[baseIndex + 1] = (clamped >> 8) & 0xff;
+  });
+
+  if (typeof config.ledConfig === "number") {
+    bytes[LED_CONFIG_INDEX] = clampToUint8(config.ledConfig);
+  }
+
+  return bytes;
+}
+
+function stringToByteArray(str: string, appNum: AppSlotId): Uint8Array {
   const encoder = new TextEncoder();
-  const res = encoder.encode(str);
+  const encodedName = encoder.encode(str);
+  const maxPayloadLength = HID_REPORT_LENGTH - APP_NAME_HEADER_LENGTH;
 
-  const allBytesWithPrefix = [0x04, appNum, ...res];
+  if (encodedName.length > maxPayloadLength) {
+    throw new Error(
+      `Keymap name is too long. Limit to ${maxPayloadLength} bytes (current: ${encodedName.length} bytes).`
+    );
+  }
 
-  const allBytes = new Uint8Array(63);
-  allBytes.set(allBytesWithPrefix);
+  const allBytes = new Uint8Array(HID_REPORT_LENGTH);
+  allBytes.set([COMMAND_ID.APP_NAME, appNum]);
+  allBytes.set(encodedName, APP_NAME_HEADER_LENGTH);
 
   return allBytes;
 }
 
 export const convertKeymapToBytes = (
   keymap: KeymapType,
-  appNum: 0x00 | 0x01 | 0x02,
-  layerNum: 0x00 | 0x01 | 0x02
+  appNum: AppSlotId,
+  layerNum: LayerId
 ): Uint8Array => {
-  console.log("keymap", keymap);
   const processKey = (key: Key): Uint8[] => {
     const [modifier, character] = getKeyUsageID(key);
     return [modifier, character];
@@ -133,9 +178,20 @@ export const convertKeymapToBytes = (
       ...column3Bytes,
     ];
 
-    const allBytesWithPrefix = [0x05, appNum, layerNum, ...allBytes];
+    const allBytesWithPrefix = [
+      COMMAND_ID.KEYMAP,
+      appNum,
+      layerNum,
+      ...allBytes,
+    ];
 
-    const paddedBytes = new Uint8Array(63);
+    if (allBytesWithPrefix.length > HID_REPORT_LENGTH) {
+      throw new Error(
+        "Keymap data is too large to fit into a single HID report."
+      );
+    }
+
+    const paddedBytes = new Uint8Array(HID_REPORT_LENGTH);
     paddedBytes.set(allBytesWithPrefix);
 
     return paddedBytes;

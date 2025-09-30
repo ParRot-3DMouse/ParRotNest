@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
-import { AppType } from "../../../app/api/[[...route]]/route";
-import { KeymapToShare, User } from "../../../app/api/types";
+import type { AppType } from "../../../app/api/[[...route]]/route";
+import type { KeymapToShare, User } from "../../../app/api/types";
 
 export const LikesAPI = () => {
   const appClient = hc<AppType>("/");

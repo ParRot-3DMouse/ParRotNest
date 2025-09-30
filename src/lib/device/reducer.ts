@@ -1,4 +1,4 @@
-import { KeymapType } from "./types";
+import type { KeymapConfig, KeymapType } from "./types";
 
 export const initialState: KeymapType = {
   column1: {
@@ -19,6 +19,19 @@ export const initialState: KeymapType = {
   thumbKey1: { type: "standard", character: "", modifiers: [] },
   thumbKey2: { type: "standard", character: "", modifiers: [] },
   monitorKey: { type: "standard", character: "", modifiers: [] },
+};
+
+export const initialConfig: KeymapConfig = {
+  xFlip: false,
+  yFlip: false,
+  zFlip: false,
+  xMirror: false,
+  yMirror: false,
+  zMirror: false,
+  dpiSlot1: 0,
+  dpiSlot2: 0,
+  dpiSlot3: 0,
+  ledConfig: 0,
 };
 
 export const ActionType = {

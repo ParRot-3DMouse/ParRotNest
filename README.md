@@ -1,67 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`c3`](https://developers.cloudflare.com/pages/get-started/c3).
+# ParRotNest
 
-## Getting Started
+ParRotNestは、3Dポインティングデバイス「ParRot」のキーマップと本体設定をブラウザ上で編集・書き込みできるNext.jsアプリケーションです。WebHID APIに対応したブラウザからUSB接続したParRotにアクセスし、レイヤーごとのキー割り当てやDPIなどの細かな設定を管理できます。
 
-First, run the development server:
+## 主な機能
+- WebHID経由でのParRot検出・接続と設定書き込み
+- レイヤー3層構成のキーマップエディタ（ドラッグ&ドロップ対応）
+- カスタムキーやDPI・レイヤー切替といったデバイス固有アクションの設定
+- キーマップ共有・いいね機能を想定したREST APIとクライアント実装
+- Googleログイン（NextAuth）によるユーザー管理
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 技術スタック
+- Next.js 15（App Router / React 19）
+- Panda CSS（`styled-system`）によるデザインシステム
+- Hono によるエッジ向け API ルーティング
+- Cloudflare Pages / D1 / Wrangler
+- TypeScript & ESLint
+
+## ディレクトリ構成（抜粋）
+```text
+src/
+  app/            Next.js App Router エントリ、API ルート、ページ
+  components/     Panda CSS ベースのUIコンポーネント
+  lib/            APIクライアントやデバイス関連のドメインロジック
+migrations/       D1データベース用SQLマイグレーション
+public/           静的アセット
+styled-system/    Panda CSSのビルド成果物（`npm run prepare`で再生成）
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## セットアップ手順
+1. 依存関係のインストール
+   ```bash
+   npm install
+   ```
+2. 環境変数の設定（`.env.local` を想定）
+   - `NEXTAUTH_SECRET`
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - Cloudflare D1 バインディング（`wrangler.toml` 参照）
+   - 必要に応じて `APP_ENV`（`production` 時は NextAuth cookie を secure に）
+3. 開発サーバー起動
+   ```bash
+   npm run dev
+   ```
+4. WebHID対応ブラウザ（Chrome, Edge, Operaなど）で `http://localhost:3000` にアクセス
 
-## Cloudflare integration
+## 用意されたnpmスクリプト
+- `npm run dev` : Next.js開発サーバー
+- `npm run build` : プロダクションビルド
+- `npm run start` : ビルド成果物のローカル実行
+- `npm run lint` : ESLint
+- `npm run prepare` : Panda CSSコード生成
+- `npm run pages:build` : Cloudflare Pages向けビルド（`@cloudflare/next-on-pages`）
+- `npm run preview` : Pagesビルド + `wrangler pages dev` によるローカルプレビュー
+- `npm run deploy` : Pagesへのデプロイ（事前に `preview` 実行推奨）
+- `npm run cf-typegen` : Wrangler経由で`env.d.ts`を再生成（バインディング追加時）
 
-Besides the `dev` script mentioned above `c3` has added a few extra scripts that allow you to integrate the application with the [Cloudflare Pages](https://pages.cloudflare.com/) environment, these are:
-  - `pages:build` to build the application for Pages using the [`@cloudflare/next-on-pages`](https://github.com/cloudflare/next-on-pages) CLI
-  - `preview` to locally preview your Pages application using the [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI
-  - `deploy` to deploy your Pages application using the [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI
+## Cloudflare Pages / D1 ワークフロー
+1. スキーマ変更は `migrations` ディレクトリの連番SQLを更新。
+2. `wrangler.toml` でD1などのバインディングを管理。変更時は `npm run cf-typegen` を実行。
+3. Pages環境を再現する際は `npm run pages:build` → `npm run preview` の順で確認。
+4. 問題なければ `npm run deploy` でPagesに反映。
 
-> __Note:__ while the `dev` script is optimal for local development you should preview your Pages application as well (periodically or before deployments) in order to make sure that it can properly work in the Pages environment (for more details see the [`@cloudflare/next-on-pages` recommended workflow](https://github.com/cloudflare/next-on-pages/blob/main/internal-packages/next-dev/README.md#recommended-development-workflow))
+## デバイス機能の要点
+- `src/lib/device` にキーマップ定義やHIDレポート生成のロジックを集約。
+- `KeymapProvider` でアプリ全体のキーマップ状態を管理し、`KeymapComponent` がUIを構築。
+- `DeviceCard` から接続したデバイスに対し、選択したスロット（1〜3）へ書き込み可能。
 
-### Bindings
+## 開発時のヒント
+- スタイルはPandaのトークンを利用し、変更時は `npm run prepare` でリビルド。
+- 新しいAPIルートは Hono ルーター（`src/app/api/[[...route]]`）に追加し、クライアント側は `src/lib/api/handlers` にまとめる。
+- UI可視変更を行った場合はスクリーンショットや動画をPRに添付。
+- テストは未導入のため、挙動確認手順をPRで共有。
 
-Cloudflare [Bindings](https://developers.cloudflare.com/pages/functions/bindings/) are what allows you to interact with resources available in the Cloudflare Platform.
-
-You can use bindings during development, when previewing locally your application and of course in the deployed application:
-
-- To use bindings in dev mode you need to define them in the `next.config.js` file under `setupDevBindings`, this mode uses the `next-dev` `@cloudflare/next-on-pages` submodule. For more details see its [documentation](https://github.com/cloudflare/next-on-pages/blob/05b6256/internal-packages/next-dev/README.md).
-
-- To use bindings in the preview mode you need to add them to the `pages:preview` script accordingly to the `wrangler pages dev` command. For more details see its [documentation](https://developers.cloudflare.com/workers/wrangler/commands/#dev-1) or the [Pages Bindings documentation](https://developers.cloudflare.com/pages/functions/bindings/).
-
-- To use bindings in the deployed application you will need to configure them in the Cloudflare [dashboard](https://dash.cloudflare.com/). For more details see the  [Pages Bindings documentation](https://developers.cloudflare.com/pages/functions/bindings/).
-
-#### KV Example
-
-`c3` has added for you an example showing how you can use a KV binding.
-
-In order to enable the example:
-- Search for javascript/typescript lines containing the following comment:
-  ```ts
-  // KV Example:
-  ```
-  and uncomment the commented lines below it (also uncomment the relevant imports).
-- In the `wrangler.json` file add the following configuration line:
-  ```
-  "kv_namespaces": [{ "binding": "MY_KV_NAMESPACE", "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }],
-  ```
-- If you're using TypeScript run the `cf-typegen` script to update the `env.d.ts` file:
-  ```bash
-  npm run cf-typegen
-  # or
-  yarn cf-typegen
-  # or
-  pnpm cf-typegen
-  # or
-  bun cf-typegen
-  ```
-
-After doing this you can run the `dev` or `preview` script and visit the `/api/hello` route to see the example in action.
-
-Finally, if you also want to see the example work in the deployed application make sure to add a `MY_KV_NAMESPACE` binding to your Pages application in its [dashboard kv bindings settings section](https://dash.cloudflare.com/?to=/:account/pages/view/:pages-project/settings/functions#kv_namespace_bindings_section). After having configured it make sure to re-deploy your application.
+## ライセンス
+`LICENSE` を参照してください。

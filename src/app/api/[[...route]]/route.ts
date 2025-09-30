@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import users from "./users";
-import { D1Database } from "@cloudflare/workers-types";
+import type { D1Database } from "@cloudflare/workers-types";
 import { handle } from "hono/vercel";
-import { jwt, JwtVariables } from "hono/jwt";
+import { jwt } from "hono/jwt";
+import type { JwtVariables } from "hono/jwt";
 import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import keymaps from "./keymaps";

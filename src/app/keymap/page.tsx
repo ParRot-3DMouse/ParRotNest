@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../../components/provider/UserContext";
 import { clientApi } from "../../lib/api/clientApi";
-import { KeymapCollection } from "../../lib/device/types";
+import type { KeymapCollection } from "../../lib/device/types";
 import { css } from "../../../styled-system/css";
 import Link from "next/link";
 

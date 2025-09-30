@@ -1,3 +1,6 @@
+import type { UniqueKey } from "./unique-keys";
+export type { UniqueKey } from "./unique-keys";
+
 // モディファイアキーの型定義
 export type ModifierKey = "Shift" | "Ctrl" | "Meta" | "Alt";
 
@@ -167,41 +170,45 @@ export interface StandardKey {
   character: KeyboardInput;
 }
 
-export type SwitchMovementKey = "MOVEMENT MODE TOGGLE" | "MOVEMENT MODE HOLD";
+export type SwitchMovementKey = Extract<
+  UniqueKey,
+  "MOVEMENT MODE TOGGLE" | "MOVEMENT MODE HOLD"
+>;
 
-export type DPIKey = "DPI CYCLE";
+export type DPIKey = Extract<
+  UniqueKey,
+  "DPI CYCLE" | "DPI SLOT 1" | "DPI SLOT 2" | "DPI SLOT 3"
+>;
 
-export type LayerKey =
-  | "LAYER CYCLE"
-  | "LAYER HOLD 1"
-  | "LAYER HOLD 2"
-  | "LAYER HOLD 3";
+export type LayerKey = Extract<
+  UniqueKey,
+  "LAYER CYCLE" | "LAYER HOLD 1" | "LAYER HOLD 2" | "LAYER HOLD 3"
+>;
 
-export type SlotKey = "SLOT CYCLE";
+export type SlotKey = Extract<UniqueKey, "SLOT CYCLE">;
 
-export type AxisLockKey =
+export type AxisLockKey = Extract<
+  UniqueKey,
   | "AXIS LOCK X"
   | "AXIS LOCK Y"
   | "AXIS LOCK Z"
   | "AXIS LOCK X HOLD"
   | "AXIS LOCK Y HOLD"
-  | "AXIS LOCK Z HOLD";
+  | "AXIS LOCK Z HOLD"
+>;
 
-export type UniqueKey =
-  | "MOVEMENT MODE TOGGLE"
-  | "MOVEMENT MODE HOLD"
-  | "DPI CYCLE"
-  | "LAYER CYCLE"
-  | "LAYER HOLD 1"
-  | "LAYER HOLD 2"
-  | "LAYER HOLD 3"
-  | "SLOT CYCLE"
-  | "AXIS LOCK X"
-  | "AXIS LOCK Y"
-  | "AXIS LOCK Z"
-  | "AXIS LOCK X HOLD"
-  | "AXIS LOCK Y HOLD"
-  | "AXIS LOCK Z HOLD";
+export type KeymapConfig = {
+  xFlip: boolean;
+  yFlip: boolean;
+  zFlip: boolean;
+  xMirror: boolean;
+  yMirror: boolean;
+  zMirror: boolean;
+  dpiSlot1: number;
+  dpiSlot2: number;
+  dpiSlot3: number;
+  ledConfig?: number;
+};
 
 export interface CustomKey {
   type: "custom";
@@ -227,6 +234,7 @@ export type KeymapType = {
 
 export type KeymapCollection = {
   appName: string;
+  config: KeymapConfig;
   layer1: KeymapType;
   layer2: KeymapType;
   layer3: KeymapType;

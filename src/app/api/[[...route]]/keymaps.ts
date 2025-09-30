@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { Bindings, Variables } from "./route";
+import type { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
 import { getUserID } from "../../../lib/api/getUserId";
-import { Keymap } from "../types";
+import type { Keymap } from "../types";
 
 const postKeymapSchema = z.object({
   keymap_name: z.string(),

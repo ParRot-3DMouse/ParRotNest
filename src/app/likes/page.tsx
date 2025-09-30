@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../../components/provider/UserContext";
 import { clientApi } from "../../lib/api/clientApi";
-import { KeymapToShare } from "../api/types";
+import type { KeymapToShare } from "../api/types";
 import Link from "next/link";
 import { css } from "../../../styled-system/css"; // pandaCssのcss関数をインポート
 

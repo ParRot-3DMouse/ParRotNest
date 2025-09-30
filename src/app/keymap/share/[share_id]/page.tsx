@@ -6,6 +6,7 @@ import { KeymapComponent } from "../../../../components/KeymapComponent";
 import { clientApi } from "../../../../lib/api/clientApi";
 import { css } from "../../../../../styled-system/css";
 import { useKeymap } from "../../../../components/provider/KeymapContext";
+import { normalizeKeymapCollection } from "../../../../lib/device/normalize";
 
 export default function KeymapPage({
   params,
@@ -27,7 +28,7 @@ export default function KeymapPage({
         share_id: share_id,
       });
       if (res) {
-        const receivedKeymap = res.keymap_json;
+        const receivedKeymap = normalizeKeymapCollection(res.keymap_json);
         setKeymapCollection(receivedKeymap);
       }
     } catch (error) {

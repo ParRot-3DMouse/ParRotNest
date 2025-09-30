@@ -1,8 +1,10 @@
-import NextAuth, { NextAuthConfig, Session } from "next-auth";
+import NextAuth from "next-auth";
+import type { NextAuthConfig, Session } from "next-auth";
 import Google from "next-auth/providers/google";
-import { Provider } from "next-auth/providers";
-import { JWT, JWTDecodeParams, JWTEncodeParams } from "next-auth/jwt";
-import { JWTPayload, SignJWT, jwtVerify } from "jose";
+import type { Provider } from "next-auth/providers";
+import type { JWT, JWTDecodeParams, JWTEncodeParams } from "next-auth/jwt";
+import { SignJWT, jwtVerify } from "jose";
+import type { JWTPayload } from "jose";
 
 const providers: Provider[] = [
   Google({

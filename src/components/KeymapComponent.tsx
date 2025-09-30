@@ -1,102 +1,292 @@
+"use client";
+
+import { useState, useMemo, useEffect } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { css } from "../../styled-system/css";
-import Device from "./device";
-import { KeymapCollection } from "../lib/device/types";
-import { clientApi } from "../lib/api/clientApi";
-import { initialState } from "../lib/device/reducer";
+import { Check, Copy, Library } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import {
-  axisLockKeys,
-  dpiKeys,
-  KeyMenu,
-  layerKeys,
-  movementKeys,
-  sloyKeys,
-} from "./UniqueKeyMenu";
-import { Copy } from "lucide-react";
+import { clientApi } from "../lib/api/clientApi";
+import { normalizeKeymapCollection } from "../lib/device/normalize";
+import type { KeymapCollection } from "../lib/device/types";
+import Device from "./device";
+import { ShortcutDrawer } from "./ShortcutDrawer";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
-  setKeymapCollection: React.Dispatch<React.SetStateAction<KeymapCollection>>;
+  setKeymapCollection: Dispatch<SetStateAction<KeymapCollection>>;
   activeLayer: 1 | 2 | 3;
-  setActiveLayer: React.Dispatch<React.SetStateAction<1 | 2 | 3>>;
+  setActiveLayer: Dispatch<SetStateAction<1 | 2 | 3>>;
   pageKinds: "new" | "edit" | "share";
 }
 
 interface NewKeymapProps extends KeymapComponentBaseProps {
   pageKinds: "new";
-  keymap_id?: never; // `isNew`がtrueの場合は`keymap_id`を渡さない
+  keymap_id?: never;
 }
 
 interface ExistingKeymapProps extends KeymapComponentBaseProps {
   pageKinds: "edit" | "share";
-  keymap_id: string; // `isNew`がfalseの場合は`keymap_id`を必須にする
+  keymap_id: string;
 }
 
 type KeymapComponentProps = NewKeymapProps | ExistingKeymapProps;
 
-const buttonContainer = css({
-  textAlign: "center",
+const pageContainer = css({
   display: "flex",
-  gap: "1rem",
+  flexDirection: "column",
+  gap: "32px",
+  padding: "32px 40px 60px",
+  alignItems: "center",
+});
+
+const focusColumn = css({
+  width: "100%",
+  maxWidth: "700px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "32px",
+});
+
+const headerRow = css({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: "16px",
+  width: "100%",
+});
+
+const nameInput = css({
+  width: "min(420px, 100%)",
+  padding: "12px 16px",
+  borderRadius: "12px",
+  border: "1px solid rgba(245,235,227,0.12)",
+  background: "rgba(245,235,227,0.08)",
+  color: "#f5ebe3",
+  fontSize: "18px",
+  fontWeight: "600",
+  outline: "none",
+  transition: "all 0.15s ease",
+  _focus: {
+    borderColor: "rgba(177,61,87,0.6)",
+    boxShadow: "0 0 0 2px rgba(177,61,87,0.25)",
+  },
+  _disabled: {
+    opacity: 0.6,
+  },
+});
+
+const layerTabs = css({
+  display: "inline-flex",
+  marginTop: "12px",
+  background: "rgba(245,235,227,0.06)",
+  borderRadius: "12px",
+  padding: "4px",
+  border: "1px solid rgba(245,235,227,0.14)",
+  gap: "8px",
+  alignSelf: "flex-start",
+});
+
+const layerButton = css({
+  background: "transparent",
+  color: "rgba(245,235,227,0.55)",
+  fontSize: "14px",
+  fontWeight: "600",
+  padding: "10px 18px",
+  borderRadius: "10px",
+  cursor: "pointer",
+  transition: "all 0.18s ease",
+  _hover: {
+    color: "#f5ebe3",
+  },
+  _focusVisible: {
+    outline: "none",
+    boxShadow: "0 0 0 2px rgba(245,235,227,0.45)",
+  },
+});
+
+const layerButtonActive = css({
+  background:
+    "linear-gradient(135deg, rgba(177,61,87,0.85) 0%, rgba(216,102,136,0.9) 100%)",
+  color: "#fdf5f0",
+  borderColor: "rgba(245,235,227,0.4)",
+  boxShadow: "0 6px 18px rgba(177,61,87,0.24)",
+});
+
+const headline = css({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  textAlign: "left",
+});
+
+const actionGroup = css({
+  display: "flex",
+  gap: "12px",
+  flexWrap: "wrap",
   justifyContent: "center",
+  marginTop: "24px",
 });
+
+const primaryButton = css({
+  background: "linear-gradient(135deg, #177b3a 0%, #1d9454 100%)",
+  color: "#f5ebe3",
+  border: "none",
+  borderRadius: "12px",
+  padding: "12px 20px",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  transition: "transform 0.12s ease, box-shadow 0.12s ease",
+  _hover: {
+    transform: "translateY(-1px)",
+    boxShadow: "0 10px 28px rgba(23,123,58,0.28)",
+  },
+  _disabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
+    boxShadow: "none",
+  },
+});
+
+const secondaryButton = css({
+  background: "rgba(245,235,227,0.08)",
+  color: "#f5ebe3",
+  border: "1px solid rgba(245,235,227,0.12)",
+  borderRadius: "12px",
+  padding: "12px 20px",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  transition: "all 0.12s ease",
+  _hover: {
+    background: "rgba(245,235,227,0.16)",
+  },
+});
+
 const dangerButton = css({
-  backgroundColor: "#b13d57",
-  paddingLeft: "0.75rem",
-  paddingRight: "0.75rem",
-  paddingTop: "0.375rem",
-  paddingBottom: "0.375rem",
-  borderRadius: "0.375rem",
-  fontSize: "0.875rem",
-  fontWeight: "500",
-  _hover: {
-    // backgroundColor: "red.700",
-  },
-  _active: {
-    // backgroundColor: "red.800",
-  },
-  width: "fit-content",
+  background: "rgba(177,61,87,0.18)",
+  color: "#f5ebe3",
+  border: "1px solid rgba(177,61,87,0.4)",
+  borderRadius: "12px",
+  padding: "12px 20px",
+  fontSize: "14px",
+  fontWeight: "600",
   cursor: "pointer",
+  transition: "all 0.12s ease",
+  _hover: {
+    background: "rgba(177,61,87,0.28)",
+  },
 });
 
-const saveButton = css({
-  backgroundColor: "#177b3a",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  paddingTop: "0.5rem",
-  paddingBottom: "0.5rem",
-  borderRadius: "0.375rem",
-  fontWeight: "500",
-  _hover: {
-    // backgroundColor: "blue.700",
-  },
-  _active: {
-    // backgroundColor: "blue.800",
-  },
-  width: "fit-content",
-  cursor: "pointer",
+const workspaceCard = css({
+  background: "rgba(245,235,227,0.03)",
+  borderRadius: "20px",
+  border: "1px solid rgba(245,235,227,0.08)",
+  padding: "24px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "24px",
+  width: "100%",
 });
 
-const shareButton = css({
-  backgroundColor: "#145991",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  paddingTop: "0.5rem",
-  paddingBottom: "0.5rem",
-  borderRadius: "0.375rem",
-  fontWeight: "500",
-  _hover: {
-    // backgroundColor: "blue.700",
-  },
-  _active: {
-    // backgroundColor: "blue.800",
-  },
-  width: "fit-content",
-  cursor: "pointer",
+const toolbar = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+  alignItems: "center",
+  textAlign: "center",
 });
+
+const paletteTrigger = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  background: "rgba(245,235,227,0.08)",
+  color: "#f5ebe3",
+  border: "1px solid rgba(245,235,227,0.12)",
+  padding: "10px 16px",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontSize: "13px",
+  fontWeight: "600",
+  transition: "all 0.12s ease",
+  _hover: {
+    background: "rgba(245,235,227,0.16)",
+  },
+});
+
+const shareOverlay = css({
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.55)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1500,
+});
+
+const shareDialog = css({
+  background: "#2b2727",
+  borderRadius: "16px",
+  padding: "28px",
+  width: "min(480px, 90vw)",
+  border: "1px solid rgba(245,235,227,0.12)",
+  display: "flex",
+  flexDirection: "column",
+  gap: "16px",
+});
+
+const shareField = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  padding: "12px",
+  borderRadius: "10px",
+  background: "rgba(245,235,227,0.05)",
+  border: "1px solid rgba(245,235,227,0.1)",
+  fontSize: "13px",
+  color: "#f5ebe3",
+});
+
+const shareButtonRow = css({
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "12px",
+});
+
+const toastContainer = css({
+  position: "fixed",
+  top: "24px",
+  right: "32px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+  zIndex: 1600,
+});
+
+const toast = css({
+  backdropFilter: "blur(18px)",
+  background: "rgba(23, 123, 58, 0.18)",
+  border: "1px solid rgba(23, 123, 58, 0.4)",
+  borderRadius: "14px",
+  padding: "12px 18px",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "12px",
+  color: "#f5ebe3",
+  boxShadow: "0 14px 28px rgba(0,0,0,0.25)",
+});
+
+const layerLabels: Record<1 | 2 | 3, string> = {
+  1: "Layer 1",
+  2: "Layer 2",
+  3: "Layer 3",
+};
 
 export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   keymap_id,
@@ -107,308 +297,216 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   pageKinds,
 }) => {
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [isPaletteOpen, setPaletteOpen] = useState(false);
+  const [paletteSearch, setPaletteSearch] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isPaletteOpen) {
+      setPaletteSearch("");
+    }
+  }, [isPaletteOpen]);
+
+  const collection = useMemo(
+    () => normalizeKeymapCollection(keymapCollection),
+    [keymapCollection]
+  );
+
+  const updateCollection: Dispatch<SetStateAction<KeymapCollection>> = (
+    value
+  ) => {
+    setKeymapCollection((prev) => {
+      const normalizedPrev = normalizeKeymapCollection(prev);
+      if (typeof value === "function") {
+        const next = value(normalizedPrev);
+        return normalizeKeymapCollection(next);
+      }
+      return normalizeKeymapCollection(value);
+    });
+  };
 
   const handleSave = async () => {
     try {
       if (pageKinds === "new") {
         const res = await clientApi().keymaps.postKeymap({
-          keymap_name: keymapCollection.appName,
-          keymap_json: keymapCollection,
+          keymap_name: collection.appName,
+          keymap_json: collection,
         });
         router.push(`/keymap/${res.keymap_id}`);
       } else if (pageKinds === "edit") {
         await clientApi().keymaps.putKeymap({
-          keymap_id: keymap_id,
-          keymap_name: keymapCollection.appName,
-          keymap_json: JSON.stringify(keymapCollection),
+          keymap_id,
+          keymap_name: collection.appName,
+          keymap_json: JSON.stringify(collection),
         });
-        router.push(`/keymap/${keymap_id}`);
+        setToastMessage("保存しました");
       }
-    } catch (err) {
-      throw Error(err instanceof Error ? err.message : "Failed to save keymap");
+    } catch (error) {
+      throw Error(
+        error instanceof Error ? error.message : "Failed to save keymap"
+      );
     }
   };
 
   const handleShare = async () => {
+    if (pageKinds !== "edit") return;
     try {
-      if (pageKinds === "edit") {
-        const res = await clientApi().keymaps_to_share.postKeymapToShare({
-          keymap_name: keymapCollection.appName,
-          keymap_json: keymapCollection,
-        });
-
-        const share_id = res.share_id;
-        const url = `${window.location.origin}/keymap/share/${share_id}`;
-        setShareLink(url);
-      }
-    } catch (err) {
+      const res = await clientApi().keymaps_to_share.postKeymapToShare({
+        keymap_name: collection.appName,
+        keymap_json: collection,
+      });
+      const url = `${window.location.origin}/keymap/share/${res.share_id}`;
+      setShareLink(url);
+    } catch (error) {
       throw Error(
-        err instanceof Error ? err.message : "Failed to share keymap"
+        error instanceof Error ? error.message : "Failed to share keymap"
       );
     }
   };
 
   const handleReset = () => {
-    try {
-      setKeymapCollection({
-        appName: "",
-        layer1: initialState,
-        layer2: initialState,
-        layer3: initialState,
-      });
-    } catch (err) {
-      throw Error(
-        err instanceof Error ? err.message : "Failed to reset keymap"
-      );
-    }
+    if (pageKinds === "share") return;
+    updateCollection(() => normalizeKeymapCollection({}));
   };
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timeout = window.setTimeout(() => setToastMessage(null), 3200);
+    return () => window.clearTimeout(timeout);
+  }, [toastMessage]);
+
+  const actionButtons =
+    pageKinds === "share" ? null : (
+      <div className={actionGroup}>
+        <button className={dangerButton} onClick={handleReset}>
+          すべてクリア
+        </button>
+        <button className={primaryButton} onClick={handleSave}>
+          保存する
+        </button>
+        {pageKinds === "edit" && (
+          <button className={secondaryButton} onClick={handleShare}>
+            共有リンクを作成
+          </button>
+        )}
+      </div>
+    );
+
   return (
-    <div>
-      <DndProvider backend={HTML5Backend}>
-        <div
-          className={css({
-            display: "flex",
-            justifyContent: "center",
-            // alignItems: "center",
-            flexDirection: "column",
-            gap: "20px",
-          })}
-        >
-          <div
-            className={css({
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              paddingTop: "50px",
-            })}
-          >
-            <input
-              type="text"
-              placeholder="Keymap Name"
-              value={keymapCollection.appName}
-              onChange={(e) =>
-                setKeymapCollection((prev) => {
-                  return { ...prev, appName: e.target.value };
-                })
-              }
-              disabled={pageKinds === "share"}
-              className={css({
-                width: "400px",
-                maxWidth: "400px",
-                padding: "8px",
-                borderRadius: "0.375rem",
-                border: "1px solid",
-                backgroundColor: "#f5ebe3",
-                color: "#2b2727",
-              })}
-            />
+    <DndProvider backend={HTML5Backend}>
+      <div className={pageContainer}>
+        <div className={focusColumn}>
+          <header className={headerRow}>
+            <div className={headline}>
+              <input
+                className={nameInput}
+                type="text"
+                placeholder="キーマップの名称"
+                value={collection.appName}
+                onChange={(event) =>
+                  updateCollection((prev) => ({
+                    ...prev,
+                    appName: event.target.value,
+                  }))
+                }
+                disabled={pageKinds === "share"}
+              />
+              <div className={layerTabs} role="tablist">
+                {[1, 2, 3].map((layer) => {
+                  const isActive = activeLayer === layer;
+                  return (
+                    <button
+                      key={layer}
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveLayer(layer as 1 | 2 | 3)}
+                      className={`${layerButton} ${isActive ? layerButtonActive : ""}`}
+                      disabled={pageKinds === "share" && !isActive}
+                    >
+                      {layerLabels[layer as 1 | 2 | 3]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </header>
+
+          <section className={workspaceCard}>
             <Device
               pageKinds={pageKinds}
-              keymapCollection={keymapCollection}
-              setKeymapCollection={setKeymapCollection}
+              keymapCollection={collection}
+              setKeymapCollection={updateCollection}
               activeLayer={activeLayer}
-              setActiveLayer={setActiveLayer}
             />
-            <div className={buttonContainer}>
-              {pageKinds === "edit" ||
-                (pageKinds === "new" && (
-                  <button onClick={handleReset} className={dangerButton}>
-                    {" "}
-                    Reset
-                  </button>
-                ))}
-              {(pageKinds === "edit" || pageKinds === "new") && (
-                <button onClick={handleSave} className={saveButton}>
-                  Save
-                </button>
-              )}
-              {pageKinds === "edit" && (
-                <button onClick={handleShare} className={shareButton}>
-                  Share
-                </button>
-              )}
-            </div>
-          </div>
-          <div
-            className={css({
-              position: "fixed",
-              bottom: 0,
-              right: 0,
-              height: "250px",
-              transform: isCollapsed ? "translateY(210px)" : "translateY(0px)",
-              transition: "transform 0.3s ease",
-              width: "calc(100dvw - 350px)",
-            })}
-          >
-            <div
-              className={css({
-                height: "100%",
-                padding: "20px",
-              })}
-            >
-              {pageKinds !== "share" && (
-                <>
-                  <div
-                    className={css({
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: "20px",
-                    })}
-                  >
-                    <div>
-                      <h2>Movement Key</h2>
-                      <KeyMenu keys={movementKeys} />
-                    </div>
-                    <div>
-                      <h2>DPI Key</h2>
-                      <KeyMenu keys={dpiKeys} />
-                    </div>
-                    <div>
-                      <h2>Layer Key</h2>
-                      <KeyMenu keys={layerKeys} />
-                    </div>
-                    <div>
-                      <h2>Slot Key</h2>
-                      <KeyMenu keys={sloyKeys} />
-                    </div>
-                    <div>
-                      <h2>Axis Lock Key</h2>
-                      <KeyMenu keys={axisLockKeys} />
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className={css({
-                      position: "absolute",
-                      top: "-25px",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "50%",
-                      backgroundColor: "#606060",
-                      color: "#fff",
-                      border: "none",
-                      cursor: "pointer",
-                    })}
-                  >
-                    {isCollapsed ? "▲" : "▼"}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </DndProvider>
-      {shareLink && (
-        <div
-          className={css({
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          })}
-        >
-          <div
-            className={css({
-              backgroundColor: "#2b2727",
-              padding: "24px",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              minWidth: "320px",
-              fontFamily: "monospace",
-              position: "relative",
-            })}
-          >
-            <div
-              className={css({
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-              })}
-            >
-              <h2
-                className={css({
-                  margin: 0,
-                  fontSize: "18px",
-                })}
-              >
-                Copy the link to share!
-              </h2>
-            </div>
-            <pre
-              className={css({
-                backgroundColor: "#2d2d2d",
-                padding: "12px",
-                borderRadius: "4px",
-                overflowX: "auto",
-                fontSize: "14px",
-                margin: 0,
-              })}
-            >
-              <code
-                className={css({
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "8px",
-                })}
-              >
-                <div className={css({ overflowX: "scroll" })}>{shareLink}</div>
+
+            {actionButtons}
+
+            {pageKinds !== "share" && (
+              <div className={toolbar}>
                 <button
-                  className={css({
-                    cursor: "pointer",
-                    _hover: {
-                      color: "#a0a0a0",
-                    },
-                    _active: {
-                      color: "#606060",
-                      transform: "scale(0.95)",
-                    },
-                  })}
-                  onClick={() => {
-                    navigator.clipboard.writeText(shareLink);
-                  }}
+                  type="button"
+                  className={paletteTrigger}
+                  onClick={() => setPaletteOpen(true)}
                 >
-                  <Copy size={24} />
+                  <Library size={18} />
+                  ショートカットライブラリを開く
                 </button>
-              </code>
-            </pre>
-            <div
-              className={css({
-                display: "flex",
-                justifyContent: "flex-end",
-                marginTop: "16px",
-              })}
-            >
-              <button
-                onClick={() => setShareLink(null)}
-                className={css({
-                  padding: "6px 12px",
-                  borderRadius: "4px",
-                  backgroundColor: "#b13d57",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                })}
-              >
-                Close
-              </button>
+              </div>
+            )}
+          </section>
+        </div>
+
+        {shareLink && (
+          <div className={shareOverlay}>
+            <div className={shareDialog}>
+              <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
+                共有リンクをコピーしてください
+              </h2>
+              <div className={shareField}>
+                <span
+                  className={css({
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  })}
+                >
+                  {shareLink}
+                </span>
+                <button
+                  className={secondaryButton}
+                  onClick={() => navigator.clipboard.writeText(shareLink)}
+                >
+                  <Copy size={16} /> コピー
+                </button>
+              </div>
+              <div className={shareButtonRow}>
+                <button
+                  className={secondaryButton}
+                  onClick={() => setShareLink(null)}
+                >
+                  閉じる
+                </button>
+              </div>
             </div>
+          </div>
+        )}
+
+        <ShortcutDrawer
+          open={isPaletteOpen && pageKinds !== "share"}
+          search={paletteSearch}
+          onSearchChange={setPaletteSearch}
+          onClose={() => setPaletteOpen(false)}
+        />
+      </div>
+      {toastMessage && (
+        <div className={toastContainer} role="status" aria-live="polite">
+          <div className={toast}>
+            <Check size={18} />
+            <span>{toastMessage}</span>
           </div>
         </div>
       )}
-    </div>
+    </DndProvider>
   );
 };
