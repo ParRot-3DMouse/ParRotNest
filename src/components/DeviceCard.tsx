@@ -52,18 +52,6 @@ const cardTitle = css({
   fontWeight: "600",
 });
 
-const statusBadge = css({
-  fontSize: "12px",
-  fontWeight: "600",
-  padding: "4px 12px",
-  borderRadius: "999px",
-  letterSpacing: "0.01em",
-  background: "rgba(245,235,227,0.06)",
-  borderColor: "rgba(245,235,227,0.16)",
-  color: "rgba(245,235,227,0.65)",
-  border: "1px solid",
-});
-
 const deviceInfo = css({
   display: "flex",
   flexDirection: "column",
