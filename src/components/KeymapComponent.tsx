@@ -76,6 +76,7 @@ const layerTabs = css({
   padding: "4px",
   border: "1px solid rgba(245,235,227,0.14)",
   boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
+  gap: "8px",
 });
 
 const layerButton = css({
