@@ -85,7 +85,6 @@ const layerButton = css({
   fontWeight: "600",
   padding: "10px 18px",
   borderRadius: "10px",
-  border: "1px solid transparent",
   cursor: "pointer",
   transition: "all 0.18s ease",
   _hover: {
@@ -98,7 +97,8 @@ const layerButton = css({
 });
 
 const layerButtonActive = css({
-  background: "linear-gradient(135deg, rgba(177,61,87,0.85) 0%, rgba(216,102,136,0.9) 100%)",
+  background:
+    "linear-gradient(135deg, rgba(177,61,87,0.85) 0%, rgba(216,102,136,0.9) 100%)",
   color: "#fdf5f0",
   borderColor: "rgba(245,235,227,0.4)",
   boxShadow: "0 6px 18px rgba(177,61,87,0.24)",
