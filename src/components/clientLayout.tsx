@@ -58,25 +58,39 @@ const drawerOverlay = css({
   inset: 0,
   background: "rgba(0,0,0,0.45)",
   display: "flex",
-  justifyContent: "flex-end",
+  justifyContent: "flex-start",
   alignItems: "stretch",
   zIndex: 2000,
+  opacity: 0,
+  pointerEvents: "none",
+  transition: "opacity 0.25s ease",
+  '&[data-open="true"]': {
+    opacity: 1,
+    pointerEvents: "auto",
+  },
 });
 
 const drawerBackdrop = css({
   flex: 1,
+  order: 2,
 });
 
 const drawerPanel = css({
   width: "min(320px, 90vw)",
   background: "#2b2727",
-  borderLeft: "1px solid rgba(245,235,227,0.12)",
+  borderRight: "1px solid rgba(245,235,227,0.12)",
   padding: "20px",
   display: "flex",
   flexDirection: "column",
   overflowY: "auto",
   height: "100%",
-  boxShadow: "-12px 0 28px rgba(0,0,0,0.35)",
+  boxShadow: "12px 0 28px rgba(0,0,0,0.35)",
+  order: 1,
+  transform: "translateX(-100%)",
+  transition: "transform 0.25s ease",
+  '&[data-open="true"]': {
+    transform: "translateX(0)",
+  },
 });
 
 const drawerHeader = css({
@@ -173,10 +187,15 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
         )}
       </div>
 
-      {isCompact && drawerOpen && (
-        <div className={drawerOverlay} role="dialog" aria-modal="true">
+      {isCompact && (
+        <div
+          className={drawerOverlay}
+          data-open={drawerOpen}
+          role="dialog"
+          aria-modal="true"
+        >
           <div className={drawerBackdrop} onClick={() => setDrawerOpen(false)} />
-          <div className={drawerPanel}>
+          <div className={drawerPanel} data-open={drawerOpen}>
             <div className={drawerHeader}>
               <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
                 デバイス
