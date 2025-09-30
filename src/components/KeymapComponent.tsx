@@ -71,31 +71,37 @@ const nameInput = css({
 const layerTabs = css({
   display: "inline-flex",
   marginTop: "16px",
-  background: "rgba(245,235,227,0.04)",
+  background: "rgba(245,235,227,0.06)",
   borderRadius: "12px",
   padding: "4px",
-  border: "1px solid rgba(245,235,227,0.08)",
+  border: "1px solid rgba(245,235,227,0.14)",
+  boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
 });
 
 const layerButton = css({
-  border: "none",
   background: "transparent",
-  color: "rgba(245,235,227,0.65)",
+  color: "rgba(245,235,227,0.55)",
   fontSize: "14px",
   fontWeight: "600",
   padding: "10px 18px",
   borderRadius: "10px",
+  border: "1px solid transparent",
   cursor: "pointer",
-  transition: "all 0.15s ease",
+  transition: "all 0.18s ease",
   _hover: {
     color: "#f5ebe3",
+  },
+  _focusVisible: {
+    outline: "none",
+    boxShadow: "0 0 0 2px rgba(245,235,227,0.45)",
   },
 });
 
 const layerButtonActive = css({
-  background: "rgba(177,61,87,0.2)",
-  color: "#f5ebe3",
-  boxShadow: "0 0 12px rgba(177,61,87,0.35)",
+  background: "linear-gradient(135deg, rgba(177,61,87,0.85) 0%, rgba(216,102,136,0.9) 100%)",
+  color: "#fdf5f0",
+  borderColor: "rgba(245,235,227,0.4)",
+  boxShadow: "0 6px 18px rgba(177,61,87,0.24)",
 });
 
 const headline = css({
@@ -203,11 +209,6 @@ const paletteTrigger = css({
   _hover: {
     background: "rgba(245,235,227,0.16)",
   },
-});
-
-const infoText = css({
-  fontSize: "12px",
-  color: "rgba(245,235,227,0.6)",
 });
 
 const shareOverlay = css({
