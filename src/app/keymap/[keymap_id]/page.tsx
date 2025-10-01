@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-// import { css } from "../../../../styled-system/css";
-import { KeymapComponent } from "../../../components/KeymapComponent";
-import { clientApi } from "../../../lib/api/clientApi";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { KeymapComponent } from "../../../components/KeymapComponent";
 import { useKeymap } from "../../../components/provider/KeymapContext";
-import { normalizeKeymapCollection } from "../../../lib/device/normalize";
+import type { KeymapCollection } from "../../../lib/device/types";
+import { useKeymapLoader } from "../../../lib/hooks/useKeymapLoader";
 
 export default function KeymapPage({
   params,
@@ -15,37 +14,59 @@ export default function KeymapPage({
 }) {
   const { keymapCollection, setKeymapCollection } = useKeymap();
   const [activeLayer, setActiveLayer] = useState<1 | 2 | 3>(1);
-  const [keymap_id, setKeymap_id] = useState<string>("");
+  const [keymapId, setKeymapId] = useState<string>();
   const router = useRouter();
-  const api = clientApi();
 
-  const fetchKeymap = async () => {
-    try {
-      const { keymap_id } = await params;
-      setKeymap_id(keymap_id);
-      const res = await api.keymaps.getKeymapById({
-        keymap_id: keymap_id,
-      });
-      if (res) {
-        const receivedKeymap = normalizeKeymapCollection(res.keymap_json);
-        setKeymapCollection(receivedKeymap);
-      }
-    } catch (error) {
-      router.push("/404");
+  const handleLoaded = useCallback(
+    (collection: KeymapCollection) => {
+      setKeymapCollection(collection);
+    },
+    [setKeymapCollection]
+  );
+
+  const handleError = useCallback(
+    (error: unknown) => {
       console.error("Failed to fetch keymap:", error);
-    }
-  };
+      router.replace("/404");
+    },
+    [router]
+  );
 
   useEffect(() => {
-    fetchKeymap();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    let isSubscribed = true;
+
+    params
+      .then(({ keymap_id }) => {
+        if (!isSubscribed) return;
+        setKeymapId(keymap_id);
+      })
+      .catch((error) => {
+        if (!isSubscribed) return;
+        handleError(error);
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [handleError, params]);
+
+  useKeymapLoader({
+    kind: "edit",
+    id: keymapId,
+    onLoaded: handleLoaded,
+    onError: handleError,
+    enabled: Boolean(keymapId),
+  });
+
+  if (!keymapId) {
+    return null;
+  }
 
   return (
     <div>
       <KeymapComponent
         pageKinds="edit"
-        keymap_id={keymap_id}
+        keymap_id={keymapId}
         keymapCollection={keymapCollection}
         setKeymapCollection={setKeymapCollection}
         activeLayer={activeLayer}
