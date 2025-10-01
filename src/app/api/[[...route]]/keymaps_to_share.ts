@@ -46,7 +46,8 @@ const keymaps_to_share = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /keymaps_to_share/:share_id
@@ -66,7 +67,8 @@ const keymaps_to_share = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /keymaps_to_share/author/:author_id
@@ -87,7 +89,8 @@ const keymaps_to_share = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // DELETE /keymaps_to_share/:share_id
@@ -132,7 +135,9 @@ const keymaps_to_share = new Hono<{
         if (err instanceof z.ZodError) {
           return c.json({ error: "Invalid input", details: err.errors }, 400);
         }
-        return c.json({ error: err }, 500);
+        const message =
+          err instanceof Error ? err.message : JSON.stringify(err);
+        return c.json({ error: message }, 500);
       }
     }
   );

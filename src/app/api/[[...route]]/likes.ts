@@ -46,7 +46,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /likes/check/:share_id
@@ -71,7 +72,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /likes/share/:share_id
@@ -92,7 +94,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /likes/user/:user_id
@@ -122,7 +125,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // DELETE /likes/
@@ -145,7 +149,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   });
 
