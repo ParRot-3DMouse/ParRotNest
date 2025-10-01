@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { css } from "../../styled-system/css";
-import { Check, Copy, Library } from "lucide-react";
+import { Check, Library } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { useRouter } from "next/navigation";
-import { clientApi } from "../lib/api/clientApi";
-import { normalizeKeymapCollection } from "../lib/device/normalize";
 import type { KeymapCollection } from "../lib/device/types";
+import { useKeymapCollectionState } from "../lib/hooks/useKeymapCollectionState";
+import { useKeymapActions } from "../lib/hooks/useKeymapActions";
 import Device from "./device";
 import { ShortcutDrawer } from "./ShortcutDrawer";
+import { LayerTabs } from "./keymap/LayerTabs";
+import { ShareLinkDialog } from "./keymap/ShareLinkDialog";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -75,43 +76,6 @@ const nameInput = css({
   _disabled: {
     opacity: 0.6,
   },
-});
-
-const layerTabs = css({
-  display: "inline-flex",
-  marginTop: "12px",
-  background: "rgba(245,235,227,0.06)",
-  borderRadius: "12px",
-  padding: "4px",
-  border: "1px solid rgba(245,235,227,0.14)",
-  gap: "8px",
-  alignSelf: "flex-start",
-});
-
-const layerButton = css({
-  background: "transparent",
-  color: "rgba(245,235,227,0.55)",
-  fontSize: "14px",
-  fontWeight: "600",
-  padding: "10px 18px",
-  borderRadius: "10px",
-  cursor: "pointer",
-  transition: "all 0.18s ease",
-  _hover: {
-    color: "#f5ebe3",
-  },
-  _focusVisible: {
-    outline: "none",
-    boxShadow: "0 0 0 2px rgba(245,235,227,0.45)",
-  },
-});
-
-const layerButtonActive = css({
-  background:
-    "linear-gradient(135deg, rgba(177,61,87,0.85) 0%, rgba(216,102,136,0.9) 100%)",
-  color: "#fdf5f0",
-  borderColor: "rgba(245,235,227,0.4)",
-  boxShadow: "0 6px 18px rgba(177,61,87,0.24)",
 });
 
 const headline = css({
@@ -220,45 +184,6 @@ const paletteTrigger = css({
   },
 });
 
-const shareOverlay = css({
-  position: "fixed",
-  inset: 0,
-  background: "rgba(0,0,0,0.55)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 1500,
-});
-
-const shareDialog = css({
-  background: "#2b2727",
-  borderRadius: "16px",
-  padding: "28px",
-  width: "min(480px, 90vw)",
-  border: "1px solid rgba(245,235,227,0.12)",
-  display: "flex",
-  flexDirection: "column",
-  gap: "16px",
-});
-
-const shareField = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
-  padding: "12px",
-  borderRadius: "10px",
-  background: "rgba(245,235,227,0.05)",
-  border: "1px solid rgba(245,235,227,0.1)",
-  fontSize: "13px",
-  color: "#f5ebe3",
-});
-
-const shareButtonRow = css({
-  display: "flex",
-  justifyContent: "flex-end",
-  gap: "12px",
-});
-
 const toastContainer = css({
   position: "fixed",
   top: "24px",
@@ -282,99 +207,32 @@ const toast = css({
   boxShadow: "0 14px 28px rgba(0,0,0,0.25)",
 });
 
-const layerLabels: Record<1 | 2 | 3, string> = {
-  1: "Layer 1",
-  2: "Layer 2",
-  3: "Layer 3",
-};
-
 export const KeymapComponent: React.FC<KeymapComponentProps> = ({
-  keymap_id,
+  keymap_id: keymapId,
   keymapCollection,
   setKeymapCollection,
   activeLayer,
   setActiveLayer,
   pageKinds,
 }) => {
-  const router = useRouter();
-  const [shareLink, setShareLink] = useState<string | null>(null);
   const [isPaletteOpen, setPaletteOpen] = useState(false);
   const [paletteSearch, setPaletteSearch] = useState("");
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { collection, updateCollection, resetCollection } =
+    useKeymapCollectionState(keymapCollection, setKeymapCollection);
+
+  const { handleSave, handleShare, handleReset, shareLink, dismissShare, toastMessage } =
+    useKeymapActions({
+      pageKind: pageKinds,
+      collection,
+      keymapId,
+      onReset: resetCollection,
+    });
 
   useEffect(() => {
     if (!isPaletteOpen) {
       setPaletteSearch("");
     }
   }, [isPaletteOpen]);
-
-  const collection = useMemo(
-    () => normalizeKeymapCollection(keymapCollection),
-    [keymapCollection]
-  );
-
-  const updateCollection: Dispatch<SetStateAction<KeymapCollection>> = (
-    value
-  ) => {
-    setKeymapCollection((prev) => {
-      const normalizedPrev = normalizeKeymapCollection(prev);
-      if (typeof value === "function") {
-        const next = value(normalizedPrev);
-        return normalizeKeymapCollection(next);
-      }
-      return normalizeKeymapCollection(value);
-    });
-  };
-
-  const handleSave = async () => {
-    try {
-      if (pageKinds === "new") {
-        const res = await clientApi().keymaps.postKeymap({
-          keymap_name: collection.appName,
-          keymap_json: collection,
-        });
-        router.push(`/keymap/${res.keymap_id}`);
-      } else if (pageKinds === "edit") {
-        await clientApi().keymaps.putKeymap({
-          keymap_id,
-          keymap_name: collection.appName,
-          keymap_json: JSON.stringify(collection),
-        });
-        setToastMessage("保存しました");
-      }
-    } catch (error) {
-      throw Error(
-        error instanceof Error ? error.message : "Failed to save keymap"
-      );
-    }
-  };
-
-  const handleShare = async () => {
-    if (pageKinds !== "edit") return;
-    try {
-      const res = await clientApi().keymaps_to_share.postKeymapToShare({
-        keymap_name: collection.appName,
-        keymap_json: collection,
-      });
-      const url = `${window.location.origin}/keymap/share/${res.share_id}`;
-      setShareLink(url);
-    } catch (error) {
-      throw Error(
-        error instanceof Error ? error.message : "Failed to share keymap"
-      );
-    }
-  };
-
-  const handleReset = () => {
-    if (pageKinds === "share") return;
-    updateCollection(() => normalizeKeymapCollection({}));
-  };
-
-  useEffect(() => {
-    if (!toastMessage) return;
-    const timeout = window.setTimeout(() => setToastMessage(null), 3200);
-    return () => window.clearTimeout(timeout);
-  }, [toastMessage]);
 
   const actionButtons =
     pageKinds === "share" ? null : (
@@ -412,23 +270,11 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
                 }
                 disabled={pageKinds === "share"}
               />
-              <div className={layerTabs} role="tablist">
-                {[1, 2, 3].map((layer) => {
-                  const isActive = activeLayer === layer;
-                  return (
-                    <button
-                      key={layer}
-                      role="tab"
-                      aria-selected={isActive}
-                      onClick={() => setActiveLayer(layer as 1 | 2 | 3)}
-                      className={`${layerButton} ${isActive ? layerButtonActive : ""}`}
-                      disabled={pageKinds === "share" && !isActive}
-                    >
-                      {layerLabels[layer as 1 | 2 | 3]}
-                    </button>
-                  );
-                })}
-              </div>
+              <LayerTabs
+                activeLayer={activeLayer}
+                disabled={pageKinds === "share"}
+                onSelect={(layer) => setActiveLayer(layer)}
+              />
             </div>
           </header>
 
@@ -457,40 +303,7 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
           </section>
         </div>
 
-        {shareLink && (
-          <div className={shareOverlay}>
-            <div className={shareDialog}>
-              <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
-                共有リンクをコピーしてください
-              </h2>
-              <div className={shareField}>
-                <span
-                  className={css({
-                    flex: 1,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  })}
-                >
-                  {shareLink}
-                </span>
-                <button
-                  className={secondaryButton}
-                  onClick={() => navigator.clipboard.writeText(shareLink)}
-                >
-                  <Copy size={16} /> コピー
-                </button>
-              </div>
-              <div className={shareButtonRow}>
-                <button
-                  className={secondaryButton}
-                  onClick={() => setShareLink(null)}
-                >
-                  閉じる
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {shareLink && <ShareLinkDialog link={shareLink} onClose={dismissShare} />}
 
         <ShortcutDrawer
           open={isPaletteOpen && pageKinds !== "share"}
