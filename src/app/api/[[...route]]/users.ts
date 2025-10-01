@@ -105,7 +105,7 @@ const users = new Hono<{
       if (authedUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 403);
       }
-      const { user_name } = updateUserSchema.parse(c.req.json());
+      const { user_name } = updateUserSchema.parse(await c.req.json());
       if (!user_name) {
         return c.json({ error: "No fields to update" }, 400);
       }
