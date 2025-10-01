@@ -1,9 +1,8 @@
-import { hc } from "hono/client";
-import type { AppType } from "../../../app/api/[[...route]]/route";
 import type { KeymapToShare, User } from "../../../app/api/types";
+import type { AppClient } from "../appClient";
+import { parseOkJson } from "./utils";
 
-export const LikesAPI = () => {
-  const appClient = hc<AppType>("/");
+export const LikesAPI = (appClient: AppClient) => {
   return {
     postLike: async ({ share_id }: { share_id: string }) => {
       const res = await appClient.api.likes.$post({
@@ -11,11 +10,7 @@ export const LikesAPI = () => {
           share_id: share_id,
         },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
     // 投稿に対するいいねを取得
     getLikesCheck: async ({
@@ -26,12 +21,8 @@ export const LikesAPI = () => {
       const res = await appClient.api.likes.check[":share_id"].$get({
         param: { share_id: share_id },
       });
-      if (res.ok) {
-        const { is_liked }: { is_liked: boolean } = await res.json();
-        return is_liked;
-      } else {
-        throw new Error(await res.text());
-      }
+      const { is_liked } = await parseOkJson<{ is_liked: boolean }>(res);
+      return is_liked;
     },
     // 投稿に対するいいねの一覧を取得
     getLikesByShare: async ({
@@ -42,13 +33,8 @@ export const LikesAPI = () => {
       const res = await appClient.api.likes.share[":share_id"].$get({
         param: { share_id: share_id },
       });
-      if (res.ok) {
-        const { results }: { results: User[] } = await res.json();
-
-        return results;
-      } else {
-        throw new Error(await res.text());
-      }
+      const { results } = await parseOkJson<{ results: User[] }>(res);
+      return results;
     },
     getLikesByUser: async ({
       user_id,
@@ -58,13 +44,8 @@ export const LikesAPI = () => {
       const res = await appClient.api.likes.user[":user_id"].$get({
         param: { user_id: user_id },
       });
-      if (res.ok) {
-        const { results }: { results: KeymapToShare[] } = await res.json();
-
-        return results;
-      } else {
-        throw new Error(await res.text());
-      }
+      const { results } = await parseOkJson<{ results: KeymapToShare[] }>(res);
+      return results;
     },
     deleteLike: async ({ share_id }: { share_id: string }) => {
       const res = await appClient.api.likes.$delete({
@@ -72,11 +53,7 @@ export const LikesAPI = () => {
           share_id: share_id,
         },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
   };
 };

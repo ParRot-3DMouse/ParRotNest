@@ -1,10 +1,9 @@
-import { hc } from "hono/client";
-import type { AppType } from "../../../app/api/[[...route]]/route";
 import type { KeymapCollection } from "../../device/types";
 import { notFound } from "next/navigation";
+import type { AppClient } from "../appClient";
+import { buildResponseError, parseOkJson } from "./utils";
 
-export const KeymapsToShareAPI = () => {
-  const appClient = hc<AppType>("/");
+export const KeymapsToShareAPI = (appClient: AppClient) => {
   return {
     postKeymapToShare: async ({
       keymap_name,
@@ -19,11 +18,7 @@ export const KeymapsToShareAPI = () => {
           keymap_json: JSON.stringify(keymap_json),
         },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson<{ status: string; share_id: string }>(res);
     },
     getKeymapToShareById: async ({
       share_id,
@@ -37,23 +32,24 @@ export const KeymapsToShareAPI = () => {
       const res = await appClient.api.keymaps_to_share[":share_id"].$get({
         param: { share_id: share_id },
       });
-      if (res.ok) {
-        try {
-          const data = await res.json();
-          return {
-            share_id: data[0].share_id,
-            keymap_name: data[0].keymap_name,
-            keymap_json: JSON.parse(data[0].keymap_json),
-          };
-        } catch (error) {
+      try {
+        if (!res.ok) {
           if (res.status === 404) {
             notFound();
           }
-          throw error;
+          throw await buildResponseError(res);
         }
-      } else {
-        notFound();
-        throw new Error(await res.text());
+        const data = await res.json();
+        return {
+          share_id: data[0].share_id,
+          keymap_name: data[0].keymap_name,
+          keymap_json: JSON.parse(data[0].keymap_json),
+        };
+      } catch (error) {
+        if (res.status === 404) {
+          notFound();
+        }
+        throw error;
       }
     },
     getKeymapsToShareByUser: async ({
@@ -72,16 +68,13 @@ export const KeymapsToShareAPI = () => {
       ].$get({
         param: { author_id: author_id },
       });
-      if (res.ok) {
-        try {
-          return await res.json();
-        } catch (error) {
+      try {
+        return await parseOkJson(res);
+      } catch (error) {
+        if (res.status === 404) {
           notFound();
-          throw error;
         }
-      } else {
-        notFound();
-        throw new Error(await res.text());
+        throw error;
       }
     },
     deleteKeymapToShare: async ({
@@ -97,11 +90,7 @@ export const KeymapsToShareAPI = () => {
           author_id: author_id,
         },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
   };
 };

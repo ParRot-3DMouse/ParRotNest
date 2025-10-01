@@ -51,7 +51,8 @@ const keymaps = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /keymaps/user/:user_id
@@ -82,7 +83,8 @@ const keymaps = new Hono<{
           400
         );
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /keymaps/:keymap_id
@@ -112,7 +114,8 @@ const keymaps = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid keymap_id", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // PUT /keymaps/:keymap_id
@@ -154,7 +157,7 @@ const keymaps = new Hono<{
         params.push(partialData.keymap_json);
       }
 
-      const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")} WHERE keymap_id = ?${setClauses.length + 1} AND user_id = ?${setClauses.length + 2}`;
+      const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE keymap_id = ?${setClauses.length + 1} AND user_id = ?${setClauses.length + 2}`;
       params.push(keymap_id, authUserId);
 
       await process.env.DB.prepare(updateSql)
@@ -166,7 +169,8 @@ const keymaps = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // DELETE /keymaps/:keymap_id
@@ -202,7 +206,8 @@ const keymaps = new Hono<{
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid keymap_id", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   });
 

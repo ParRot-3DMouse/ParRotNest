@@ -1,8 +1,7 @@
-import type { AppType } from "../../../app/api/[[...route]]/route";
-import { hc } from "hono/client";
+import type { AppClient } from "../appClient";
+import { parseOkJson } from "./utils";
 
-export const UsersAPI = () => {
-  const appClient = hc<AppType>("/");
+export const UsersAPI = (appClient: AppClient) => {
   return {
     postUser: async ({
       user_email,
@@ -17,21 +16,13 @@ export const UsersAPI = () => {
           user_name: user_name,
         },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson<{ status: string; user_id?: string }>(res);
     },
     getUser: async ({ user_id }: { user_id: string }) => {
       const res = await appClient.api.users[":user_id"].$get({
         param: { user_id: user_id },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
     updateUser: async ({
       user_id,
@@ -46,21 +37,13 @@ export const UsersAPI = () => {
           user_name: user_name,
         },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
     deleteUser: async ({ user_id }: { user_id: string }) => {
       const res = await appClient.api.users[":user_id"].$delete({
         param: { user_id: user_id },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
   };
 };

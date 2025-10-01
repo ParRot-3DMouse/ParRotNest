@@ -46,7 +46,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /likes/check/:share_id
@@ -71,7 +72,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /likes/share/:share_id
@@ -92,7 +94,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // GET /likes/user/:user_id
@@ -112,7 +115,7 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
       const { results }: { results: KeymapToShare[] } =
         await process.env.DB.prepare(
-          `SELECT keymaps_to_share.share_id, keymaps_to_share.keymap_name, keymaps_to_share.keymap_json, keymaps_to_share.author_id, keymaps_to_share.created_at, keymaps_to_share.update_at FROM likes JOIN keymaps_to_share ON likes.share_id = keymaps_to_share.share_id WHERE likes.user_id = ?1`
+          `SELECT keymaps_to_share.share_id, keymaps_to_share.keymap_name, keymaps_to_share.keymap_json, keymaps_to_share.author_id, keymaps_to_share.created_at, keymaps_to_share.updated_at FROM likes JOIN keymaps_to_share ON likes.share_id = keymaps_to_share.share_id WHERE likes.user_id = ?1`
         )
           .bind(user_id)
           .all();
@@ -122,7 +125,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   })
   // DELETE /likes/
@@ -145,7 +149,8 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (err instanceof z.ZodError) {
         return c.json({ error: "Invalid input", details: err.errors }, 400);
       }
-      return c.json({ error: err }, 500);
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
+      return c.json({ error: message }, 500);
     }
   });
 

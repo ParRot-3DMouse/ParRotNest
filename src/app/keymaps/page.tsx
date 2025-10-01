@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { css } from "../../../styled-system/css";
-import { clientApi } from "../../lib/api/clientApi";
 import { useUser } from "../../components/provider/UserContext";
-import type { KeymapToShare } from "../api/types";
+import { clientApi } from "../../lib/api/clientApi";
 import { SectionHeader } from "../../components/common/SectionHeader";
 import { SummaryCard } from "../../components/mypage/SummaryCard";
-import { LikeCard } from "../../components/likes/LikeCard";
+import { KeymapCard } from "../../components/keymaps/KeymapCard";
+
+type SortOption = "recent" | "oldest" | "name";
+
+interface KeymapItem {
+  keymap_id: string;
+  keymap_name: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const container = css({
   display: "flex",
@@ -76,7 +85,17 @@ const emptyState = css({
   alignItems: "center",
 });
 
-type SortOption = "recent" | "oldest";
+const linkButton = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "6px",
+  color: "rgba(245,235,227,0.9)",
+  textDecoration: "none",
+  fontSize: "13px",
+  _hover: {
+    color: "#f5ebe3",
+  },
+});
 
 const formatDate = (iso?: string) => {
   if (!iso) return "";
@@ -85,67 +104,59 @@ const formatDate = (iso?: string) => {
   return date.toLocaleDateString();
 };
 
-export default function LikesPage() {
+export default function KeymapPage() {
   const { userId } = useUser();
-  const api = clientApi();
-  const [likeKeymaps, setLikeKeymaps] = useState<KeymapToShare[]>([]);
+  const api = useMemo(() => clientApi(), []);
+  const [keymaps, setKeymaps] = useState<KeymapItem[]>([]);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
-  const [busyShareId, setBusyShareId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchLikesList = async () => {
+    const fetchOwnKeymaps = async () => {
       try {
         if (!userId) return;
-        const res = await api.likes.getLikesByUser({ user_id: userId });
+        const res = await api.keymaps.getKeymapsByUser({ user_id: userId });
         if (res) {
-          setLikeKeymaps(res);
+          setKeymaps(
+            res.map((item) => ({
+              keymap_id: item.keymap_id,
+              keymap_name: item.keymap_name,
+              created_at: item.created_at,
+              updated_at: item.updated_at,
+            }))
+          );
         }
       } catch (error) {
-        console.error("Failed to fetch likes:", error);
+        console.error("Failed to fetch own keymaps:", error);
       }
     };
-    fetchLikesList();
+    fetchOwnKeymaps();
   }, [api, userId]);
 
   const filtered = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     const base = keyword
-      ? likeKeymaps.filter((item) => {
-          const title = item.keymap_name?.toLowerCase() ?? "";
-          const author = item.author_id?.toLowerCase() ?? "";
-          return title.includes(keyword) || author.includes(keyword);
-        })
-      : likeKeymaps;
+      ? keymaps.filter(
+          (item) =>
+            item.keymap_name?.toLowerCase().includes(keyword) ||
+            item.keymap_id.includes(keyword)
+        )
+      : keymaps;
 
-    const sorter = [...base].sort((a, b) => {
+    return [...base].sort((a, b) => {
+      if (sortBy === "name") {
+        return a.keymap_name.localeCompare(b.keymap_name);
+      }
       const dateA = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
       const dateB = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
       return sortBy === "recent" ? dateB - dateA : dateA - dateB;
     });
+  }, [keymaps, search, sortBy]);
 
-    return sorter;
-  }, [likeKeymaps, search, sortBy]);
-
-  const handleUnlike = async (shareId: string) => {
-    if (!userId) return;
-    try {
-      setBusyShareId(shareId);
-      await api.likes.deleteLike({ share_id: shareId });
-      setLikeKeymaps((prev) =>
-        prev.filter((item) => item.share_id !== shareId)
-      );
-    } catch (error) {
-      console.error("Failed to unlike", error);
-    } finally {
-      setBusyShareId((prev) => (prev === shareId ? null : prev));
-    }
-  };
-
-  const totals = likeKeymaps.length;
-  const latestDate = likeKeymaps.length
+  const totals = keymaps.length;
+  const latestUpdate = keymaps.length
     ? formatDate(
-        likeKeymaps
+        keymaps
           .map((item) => item.updated_at ?? item.created_at)
           .filter(Boolean)
           .sort(
@@ -157,20 +168,20 @@ export default function LikesPage() {
 
   return (
     <div className={container}>
-      <SectionHeader title="Likes" />
+      <SectionHeader title="Keymaps" />
 
       <div className={summaryGrid}>
         <SummaryCard
-          title="いいねしたキーマップ"
+          title="保存済み"
           value={totals}
-          actions={<span>最新のいいね: {latestDate}</span>}
+          actions={<span>最終更新: {latestUpdate}</span>}
         />
       </div>
 
       <div className={toolbar}>
         <input
           className={searchInput}
-          placeholder="キーマップ名や作者IDで検索"
+          placeholder="キーマップ名やIDで検索"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
@@ -181,35 +192,39 @@ export default function LikesPage() {
         >
           <option value="recent">最新順</option>
           <option value="oldest">古い順</option>
+          <option value="name">名前順</option>
         </select>
       </div>
 
       {filtered.length === 0 ? (
         <div className={emptyState}>
-          {likeKeymaps.length === 0 ? (
+          {keymaps.length === 0 ? (
             <>
               <p>
-                気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。
+                保存したキーマップを修正・削除・共有できます。まずは新しいキーマップを作成してみましょう。
               </p>
+              <Link href="/keymaps/new" className={linkButton}>
+                新しいキーマップを作る
+              </Link>
             </>
           ) : (
             <>
-              <p>条件に一致するキーマップが見つかりませんでした。</p>
+              <p>条件に一致するキーマップがありません。</p>
+              <Link href="/keymaps/new" className={linkButton}>
+                新しいキーマップを作る
+              </Link>
             </>
           )}
         </div>
       ) : (
         <div className={grid}>
-          {filtered.map((item) => (
-            <LikeCard
-              key={item.share_id}
-              title={item.keymap_name}
-              author={item.author_id}
-              createdAt={item.created_at}
-              updatedAt={item.updated_at}
-              shareId={item.share_id}
-              onUnlike={() => handleUnlike(item.share_id)}
-              disabling={busyShareId === item.share_id}
+          {filtered.map((keymap) => (
+            <KeymapCard
+              key={keymap.keymap_id}
+              keymapId={keymap.keymap_id}
+              name={keymap.keymap_name}
+              createdAt={keymap.created_at}
+              updatedAt={keymap.updated_at}
             />
           ))}
         </div>

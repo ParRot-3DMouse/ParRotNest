@@ -44,11 +44,11 @@ export const HeaderMenu: React.FC = () => {
     <header className={headerContainer}>
       <div className={appName}>ParRotNest</div>
       <nav className={navLinks}>
-        <Link href="/keymap/new" className={linkStyle}>
+        <Link href="/keymaps/new" className={linkStyle}>
           <FilePlus2 size={28} />
           <p>New Keymap</p>
         </Link>
-        <Link href="/keymap" className={linkStyle}>
+        <Link href="/keymaps" className={linkStyle}>
           <Keyboard size={28} />
           <p>Keymaps</p>
         </Link>
