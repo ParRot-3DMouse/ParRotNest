@@ -1,9 +1,8 @@
-import { hc } from "hono/client";
-import type { AppType } from "../../../app/api/[[...route]]/route";
 import type { KeymapCollection } from "../../device/types";
+import type { AppClient } from "../appClient";
+import { buildResponseError, parseOkJson } from "./utils";
 
-export const KeymapsAPI = () => {
-  const appClient = hc<AppType>("/");
+export const KeymapsAPI = (appClient: AppClient) => {
   return {
     postKeymap: async ({
       keymap_name,
@@ -18,15 +17,7 @@ export const KeymapsAPI = () => {
           keymap_json: JSON.stringify(keymap_json),
         },
       });
-      if (res.ok) {
-        try {
-          return await res.json();
-        } catch (error) {
-          throw error;
-        }
-      } else {
-        throw new Error(`Error: ${res.status} - ${await res.text()}`);
-      }
+      return await parseOkJson<{ status: string; keymap_id: string }>(res);
     },
     getKeymapById: async ({
       keymap_id,
@@ -40,20 +31,15 @@ export const KeymapsAPI = () => {
       const res = await appClient.api.keymaps[":keymap_id"].$get({
         param: { keymap_id: keymap_id },
       });
-      if (res.ok) {
-        try {
-          const data = await res.json();
-          return {
-            keymap_id: data[0].keymap_id,
-            keymap_name: data[0].keymap_name,
-            keymap_json: JSON.parse(data[0].keymap_json),
-          };
-        } catch (error) {
-          throw error;
-        }
-      } else {
-        throw new Error(`Error: ${res.status} - ${await res.text()}`);
+      if (!res.ok) {
+        throw await buildResponseError(res);
       }
+      const data = await res.json();
+      return {
+        keymap_id: data[0].keymap_id,
+        keymap_name: data[0].keymap_name,
+        keymap_json: JSON.parse(data[0].keymap_json),
+      };
     },
     getKeymapsByUser: async ({
       user_id,
@@ -72,24 +58,19 @@ export const KeymapsAPI = () => {
       const res = await appClient.api.keymaps.user[":user_id"].$get({
         param: { user_id: user_id },
       });
-      if (res.ok) {
-        try {
-          const data = await res.json();
-          const formattedData = data.map((item) => ({
-            keymap_id: item.keymap_id,
-            keymap_name: item.keymap_name,
-            keymap_json: JSON.parse(item.keymap_json),
-            user_id: item.user_id,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-          }));
-          return formattedData;
-        } catch (error) {
-          throw error;
-        }
-      } else {
-        throw new Error(`Error: ${res.status} - ${await res.text()}`);
+      if (!res.ok) {
+        throw await buildResponseError(res);
       }
+      const data = await res.json();
+      const formattedData = data.map((item: any) => ({
+        keymap_id: item.keymap_id,
+        keymap_name: item.keymap_name,
+        keymap_json: JSON.parse(item.keymap_json),
+        user_id: item.user_id,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }));
+      return formattedData;
     },
     putKeymap: async ({
       keymap_id,
@@ -107,25 +88,13 @@ export const KeymapsAPI = () => {
           keymap_json: keymap_json as unknown as string,
         },
       });
-      if (res.ok) {
-        try {
-          return await res.json();
-        } catch (error) {
-          throw error;
-        }
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
     deleteKeymap: async ({ keymap_id }: { keymap_id: string }) => {
       const res = await appClient.api.keymaps[":keymap_id"].$delete({
         param: { keymap_id: keymap_id },
       });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        throw new Error(await res.text());
-      }
+      return await parseOkJson(res);
     },
   };
 };
