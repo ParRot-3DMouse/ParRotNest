@@ -11,8 +11,8 @@ import { useKeymapCollectionState } from "../lib/hooks/useKeymapCollectionState"
 import { useKeymapActions } from "../lib/hooks/useKeymapActions";
 import Device from "./device";
 import { ShortcutDrawer } from "./ShortcutDrawer";
-import { LayerTabs } from "./keymap/LayerTabs";
-import { ShareLinkDialog } from "./keymap/ShareLinkDialog";
+import { LayerTabs } from "./keymaps/LayerTabs";
+import { ShareLinkDialog } from "./keymaps/ShareLinkDialog";
 
 interface KeymapComponentBaseProps {
   keymapCollection: KeymapCollection;
@@ -220,13 +220,19 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
   const { collection, updateCollection, resetCollection } =
     useKeymapCollectionState(keymapCollection, setKeymapCollection);
 
-  const { handleSave, handleShare, handleReset, shareLink, dismissShare, toastMessage } =
-    useKeymapActions({
-      pageKind: pageKinds,
-      collection,
-      keymapId,
-      onReset: resetCollection,
-    });
+  const {
+    handleSave,
+    handleShare,
+    handleReset,
+    shareLink,
+    dismissShare,
+    toastMessage,
+  } = useKeymapActions({
+    pageKind: pageKinds,
+    collection,
+    keymapId,
+    onReset: resetCollection,
+  });
 
   useEffect(() => {
     if (!isPaletteOpen) {
@@ -303,7 +309,9 @@ export const KeymapComponent: React.FC<KeymapComponentProps> = ({
           </section>
         </div>
 
-        {shareLink && <ShareLinkDialog link={shareLink} onClose={dismissShare} />}
+        {shareLink && (
+          <ShareLinkDialog link={shareLink} onClose={dismissShare} />
+        )}
 
         <ShortcutDrawer
           open={isPaletteOpen && pageKinds !== "share"}

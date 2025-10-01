@@ -110,21 +110,27 @@ export const LikeCard: FC<LikeCardProps> = ({
     <article className={card}>
       <div className={titleRow}>
         <h3 className={titleStyle}>{title}</h3>
-        <Link href={`/keymap/share/${shareId}`} className={linkButton}>
+        <Link href={`/keymaps/share/${shareId}`} className={linkButton}>
           詳細を見る <ArrowUpRight size={16} />
         </Link>
       </div>
       <div className={metaList}>
         <span>作者ID: {author}</span>
         {updatedAt && <span>最終更新: {formatDate(updatedAt)}</span>}
-        {!updatedAt && createdAt && <span>作成日: {formatDate(createdAt)}</span>}
+        {!updatedAt && createdAt && (
+          <span>作成日: {formatDate(createdAt)}</span>
+        )}
       </div>
       <div className={actionRow}>
-        <Link href={`/keymap/share/${shareId}`} className={linkButton}>
+        <Link href={`/keymaps/share/${shareId}`} className={linkButton}>
           共有ページへ移動 <ArrowUpRight size={16} />
         </Link>
         {onUnlike && (
-          <button className={secondaryButton} onClick={() => onUnlike()} disabled={disabling}>
+          <button
+            className={secondaryButton}
+            onClick={() => onUnlike()}
+            disabled={disabling}
+          >
             いいねを外す
           </button>
         )}

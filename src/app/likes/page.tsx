@@ -170,14 +170,7 @@ export default function LikesPage() {
 
   return (
     <div className={container}>
-      <SectionHeader
-        title="Likes"
-        actions={
-          <Link href="/keymap" className={linkButton}>
-            新しいキーマップを探す
-          </Link>
-        }
-      />
+      <SectionHeader title="Likes" />
 
       <div className={summaryGrid}>
         <SummaryCard
@@ -208,7 +201,9 @@ export default function LikesPage() {
         <div className={emptyState}>
           {likeKeymaps.length === 0 ? (
             <>
-              <p>気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。</p>
+              <p>
+                気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。
+              </p>
               <Link href="/keymap" className={linkButton}>
                 公開キーマップを探しに行く
               </Link>

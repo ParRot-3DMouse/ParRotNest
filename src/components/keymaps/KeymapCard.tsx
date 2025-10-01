@@ -82,7 +82,7 @@ export const KeymapCard: FC<KeymapCardProps> = ({
         <span>最終更新: {formatDate(updatedAt)}</span>
         <span>作成日: {formatDate(createdAt)}</span>
       </div>
-      <Link href={`/keymap/${keymapId}`} className={linkButton}>
+      <Link href={`/keymaps/${keymapId}`} className={linkButton}>
         編集ページを開く <PenSquare size={16} />
       </Link>
     </article>

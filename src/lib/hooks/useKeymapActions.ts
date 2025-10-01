@@ -35,7 +35,10 @@ export const useKeymapActions = ({
 
   useEffect(() => {
     if (!toastMessage) return;
-    const timeout = window.setTimeout(() => setToastMessage(null), TOAST_DISMISS_DELAY);
+    const timeout = window.setTimeout(
+      () => setToastMessage(null),
+      TOAST_DISMISS_DELAY
+    );
     return () => window.clearTimeout(timeout);
   }, [toastMessage]);
 
@@ -46,7 +49,7 @@ export const useKeymapActions = ({
           keymap_name: collection.appName,
           keymap_json: collection,
         });
-        router.push(`/keymap/${res.keymap_id}`);
+        router.push(`/keymaps/${res.keymap_id}`);
         return;
       }
 
@@ -72,7 +75,7 @@ export const useKeymapActions = ({
         keymap_name: collection.appName,
         keymap_json: collection,
       });
-      const url = `${window.location.origin}/keymap/share/${res.share_id}`;
+      const url = `${window.location.origin}/keymaps/share/${res.share_id}`;
       setShareLink(url);
     } catch (error) {
       throw new Error(

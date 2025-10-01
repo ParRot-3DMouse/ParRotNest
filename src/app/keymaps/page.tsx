@@ -7,7 +7,7 @@ import { useUser } from "../../components/provider/UserContext";
 import { clientApi } from "../../lib/api/clientApi";
 import { SectionHeader } from "../../components/common/SectionHeader";
 import { SummaryCard } from "../../components/mypage/SummaryCard";
-import { KeymapCard } from "../../components/keymap/KeymapCard";
+import { KeymapCard } from "../../components/keymaps/KeymapCard";
 
 type SortOption = "recent" | "oldest" | "name";
 
@@ -168,14 +168,7 @@ export default function KeymapPage() {
 
   return (
     <div className={container}>
-      <SectionHeader
-        title="Keymaps"
-        actions={
-          <Link href="/keymap/new" className={linkButton}>
-            新しいキーマップを作成
-          </Link>
-        }
-      />
+      <SectionHeader title="Keymaps" />
 
       <div className={summaryGrid}>
         <SummaryCard
@@ -207,15 +200,17 @@ export default function KeymapPage() {
         <div className={emptyState}>
           {keymaps.length === 0 ? (
             <>
-              <p>保存したキーマップを修正・削除・共有できます。まずは新しいキーマップを作成してみましょう。</p>
-              <Link href="/keymap/new" className={linkButton}>
+              <p>
+                保存したキーマップを修正・削除・共有できます。まずは新しいキーマップを作成してみましょう。
+              </p>
+              <Link href="/keymaps/new" className={linkButton}>
                 新しいキーマップを作る
               </Link>
             </>
           ) : (
             <>
               <p>条件に一致するキーマップがありません。</p>
-              <Link href="/keymap/new" className={linkButton}>
+              <Link href="/keymaps/new" className={linkButton}>
                 新しいキーマップを作る
               </Link>
             </>

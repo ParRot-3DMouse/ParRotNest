@@ -136,7 +136,7 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
     [setKeymapCollection]
   );
 
-  const isShareView = pathname.startsWith("/keymap/share");
+  const isShareView = pathname.startsWith("/keymaps/share");
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 950px)");
@@ -181,7 +181,10 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
       <div className={contentStyle}>
         {children}
         {isCompact && (
-          <button className={floatingButton} onClick={() => setDrawerOpen(true)}>
+          <button
+            className={floatingButton}
+            onClick={() => setDrawerOpen(true)}
+          >
             <PanelLeftOpen size={18} /> デバイス
           </button>
         )}
@@ -194,13 +197,19 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
           role="dialog"
           aria-modal="true"
         >
-          <div className={drawerBackdrop} onClick={() => setDrawerOpen(false)} />
+          <div
+            className={drawerBackdrop}
+            onClick={() => setDrawerOpen(false)}
+          />
           <div className={drawerPanel} data-open={drawerOpen}>
             <div className={drawerHeader}>
               <h2 className={css({ fontSize: "18px", fontWeight: "700" })}>
                 デバイス
               </h2>
-              <button className={closeButton} onClick={() => setDrawerOpen(false)}>
+              <button
+                className={closeButton}
+                onClick={() => setDrawerOpen(false)}
+              >
                 <X size={16} /> 閉じる
               </button>
             </div>

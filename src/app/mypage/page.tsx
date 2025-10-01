@@ -71,8 +71,14 @@ export default function MyPage() {
   const [profileName, setProfileName] = useState<string>("");
   const api = useMemo(() => clientApi(), []);
 
-  const { isLoading, error, keymaps, sharedKeymaps, likedKeymaps, userProfile } =
-    useMyPageData({ userId });
+  const {
+    isLoading,
+    error,
+    keymaps,
+    sharedKeymaps,
+    likedKeymaps,
+    userProfile,
+  } = useMyPageData({ userId });
 
   useEffect(() => {
     if (userProfile?.user_name) {
@@ -120,28 +126,30 @@ export default function MyPage() {
   const recentKeymaps = keymaps.slice(0, 3).map((item) => ({
     id: item.keymap_id,
     title: item.keymap_name || "無題のキーマップ",
-    href: `/keymap/${item.keymap_id}`,
+    href: `/keymaps/${item.keymap_id}`,
     meta: `更新: ${formatDateTime(item.updated_at || item.created_at)}`,
   }));
 
   const recentShared = sharedKeymaps.slice(0, 3).map((item) => ({
     id: item.share_id,
     title: item.keymap_name,
-    href: `/keymap/share/${item.share_id}`,
+    href: `/keymaps/share/${item.share_id}`,
     meta: `共有: ${formatDateTime(item.updated_at || item.created_at)}`,
   }));
 
   const recentLikes = likedKeymaps.slice(0, 3).map((item) => ({
     id: item.share_id,
     title: item.keymap_name,
-    href: `/keymap/share/${item.share_id}`,
+    href: `/keymaps/share/${item.share_id}`,
     meta: `作者ID: ${item.author_id}`,
   }));
 
   return (
     <div className={pageContainer}>
       <ProfileCard
-        name={profileName || userProfile?.user_name || session?.user?.name || ""}
+        name={
+          profileName || userProfile?.user_name || session?.user?.name || ""
+        }
         email={userProfile?.user_email || session?.user?.email || ""}
         joinedAt={userProfile?.created_at}
         onSaveName={handleSaveName}
