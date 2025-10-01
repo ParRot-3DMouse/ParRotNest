@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { css } from "../../../styled-system/css";
 import { clientApi } from "../../lib/api/clientApi";
 import { useUser } from "../../components/provider/UserContext";
@@ -75,18 +74,6 @@ const emptyState = css({
   flexDirection: "column",
   gap: "12px",
   alignItems: "center",
-});
-
-const linkButton = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "6px",
-  color: "rgba(245,235,227,0.9)",
-  textDecoration: "none",
-  fontSize: "13px",
-  _hover: {
-    color: "#f5ebe3",
-  },
 });
 
 type SortOption = "recent" | "oldest";
