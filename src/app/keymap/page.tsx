@@ -170,7 +170,6 @@ export default function KeymapPage() {
     <div className={container}>
       <SectionHeader
         title="Keymaps"
-        description="保存したキーマップを修正・削除・共有できます。まずは新しいキーマップを作成してみましょう。"
         actions={
           <Link href="/keymap/new" className={linkButton}>
             新しいキーマップを作成
@@ -206,10 +205,21 @@ export default function KeymapPage() {
 
       {filtered.length === 0 ? (
         <div className={emptyState}>
-          <p>条件に一致するキーマップがありません。</p>
-          <Link href="/keymap/new" className={linkButton}>
-            新しいキーマップを作る
-          </Link>
+          {keymaps.length === 0 ? (
+            <>
+              <p>保存したキーマップを修正・削除・共有できます。まずは新しいキーマップを作成してみましょう。</p>
+              <Link href="/keymap/new" className={linkButton}>
+                新しいキーマップを作る
+              </Link>
+            </>
+          ) : (
+            <>
+              <p>条件に一致するキーマップがありません。</p>
+              <Link href="/keymap/new" className={linkButton}>
+                新しいキーマップを作る
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className={grid}>

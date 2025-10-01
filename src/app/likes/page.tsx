@@ -172,7 +172,6 @@ export default function LikesPage() {
     <div className={container}>
       <SectionHeader
         title="Likes"
-        description="気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。"
         actions={
           <Link href="/keymap" className={linkButton}>
             新しいキーマップを探す
@@ -207,10 +206,21 @@ export default function LikesPage() {
 
       {filtered.length === 0 ? (
         <div className={emptyState}>
-          <p>条件に一致するキーマップが見つかりませんでした。</p>
-          <Link href="/keymap" className={linkButton}>
-            公開キーマップを探しに行く
-          </Link>
+          {likeKeymaps.length === 0 ? (
+            <>
+              <p>気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。</p>
+              <Link href="/keymap" className={linkButton}>
+                公開キーマップを探しに行く
+              </Link>
+            </>
+          ) : (
+            <>
+              <p>条件に一致するキーマップが見つかりませんでした。</p>
+              <Link href="/keymap" className={linkButton}>
+                公開キーマップを探しに行く
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className={grid}>
