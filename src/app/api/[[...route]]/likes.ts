@@ -112,7 +112,7 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
       const { results }: { results: KeymapToShare[] } =
         await process.env.DB.prepare(
-          `SELECT keymaps_to_share.share_id, keymaps_to_share.keymap_name, keymaps_to_share.keymap_json, keymaps_to_share.author_id, keymaps_to_share.created_at, keymaps_to_share.update_at FROM likes JOIN keymaps_to_share ON likes.share_id = keymaps_to_share.share_id WHERE likes.user_id = ?1`
+          `SELECT keymaps_to_share.share_id, keymaps_to_share.keymap_name, keymaps_to_share.keymap_json, keymaps_to_share.author_id, keymaps_to_share.created_at, keymaps_to_share.updated_at FROM likes JOIN keymaps_to_share ON likes.share_id = keymaps_to_share.share_id WHERE likes.user_id = ?1`
         )
           .bind(user_id)
           .all();

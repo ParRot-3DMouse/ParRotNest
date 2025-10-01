@@ -53,7 +53,9 @@ const sortByRecent = <T extends { updated_at?: string; created_at?: string }>(
   });
 };
 
-export const useMyPageData = ({ userId }: UseMyPageDataOptions): UseMyPageDataResult => {
+export const useMyPageData = ({
+  userId,
+}: UseMyPageDataOptions): UseMyPageDataResult => {
   const api = useMemo(() => clientApi(), []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -71,24 +73,25 @@ export const useMyPageData = ({ userId }: UseMyPageDataOptions): UseMyPageDataRe
       setIsLoading(true);
       setError(null);
       try {
-        const [userResRaw, keymapRes, sharedResRaw, likedRes] = await Promise.all([
-          api.users.getUser({ user_id: userId }),
-          api.keymaps.getKeymapsByUser({ user_id: userId }),
-          api.keymaps_to_share.getKeymapsToShareByUser({ author_id: userId }),
-          api.likes.getLikesByUser({ user_id: userId }),
-        ]);
+        const [userResRaw, keymapRes, sharedResRaw, likedRes] =
+          await Promise.all([
+            api.users.getUser({ user_id: userId }),
+            api.keymaps.getKeymapsByUser({ user_id: userId }),
+            api.keymaps_to_share.getKeymapsToShareByUser({ author_id: userId }),
+            api.likes.getLikesByUser({ user_id: userId }),
+          ]);
 
         if (cancelled) return;
 
         const userRes = userResRaw as User;
-        const sharedRes = (sharedResRaw as unknown) as KeymapToShare[];
+        const sharedRes = sharedResRaw as unknown as KeymapToShare[];
 
         setUserProfile({
           user_id: userRes.user_id,
           user_email: userRes.user_email,
           user_name: userRes.user_name,
           created_at: userRes.created_at,
-          updated_at: userRes.update_at,
+          updated_at: userRes.updated_at,
         });
 
         setKeymaps(

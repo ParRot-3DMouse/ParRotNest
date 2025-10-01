@@ -27,6 +27,8 @@ export const KeymapsAPI = (appClient: AppClient) => {
       keymap_id: string;
       keymap_name: string;
       keymap_json: KeymapCollection;
+      updated_at: string;
+      created_at: string;
     }> => {
       const res = await appClient.api.keymaps[":keymap_id"].$get({
         param: { keymap_id: keymap_id },
@@ -39,6 +41,9 @@ export const KeymapsAPI = (appClient: AppClient) => {
         keymap_id: data[0].keymap_id,
         keymap_name: data[0].keymap_name,
         keymap_json: JSON.parse(data[0].keymap_json),
+        updated_at:
+          data[0].updated_at ?? data[0].updated_at ?? data[0].created_at,
+        created_at: data[0].created_at,
       };
     },
     getKeymapsByUser: async ({
@@ -62,7 +67,7 @@ export const KeymapsAPI = (appClient: AppClient) => {
         throw await buildResponseError(res);
       }
       const data = await res.json();
-      const formattedData = data.map((item: any) => ({
+      const formattedData = data.map((item) => ({
         keymap_id: item.keymap_id,
         keymap_name: item.keymap_name,
         keymap_json: JSON.parse(item.keymap_json),

@@ -3,7 +3,7 @@ export interface User {
   user_email: string;
   user_name: string;
   created_at: string;
-  update_at: string;
+  updated_at: string;
 }
 
 export interface Keymap {
