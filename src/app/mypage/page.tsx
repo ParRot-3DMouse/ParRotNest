@@ -160,7 +160,7 @@ export default function MyPage() {
           title="保存したキーマップ"
           value={keymapCount}
           actions={
-            <Link href="/keymap" className={linkButton}>
+            <Link href="/keymaps" className={linkButton}>
               キーマップ一覧へ
             </Link>
           }
@@ -169,7 +169,7 @@ export default function MyPage() {
           title="公開中"
           value={sharedCount}
           actions={
-            <Link href="/keymap" className={linkButton}>
+            <Link href="/keymaps" className={linkButton}>
               キーマップ管理へ
             </Link>
           }

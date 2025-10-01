@@ -204,16 +204,10 @@ export default function LikesPage() {
               <p>
                 気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。
               </p>
-              <Link href="/keymap" className={linkButton}>
-                公開キーマップを探しに行く
-              </Link>
             </>
           ) : (
             <>
               <p>条件に一致するキーマップが見つかりませんでした。</p>
-              <Link href="/keymap" className={linkButton}>
-                公開キーマップを探しに行く
-              </Link>
             </>
           )}
         </div>

@@ -48,7 +48,7 @@ export const HeaderMenu: React.FC = () => {
           <FilePlus2 size={28} />
           <p>New Keymap</p>
         </Link>
-        <Link href="/keymap" className={linkStyle}>
+        <Link href="/keymaps" className={linkStyle}>
           <Keyboard size={28} />
           <p>Keymaps</p>
         </Link>
