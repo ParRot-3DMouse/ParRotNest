@@ -145,7 +145,9 @@ export default function LikesPage() {
     try {
       setBusyShareId(shareId);
       await api.likes.deleteLike({ share_id: shareId });
-      setLikeKeymaps((prev) => prev.filter((item) => item.share_id !== shareId));
+      setLikeKeymaps((prev) =>
+        prev.filter((item) => item.share_id !== shareId)
+      );
     } catch (error) {
       console.error("Failed to unlike", error);
     } finally {
@@ -159,9 +161,10 @@ export default function LikesPage() {
         likeKeymaps
           .map((item) => item.updated_at ?? item.created_at)
           .filter(Boolean)
-          .sort((a, b) => new Date(b as string).getTime() - new Date(a as string).getTime())[0] as
-          | string
-          | undefined
+          .sort(
+            (a, b) =>
+              new Date(b as string).getTime() - new Date(a as string).getTime()
+          )[0] as string | undefined
       )
     : "-";
 
@@ -169,7 +172,7 @@ export default function LikesPage() {
     <div className={container}>
       <SectionHeader
         title="Likes"
-        description="気に入ったキーマップをブックマークし、いつでも素早くアクセスできます。共有ページから詳細を確認したり、いいねを解除したりできます。"
+        description="気に入ったキーマップをいいねして、いつでもアクセスできるようにしましょう。"
         actions={
           <Link href="/keymap" className={linkButton}>
             新しいキーマップを探す

@@ -136,8 +136,10 @@ export default function KeymapPage() {
   const filtered = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     const base = keyword
-      ? keymaps.filter((item) =>
-          item.keymap_name?.toLowerCase().includes(keyword) || item.keymap_id.includes(keyword)
+      ? keymaps.filter(
+          (item) =>
+            item.keymap_name?.toLowerCase().includes(keyword) ||
+            item.keymap_id.includes(keyword)
         )
       : keymaps;
 
@@ -157,9 +159,10 @@ export default function KeymapPage() {
         keymaps
           .map((item) => item.updated_at ?? item.created_at)
           .filter(Boolean)
-          .sort((a, b) => new Date(b as string).getTime() - new Date(a as string).getTime())[0] as
-          | string
-          | undefined
+          .sort(
+            (a, b) =>
+              new Date(b as string).getTime() - new Date(a as string).getTime()
+          )[0] as string | undefined
       )
     : "-";
 
@@ -167,7 +170,7 @@ export default function KeymapPage() {
     <div className={container}>
       <SectionHeader
         title="Keymaps"
-        description="保存したキーマップをまとめて管理できます。編集ページから構成を更新したり、新しいキーマップを作成しましょう。"
+        description="保存したキーマップを修正・削除・共有できます。まずは新しいキーマップを作成してみましょう。"
         actions={
           <Link href="/keymap/new" className={linkButton}>
             新しいキーマップを作成
