@@ -157,8 +157,7 @@ const keymaps = new Hono<{
         params.push(partialData.keymap_json);
       }
 
-      setClauses.push(`updated_at = CURRENT_TIMESTAMP`);
-      const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")} WHERE keymap_id = ?${setClauses.length + 1} AND user_id = ?${setClauses.length + 2}`;
+      const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE keymap_id = ?${setClauses.length + 1} AND user_id = ?${setClauses.length + 2}`;
       params.push(keymap_id, authUserId);
 
       await process.env.DB.prepare(updateSql)
