@@ -5,6 +5,7 @@ import type { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
 import { getUserID } from "../../../lib/api/getUserId";
 import type { Keymap } from "../types";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const postKeymapSchema = z.object({
   keymap_name: z.string(),
@@ -39,8 +40,9 @@ const keymaps = new Hono<{
         return c.json({ error: "Unauthorized" }, 401);
       }
       const keymap_id = v4();
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `INSERT INTO keymaps (keymap_id, keymap_name, keymap_json, user_id) VALUES (?1, ?2, ?3, ?4)`
       )
         .bind(keymap_id, keymap_name, keymap_json, authUserId)
@@ -69,7 +71,8 @@ const keymaps = new Hono<{
       if (user_id !== authUserId) {
         return c.json({ error: "Forbidden" }, 403);
       }
-      const { results }: { results: Keymap[] } = await process.env.DB.prepare(
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
+      const { results }: { results: Keymap[] } = await env.DB.prepare(
         `SELECT * FROM keymaps WHERE user_id = ?1`
       )
         .bind(user_id)
@@ -98,8 +101,9 @@ const keymaps = new Hono<{
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results }: { results: Keymap[] } = await process.env.DB.prepare(
+      const { results }: { results: Keymap[] } = await env.DB.prepare(
         `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
         .bind(keymap_id, authUserId)
@@ -134,8 +138,9 @@ const keymaps = new Hono<{
       if (!partialData.keymap_name && !partialData.keymap_json) {
         return c.json({ error: "No fields to update" }, 400);
       }
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results: existing } = await process.env.DB.prepare(
+      const { results: existing } = await env.DB.prepare(
         `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
         .bind(keymap_id, authUserId)
@@ -160,7 +165,7 @@ const keymaps = new Hono<{
       const updateSql = `UPDATE keymaps SET ${setClauses.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE keymap_id = ?${setClauses.length + 1} AND user_id = ?${setClauses.length + 2}`;
       params.push(keymap_id, authUserId);
 
-      await process.env.DB.prepare(updateSql)
+      await env.DB.prepare(updateSql)
         .bind(...params)
         .run();
 
@@ -184,8 +189,9 @@ const keymaps = new Hono<{
       if (!authUserId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results } = await process.env.DB.prepare(
+      const { results } = await env.DB.prepare(
         `SELECT * FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
         .bind(keymap_id, authUserId)
@@ -195,7 +201,7 @@ const keymaps = new Hono<{
         return c.json({ error: "Keymap not found" }, 404);
       }
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `DELETE FROM keymaps WHERE keymap_id = ?1 AND user_id = ?2`
       )
         .bind(keymap_id, authUserId)
@@ -211,5 +217,4 @@ const keymaps = new Hono<{
     }
   });
 
-export const runtime = "edge";
 export default keymaps;

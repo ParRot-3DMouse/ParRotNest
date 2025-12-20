@@ -9,6 +9,7 @@ import { getToken } from "next-auth/jwt";
 import keymaps from "./keymaps";
 import keymaps_to_share from "./keymaps_to_share";
 import likes from "./likes";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export interface Bindings {
   DB: D1Database;
@@ -35,11 +36,12 @@ const app = new Hono<{
   .route("/keymaps_to_share", keymaps_to_share)
   .route("/likes", likes)
   .get("/", async (c) => {
-    if (!process.env.DB) {
+    const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
+    if (!env.DB) {
       return c.json({ error: "DB is not bound" }, 500);
     }
     try {
-      await process.env.DB.prepare(`SELECT * FROM users`).all();
+      await env.DB.prepare(`SELECT * FROM users`).all();
       return c.json({ status: "db connected" });
     } catch (error) {
       return c.json({ error: error }, 500);
@@ -47,8 +49,6 @@ const app = new Hono<{
   });
 
 export type AppType = typeof app;
-
-export const runtime = "edge";
 
 async function handleHonoRequest(nextReq: NextRequest) {
   const token = await getToken({

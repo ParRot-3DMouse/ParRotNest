@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getUserID } from "../../../lib/api/getUserId";
 import { v4 } from "uuid";
 import type { KeymapToShare } from "../types";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const postKeymapToShareSchema = z.object({
   keymap_name: z.string(),
@@ -35,8 +36,9 @@ const keymaps_to_share = new Hono<{
       );
       const author_id = await getUserID(c);
       const share_id = v4();
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `INSERT INTO keymaps_to_share (share_id, keymap_name, keymap_json, author_id) VALUES (?1, ?2, ?3, ?4)`
       )
         .bind(share_id, keymap_name, keymap_json, author_id)
@@ -56,8 +58,9 @@ const keymaps_to_share = new Hono<{
       const { share_id } = getKeymapToShareIdSchema.parse({
         share_id: c.req.param("share_id"),
       });
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
       const { results }: { results: KeymapToShare[] } =
-        await process.env.DB.prepare(
+        await env.DB.prepare(
           `SELECT * FROM keymaps_to_share WHERE share_id = ?1`
         )
           .bind(share_id)
@@ -77,8 +80,9 @@ const keymaps_to_share = new Hono<{
       const { author_id } = getKeymapToShareByAuthorSchema.parse({
         author_id: c.req.param("author_id"),
       });
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results } = await process.env.DB.prepare(
+      const { results } = await env.DB.prepare(
         `SELECT * FROM keymaps_to_share WHERE author_id = ?1`
       )
         .bind(author_id)
@@ -113,8 +117,9 @@ const keymaps_to_share = new Hono<{
         if (authUserId !== author_id) {
           return c.json({ error: "Forbidden" }, 403);
         }
+        const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-        const { results } = await process.env.DB.prepare(
+        const { results } = await env.DB.prepare(
           `SELECT * FROM keymaps_to_share WHERE share_id = ?1 AND author_id = ?2`
         )
           .bind(share_id, authUserId)
@@ -124,7 +129,7 @@ const keymaps_to_share = new Hono<{
           return c.json({ error: "Not found" }, 404);
         }
 
-        await process.env.DB.prepare(
+        await env.DB.prepare(
           `DELETE FROM keymaps_to_share WHERE share_id = ?1 AND author_id = ?2`
         )
           .bind(share_id, authUserId)
@@ -142,5 +147,4 @@ const keymaps_to_share = new Hono<{
     }
   );
 
-export const runtime = "edge";
 export default keymaps_to_share;

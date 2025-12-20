@@ -4,6 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { getUserID } from "../../../lib/api/getUserId";
 import type { KeymapToShare, User } from "../types";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const postLikeSchema = z.object({
   share_id: z.string().uuid(),
@@ -34,8 +35,9 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
         return c.json({ error: "Unauthorized" }, 401);
       }
       const { share_id } = postLikeSchema.parse(await c.req.json());
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `INSERT INTO likes (share_id, user_id) VALUES (?1, ?2) ON CONFLICT DO NOTHING`
       )
         .bind(share_id, user_id)
@@ -60,8 +62,9 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       const { share_id } = getLikesCheckSchema.parse({
         share_id: c.req.param("share_id"),
       });
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
       const { results }: { results: { count: number }[] } =
-        await process.env.DB.prepare(
+        await env.DB.prepare(
           `SELECT COUNT(*) AS count FROM likes WHERE share_id = ?1 AND user_id = ?2`
         )
           .bind(share_id, user_id)
@@ -82,8 +85,9 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       const { share_id } = getLikesByShareSchema.parse({
         share_id: c.req.param("share_id"),
       });
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results }: { results: User[] } = await process.env.DB.prepare(
+      const { results }: { results: User[] } = await env.DB.prepare(
         `SELECT users.user_id, users.user_name, users.user_email FROM likes JOIN users ON likes.user_id = users.user_id WHERE likes.share_id = ?1`
       )
         .bind(share_id)
@@ -112,9 +116,10 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       if (authUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
       const { results }: { results: KeymapToShare[] } =
-        await process.env.DB.prepare(
+        await env.DB.prepare(
           `SELECT keymaps_to_share.share_id, keymaps_to_share.keymap_name, keymaps_to_share.keymap_json, keymaps_to_share.author_id, keymaps_to_share.created_at, keymaps_to_share.updated_at FROM likes JOIN keymaps_to_share ON likes.share_id = keymaps_to_share.share_id WHERE likes.user_id = ?1`
         )
           .bind(user_id)
@@ -137,8 +142,9 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
         return c.json({ error: "Unauthorized" }, 401);
       }
       const { share_id } = deleteLikeSchema.parse(await c.req.json());
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `DELETE FROM likes WHERE share_id = ?1 AND user_id = ?2`
       )
         .bind(share_id, user_id)
@@ -154,5 +160,4 @@ const likes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
     }
   });
 
-export const runtime = "edge";
 export default likes;
