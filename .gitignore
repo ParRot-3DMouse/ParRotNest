@@ -50,7 +50,3 @@ next-env.d.ts
 ## Panda
 styled-system
 styled-system-studio
-
-.dev.vars
-
-wrangler.toml

@@ -1,0 +1,23 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "parrotnest",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2025-12-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".open-next/assets"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "parrotnest-db",
+			"database_id": "bf232206-e647-47ff-bdff-0ec21f862a30",
+			"migrations_dir": "migrations",
+			"preview_database_id": "bf232206-e647-47ff-bdff-0ec21f862a30"
+		}
+	]
+}
