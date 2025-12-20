@@ -39,6 +39,6 @@
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.5",
     "typescript": "^5",
-    "wrangler": "^3.105.0"
+    "wrangler": "^4.56.0"
   }
 }
