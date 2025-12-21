@@ -3,8 +3,6 @@
 import { css } from "../../styled-system/css";
 import { useRouter } from "next/navigation";
 
-export const runtime = "edge";
-
 export default function NotFound() {
   const router = useRouter();
 

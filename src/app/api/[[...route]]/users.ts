@@ -5,6 +5,7 @@ import type { Bindings, Variables } from "./route";
 import { v4 } from "uuid";
 import { getUserID } from "../../../lib/api/getUserId";
 import type { User } from "../types";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const postUserSchema = z.object({
   user_email: z.string().email(),
@@ -29,8 +30,9 @@ const users = new Hono<{
       const { user_email, user_name } = postUserSchema.parse(
         await c.req.json()
       );
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results } = await process.env.DB.prepare(
+      const { results } = await env.DB.prepare(
         `SELECT * FROM users WHERE user_email = ?1`
       )
         .bind(user_email)
@@ -43,7 +45,7 @@ const users = new Hono<{
 
       const new_user_id = v4();
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `INSERT INTO users (user_id, user_email, user_name) VALUES (?1, ?2, ?3)`
       )
         .bind(new_user_id, user_email, user_name)
@@ -72,8 +74,9 @@ const users = new Hono<{
       if (authedUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 403);
       }
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results }: { results: User[] } = await process.env.DB.prepare(
+      const { results }: { results: User[] } = await env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
       )
         .bind(user_id)
@@ -109,7 +112,8 @@ const users = new Hono<{
       if (!user_name) {
         return c.json({ error: "No fields to update" }, 400);
       }
-      const { results: existing } = await process.env.DB.prepare(
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
+      const { results: existing } = await env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
       )
         .bind(user_id)
@@ -119,7 +123,7 @@ const users = new Hono<{
         return c.json({ error: "User not found" }, 404);
       }
 
-      await process.env.DB.prepare(
+      await env.DB.prepare(
         `UPDATE users SET user_name = ?1 WHERE user_id = ?2`
       )
         .bind(user_name, user_id)
@@ -147,8 +151,9 @@ const users = new Hono<{
       if (authedUserId !== user_id) {
         return c.json({ error: "Unauthorized" }, 403);
       }
+      const { env } = getCloudflareContext<{ env: CloudflareEnv }>();
 
-      const { results } = await process.env.DB.prepare(
+      const { results } = await env.DB.prepare(
         `SELECT * FROM users WHERE user_id = ?1`
       )
         .bind(user_id)
@@ -157,7 +162,7 @@ const users = new Hono<{
         return c.json({ error: "User not found" }, 404);
       }
 
-      await process.env.DB.prepare(`DELETE FROM users WHERE user_id = ?1`)
+      await env.DB.prepare(`DELETE FROM users WHERE user_id = ?1`)
         .bind(user_id)
         .run();
 
@@ -171,5 +176,4 @@ const users = new Hono<{
     }
   });
 
-export const runtime = "edge";
 export default users;

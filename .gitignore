@@ -44,10 +44,9 @@ next-env.d.ts
 .wrangler
 .dev.vars
 
+# OpenNext
+.open-next
+
 ## Panda
 styled-system
 styled-system-studio
-
-.dev.vars
-
-wrangler.toml

@@ -134,4 +134,3 @@ export default function KeymapPage({
     </div>
   );
 }
-export const runtime = "edge";
